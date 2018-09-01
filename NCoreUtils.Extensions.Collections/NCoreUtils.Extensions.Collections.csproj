@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;net452</TargetFrameworks>
-    <VersionPrefix>1.0.1</VersionPrefix>
+    <VersionPrefix>1.0.3</VersionPrefix>
     <!-- NuGet -->
     <PackageId>NCoreUtils.Extensions.Collections</PackageId>
     <Title>$(PackageId)</Title>
@@ -9,6 +9,7 @@
     <Description>Collection extensions.</Description>
     <Copyright>Artyom Antyipin</Copyright>
     <RepositoryUrl>https://github.com/artyomszasa/NCoreUtils.Extensions.git</RepositoryUrl>
+    <PackageReleaseNotes>Unit tests and more enumerable extensions.</PackageReleaseNotes>
     <!-- Assembly Info -->
     <Product>NCoreUtils</Product>
     <AssemblyName>$(PackageId)</AssemblyName>

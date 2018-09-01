@@ -15,19 +15,23 @@ namespace NCoreUtils
         /// containing result of the conversion.
         /// </summary>
         /// <param name="source">Source value.</param>
-        /// <param name="mapper">Conversion function.</param>
+        /// <param name="selector">Conversion function.</param>
         /// <returns>
         /// Either empty value of the target type or value containing result of the conversion.
         /// </returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         [DebuggerStepThrough]
-        public static Nullable<TResult> Map<TSource, TResult>(this Nullable<TSource> source, Func<TSource, TResult> mapper)
+        public static Nullable<TResult> Map<TSource, TResult>(this Nullable<TSource> source, Func<TSource, TResult> selector)
             where TSource : struct
             where TResult : struct
         {
+            if (selector == null)
+            {
+                throw new ArgumentNullException(nameof(selector));
+            }
             if (source.HasValue)
             {
-                return new Nullable<TResult>(mapper(source.Value));
+                return new Nullable<TResult>(selector(source.Value));
             }
             return new Nullable<TResult>();
         }
@@ -48,6 +52,10 @@ namespace NCoreUtils
             where TSource : struct
             where TResult : struct
         {
+            if (binder == null)
+            {
+                throw new ArgumentNullException(nameof(binder));
+            }
             if (source.HasValue)
             {
                 return binder(source.Value);
@@ -68,6 +76,10 @@ namespace NCoreUtils
         public static Nullable<T> Where<T>(this Nullable<T> source, Func<T, bool> predicate)
             where T : struct
         {
+            if (predicate == null)
+            {
+                throw new ArgumentNullException(nameof(predicate));
+            }
             if (source.HasValue && predicate(source.Value))
             {
                 return source;
@@ -87,7 +99,13 @@ namespace NCoreUtils
         [DebuggerStepThrough]
         public static bool All<T>(this Nullable<T> source, Func<T, bool> predicate)
             where T : struct
-            => !source.HasValue || predicate(source.Value);
+        {
+            if (predicate == null)
+            {
+                throw new ArgumentNullException(nameof(predicate));
+            }
+            return !source.HasValue || predicate(source.Value);
+        }
 
         /// <summary>
         /// Checks if value is not empty.
@@ -112,7 +130,13 @@ namespace NCoreUtils
         [DebuggerStepThrough]
         public static bool Any<T>(this Nullable<T> source, Func<T, bool> predicate)
             where T : struct
-            => source.HasValue && predicate(source.Value);
+        {
+            if (predicate == null)
+            {
+                throw new ArgumentNullException(nameof(predicate));
+            }
+            return source.HasValue && predicate(source.Value);
+        }
 
         /// <summary>
         /// Checks whether the source value is empty and if so returns new value careated using the specified factory
@@ -127,7 +151,13 @@ namespace NCoreUtils
         [DebuggerStepThrough]
         public static Nullable<T> Supply<T>(this Nullable<T> source, Func<T> valueFactory)
             where T : struct
-            => source.HasValue ? source : new Nullable<T>(valueFactory());
+        {
+            if (valueFactory == null)
+            {
+                throw new ArgumentNullException(nameof(valueFactory));
+            }
+            return source.HasValue ? source : new Nullable<T>(valueFactory());
+        }
 
         /// <summary>
         /// Gets the stored value or returns default value.
@@ -167,22 +197,24 @@ namespace NCoreUtils
         [DebuggerStepThrough]
         public static TAccumulator Aggregate<TSource, TAccumulator>(this Nullable<TSource> source, TAccumulator accumulator, Func<TAccumulator, TSource, TAccumulator> fun)
             where TSource : struct
-            => source.HasValue ? accumulator : fun(accumulator, source.Value);
+        {
+            if (fun == null)
+            {
+                throw new ArgumentNullException(nameof(fun));
+            }
+            return source.HasValue ? fun(accumulator, source.Value) : accumulator;
+        }
 
         /// <summary>
         /// Creates enumeration that conatins single value stored by the actual instance if present.
         /// </summary>
         /// <param name="source">Source value.</param>
         /// <returns>Enumeration that conatins single value stored by the actual instance if present.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         [DebuggerStepThrough]
         public static IEnumerable<T> ToEnumerable<T>(this Nullable<T> source)
             where T : struct
-        {
-            if (source.HasValue)
-            {
-                yield return source.Value;
-            }
-        }
+            => source.ToArray();
 
         /// <summary>
         /// Creates list that conatins single value stored by the actual instance if present.
@@ -211,7 +243,7 @@ namespace NCoreUtils
         [DebuggerStepThrough]
         public static T[] ToArray<T>(this Nullable<T> source)
             where T : struct
-            => source.HasValue ? new T[0] : new T[] { source.Value };
+            => source.HasValue ? new T[] { source.Value } : new T[0];
 
         /// <summary>
         /// If both value is not empty applies their stored values to <paramref name="resultSelector" />.
@@ -229,6 +261,10 @@ namespace NCoreUtils
             where TSecond : struct
             where TResult : struct
         {
+            if (resultSelector == null)
+            {
+                throw new ArgumentNullException(nameof(resultSelector));
+            }
             if (first.HasValue && second.HasValue)
             {
                 return new Nullable<TResult>(resultSelector(first.Value, second.Value));

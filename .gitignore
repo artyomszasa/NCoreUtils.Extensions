@@ -2,3 +2,7 @@ NCoreUtils*/bin
 NCoreUtils*/obj
 .vscode
 .vs
+
+# unit
+coverage.opencover.xml
+NCoreUtils.Extensions.Unit/report

@@ -1,4 +1,4 @@
-
+﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.26124.0
@@ -6,6 +6,8 @@ MinimumVisualStudioVersion = 15.0.26124.0
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NCoreUtils.Extensions.Nullable", "NCoreUtils.Extensions.Nullable\NCoreUtils.Extensions.Nullable.csproj", "{6F013E00-D13C-48E5-A2A4-36122FB20D66}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NCoreUtils.Extensions.Collections", "NCoreUtils.Extensions.Collections\NCoreUtils.Extensions.Collections.csproj", "{0FDC6833-0FD5-4500-B4D5-6B363F77853C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NCoreUtils.Extensions.Unit", "NCoreUtils.Extensions.Unit\NCoreUtils.Extensions.Unit.csproj", "{DC68E6AA-5B08-40C9-9BB5-AF341073ED16}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -44,5 +46,17 @@ Global
 		{0FDC6833-0FD5-4500-B4D5-6B363F77853C}.Release|x64.Build.0 = Release|x64
 		{0FDC6833-0FD5-4500-B4D5-6B363F77853C}.Release|x86.ActiveCfg = Release|x86
 		{0FDC6833-0FD5-4500-B4D5-6B363F77853C}.Release|x86.Build.0 = Release|x86
+		{DC68E6AA-5B08-40C9-9BB5-AF341073ED16}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DC68E6AA-5B08-40C9-9BB5-AF341073ED16}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DC68E6AA-5B08-40C9-9BB5-AF341073ED16}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{DC68E6AA-5B08-40C9-9BB5-AF341073ED16}.Debug|x64.Build.0 = Debug|Any CPU
+		{DC68E6AA-5B08-40C9-9BB5-AF341073ED16}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{DC68E6AA-5B08-40C9-9BB5-AF341073ED16}.Debug|x86.Build.0 = Debug|Any CPU
+		{DC68E6AA-5B08-40C9-9BB5-AF341073ED16}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DC68E6AA-5B08-40C9-9BB5-AF341073ED16}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DC68E6AA-5B08-40C9-9BB5-AF341073ED16}.Release|x64.ActiveCfg = Release|Any CPU
+		{DC68E6AA-5B08-40C9-9BB5-AF341073ED16}.Release|x64.Build.0 = Release|Any CPU
+		{DC68E6AA-5B08-40C9-9BB5-AF341073ED16}.Release|x86.ActiveCfg = Release|Any CPU
+		{DC68E6AA-5B08-40C9-9BB5-AF341073ED16}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

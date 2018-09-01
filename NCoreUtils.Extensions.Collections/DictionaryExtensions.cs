@@ -32,5 +32,30 @@ namespace NCoreUtils
             }
             return defaultValue;
         }
+
+        /// <summary>
+        /// Returns the value associated with the specified key, or a default value if the dictionary has no value
+        /// assiciated to the key.
+        /// </summary>
+        /// <param name="source">Source dictionary.</param>
+        /// <param name="key">The key.</param>
+        /// <param name="valueFactory">Value factory invoked to provide default value.</param>
+        /// <returns>
+        /// Either the value associated with the specified key, or a default value if the dictionary has no value
+        /// assiciated to the key.
+        /// </returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static TValue GetOrSupply<TKey, TValue>(this IReadOnlyDictionary<TKey, TValue> source, TKey key, Func<TValue> valueFactory)
+        {
+            if (source == null)
+            {
+                throw new ArgumentNullException(nameof(source));
+            }
+            if (valueFactory == null)
+            {
+                throw new ArgumentNullException(nameof(valueFactory));
+            }
+            return source.TryGetValue(key, out var value) ? value : valueFactory();
+        }
     }
 }
