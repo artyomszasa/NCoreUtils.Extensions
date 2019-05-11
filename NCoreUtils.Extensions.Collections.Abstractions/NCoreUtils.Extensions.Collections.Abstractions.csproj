@@ -1,27 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <ItemGroup>
-    <ProjectReference Include="..\NCoreUtils.Extensions.Collections.Abstractions\NCoreUtils.Extensions.Collections.Abstractions.csproj" />
-  </ItemGroup>
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;net452</TargetFrameworks>
+    <RootNamespace>NCoreUtils</RootNamespace>
     <Version>1.0.5</Version>
-    <!-- NuGet -->
-    <PackageId>NCoreUtils.Extensions.Collections</PackageId>
-    <Title>$(PackageId)</Title>
-    <Authors>Artyom Antyipin</Authors>
-    <Description>Collection extensions.</Description>
-    <Copyright>Artyom Antyipin</Copyright>
-    <RepositoryUrl>https://github.com/artyomszasa/NCoreUtils.Extensions.git</RepositoryUrl>
-    <PackageReleaseNotes>Unit tests and more enumerable extensions.</PackageReleaseNotes>
-    <!-- Assembly Info -->
-    <Product>NCoreUtils</Product>
-    <AssemblyName>$(PackageId)</AssemblyName>
-    <AssemblyTitle>$(AssemblyName)</AssemblyTitle>
-    <!-- Compilation -->
-    <OutputType>Library</OutputType>
-    <DebugType>portable</DebugType>
-    <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
   <!-- mono fix -->
   <PropertyGroup>
