@@ -1,7 +1,8 @@
+dist: xenial
 language: csharp
 solution: NCoreUtils.Extensions.sln
 mono: none
-dotnet: 2.1.401
+dotnet: 2.2.203
 script:
   - dotnet restore
-  - dotnet test -c Release -f netcoreapp2.1 NCoreUtils.Extensions.Unit
+  - dotnet test -c Debug -f netcoreapp2.2 NCoreUtils.Extensions.Unit

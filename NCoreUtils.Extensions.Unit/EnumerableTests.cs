@@ -1,6 +1,8 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+using NCoreUtils.Collections;
 using Xunit;
 
 namespace NCoreUtils.Extensions.Unit
@@ -657,6 +659,89 @@ namespace NCoreUtils.Extensions.Unit
             Assert.Equal(new Box<int>(10), seq.MaxBy(selector, comparer));
             Assert.Equal(new Box<int>(10), list.MaxBy(selector, comparer));
             Assert.Equal(new Box<int>(10), rolist.MaxBy(selector, comparer));
+        }
+
+        [Fact]
+        public void EnumeratorExtensionTests()
+        {
+            var source = (IReadOnlyList<int>)new int[] { 0,1,2,3,4,5,6,7,8,9 };
+            List<int> l;
+            using (var e = source.GetEnumerator().Select(x => x * 2))
+            {
+                l = e.ToList();
+            }
+            Assert.True(Enumerable.SequenceEqual(new int[] { 0,2,4,6,8,10,12,14,16,18 }, l));
+            using (var e = source.GetEnumerator().Select((x, i) => x * i))
+            {
+                l = e.ToList();
+            }
+            Assert.Equal((IEnumerable<int>)new int[] { 0,1,4,9,16,25,36,49,64,81 }, (IEnumerable<int>)l);
+            using (var e = source.GetEnumerator().Where(x => x % 2 == 0))
+            {
+                l = e.ToList();
+            }
+            Assert.True(Enumerable.SequenceEqual(new int[] { 0,2,4,6,8 }, l));
+            using (var e = source.GetEnumerator().Where((_, i) => i % 2 == 0))
+            {
+                l = e.ToList();
+            }
+            Assert.True(Enumerable.SequenceEqual(new int[] { 0,2,4,6,8 }, l));
+
+            Assert.Throws<ArgumentNullException>(() => EnumeratorExtensions.Select<int, int>(null, i => i));
+            Assert.Throws<ArgumentNullException>(() => EnumeratorExtensions.Select<int, int>(null, (i, _) => i));
+            Assert.Throws<ArgumentNullException>(() => EnumeratorExtensions.Select<int, int>(l.GetEnumerator(), (Func<int, int>)null));
+            Assert.Throws<ArgumentNullException>(() => EnumeratorExtensions.Select<int, int>(l.GetEnumerator(), (Func<int, int, int>)null));
+            Assert.Throws<ArgumentNullException>(() => EnumeratorExtensions.Where<int>(null, i => true));
+            Assert.Throws<ArgumentNullException>(() => EnumeratorExtensions.Where<int>(null, (i, _) => true));
+            Assert.Throws<ArgumentNullException>(() => EnumeratorExtensions.Where<int>(l.GetEnumerator(), (Func<int, bool>)null));
+            Assert.Throws<ArgumentNullException>(() => EnumeratorExtensions.Where<int>(l.GetEnumerator(), (Func<int, int, bool>)null));
+            Assert.Throws<ArgumentNullException>(() => EnumeratorExtensions.ToList<int>(null));
+        }
+
+        [Fact]
+        public void MappingReadOnlyListTests()
+        {
+            var l = new MappingReadOnlyList<int, int>(new [] { 0,1,2,3,4,5,6,7,8,9 }, i => i * 2);
+            Assert.Equal(2, l[1]);
+            Assert.Equal(10, l[5]);
+            var lcount = l.Count;
+            Assert.Equal(10, lcount);
+            Assert.Equal((IEnumerable<int>)new int[] { 0,2,4,6,8,10,12,14,16,18 }, (IEnumerable<int>)l);
+            Assert.Throws<ArgumentNullException>(() => new MappingReadOnlyList<int, int>(null, i => i * 2));
+            Assert.Throws<ArgumentNullException>(() => new MappingReadOnlyList<int, int>(new int[0], null));
+        }
+
+        [Fact]
+        public void MappingReadOnlyDictionaryTests()
+        {
+            var d = new MappingReadOnlyDictionary<int, int, int>(new Dictionary<int, int>
+            {
+                { 0, 0 },
+                { 1, 1 },
+                { 2, 2 },
+                { 3, 3 },
+                { 4, 4 },
+                { 5, 5 },
+                { 6, 6 },
+                { 7, 7 },
+                { 8, 8 },
+                { 9, 9 }
+            }, i => i * 2);
+            Assert.Equal(2, d[1]);
+            Assert.Equal(10, d[5]);
+            var lcount = d.Count;
+            Assert.Equal(10, lcount);
+            Assert.True(d.ContainsKey(1));
+            Assert.True(d.TryGetValue(1, out var v));
+            Assert.Equal(2, v);
+            Assert.False(d.ContainsKey(11));
+            Assert.False(d.TryGetValue(11, out v));
+            Assert.Equal((IEnumerable<int>)new int[] { 0,1,2,3,4,5,6,7,8,9 }, d.Keys);
+            Assert.Equal((IEnumerable<int>)new int[] { 0,2,4,6,8,10,12,14,16,18 }, d.Values);
+            Assert.True(HashSet<int>.CreateSetComparer().Equals(new HashSet<int> { 0,1,2,3,4,5,6,7,8,9 }, new HashSet<int>(d.Select(kv => kv.Key))));
+            Assert.True(HashSet<int>.CreateSetComparer().Equals(new HashSet<int> { 0,2,4,6,8,10,12,14,16,18 }, new HashSet<int>(d.Select(kv => kv.Value))));
+            Assert.Throws<ArgumentNullException>(() => new MappingReadOnlyDictionary<int, int, int>(null, i => i * 2));
+            Assert.Throws<ArgumentNullException>(() => new MappingReadOnlyDictionary<int, int, int>(new Dictionary<int, int>(), null));
         }
     }
 }
