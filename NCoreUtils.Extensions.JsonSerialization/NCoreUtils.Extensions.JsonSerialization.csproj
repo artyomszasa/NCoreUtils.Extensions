@@ -1,8 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;net452</TargetFrameworks>
-    <RootNamespace>NCoreUtils</RootNamespace>
-    <Version>1.0.5</Version>
+    <TargetFrameworks>netstandard2.0;netstandard2.1;net461</TargetFrameworks>
+    <Version>3.0.0-alpha0</Version>
+    <LangVersion>8.0</LangVersion>
   </PropertyGroup>
   <!-- mono fix -->
   <PropertyGroup>
@@ -13,4 +13,13 @@
     <EnableFrameworkPathOverride Condition="'$(BaseFrameworkPathOverrideForMono)' != ''">true</EnableFrameworkPathOverride>
     <AssemblySearchPaths Condition="'$(BaseFrameworkPathOverrideForMono)' != ''">$(FrameworkPathOverride)/Facades;$(AssemblySearchPaths)</AssemblySearchPaths>
   </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\NCoreUtils.Extensions.JsonSerialization.Abstractions\NCoreUtils.Extensions.JsonSerialization.Abstractions.csproj" />
+    <ProjectReference Include="..\NCoreUtils.Extensions.Collections\NCoreUtils.Extensions.Collections.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="NCoreUtils.Maybe" Version="1.0.5" />
+    <PackageReference Include="System.Collections.Immutable" Version="1.6.0" />
+    <PackageReference Include="System.Text.Json" Version="4.6.0" />
+  </ItemGroup>
 </Project>

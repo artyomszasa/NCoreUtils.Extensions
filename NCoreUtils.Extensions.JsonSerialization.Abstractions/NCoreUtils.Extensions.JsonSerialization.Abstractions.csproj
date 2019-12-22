@@ -1,8 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;net452</TargetFrameworks>
-    <RootNamespace>NCoreUtils</RootNamespace>
-    <Version>1.0.5</Version>
+    <TargetFrameworks>netstandard2.0;netstandard2.1;net461</TargetFrameworks>
+    <Version>3.0.0-alpha0</Version>
   </PropertyGroup>
   <!-- mono fix -->
   <PropertyGroup>
