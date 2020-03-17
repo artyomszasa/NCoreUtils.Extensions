@@ -21,6 +21,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NCoreUtils.Extensions.JsonS
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NCoreUtils.Extensions.Memory", "NCoreUtils.Extensions.Memory\NCoreUtils.Extensions.Memory.csproj", "{BF626E72-6FA8-4BA0-A249-FB5D7F8A2BB9}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NCoreUtils.Extensions.AsyncEnumerable", "NCoreUtils.Extensions.AsyncEnumerable\NCoreUtils.Extensions.AsyncEnumerable.csproj", "{BBBDFBC9-81B2-478A-ABE7-5A98D09BA8FD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -142,5 +144,17 @@ Global
 		{BF626E72-6FA8-4BA0-A249-FB5D7F8A2BB9}.Release|x64.Build.0 = Release|Any CPU
 		{BF626E72-6FA8-4BA0-A249-FB5D7F8A2BB9}.Release|x86.ActiveCfg = Release|Any CPU
 		{BF626E72-6FA8-4BA0-A249-FB5D7F8A2BB9}.Release|x86.Build.0 = Release|Any CPU
+		{BBBDFBC9-81B2-478A-ABE7-5A98D09BA8FD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BBBDFBC9-81B2-478A-ABE7-5A98D09BA8FD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BBBDFBC9-81B2-478A-ABE7-5A98D09BA8FD}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{BBBDFBC9-81B2-478A-ABE7-5A98D09BA8FD}.Debug|x64.Build.0 = Debug|Any CPU
+		{BBBDFBC9-81B2-478A-ABE7-5A98D09BA8FD}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{BBBDFBC9-81B2-478A-ABE7-5A98D09BA8FD}.Debug|x86.Build.0 = Debug|Any CPU
+		{BBBDFBC9-81B2-478A-ABE7-5A98D09BA8FD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BBBDFBC9-81B2-478A-ABE7-5A98D09BA8FD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BBBDFBC9-81B2-478A-ABE7-5A98D09BA8FD}.Release|x64.ActiveCfg = Release|Any CPU
+		{BBBDFBC9-81B2-478A-ABE7-5A98D09BA8FD}.Release|x64.Build.0 = Release|Any CPU
+		{BBBDFBC9-81B2-478A-ABE7-5A98D09BA8FD}.Release|x86.ActiveCfg = Release|Any CPU
+		{BBBDFBC9-81B2-478A-ABE7-5A98D09BA8FD}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
