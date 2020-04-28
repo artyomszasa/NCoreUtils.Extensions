@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 
@@ -12,6 +13,7 @@ namespace NCoreUtils.Collections
     /// </summary>
     [Serializable]
     public class MultiValueDictionary<TKey, TValue> : IMultiValueDictionary<TKey, TValue>, IEquatable<MultiValueDictionary<TKey, TValue>>, ISerializable, IDeserializationCallback
+        where TKey : notnull
     {
         struct Entry
         {
@@ -40,7 +42,7 @@ namespace NCoreUtils.Collections
                 => HashCode == that.HashCode && Next == that.Next && keyComparer.Equals(Key, that.Key) && valueComparer.Equals(Value, that.Value);
 
             public override int GetHashCode()
-                => (HashCode << 8) ^ Next ^ Key.GetHashCode() ^ Value.GetHashCode();
+                => (HashCode << 8) ^ Next ^ Key.GetHashCode() ^ (Value?.GetHashCode() ?? 0);
 
             public override bool Equals(object obj)
                 => null != obj && obj is Entry entry && Equals(entry, EqualityComparer<TKey>.Default, EqualityComparer<TValue>.Default);
@@ -73,21 +75,15 @@ namespace NCoreUtils.Collections
 
         private MultiValueDictionary(int[] buckets, Entry[] entries, int freeIndex, int freeCount, int count, IEqualityComparer<TKey> keyComparer, IEqualityComparer<TValue> valueComparer)
         {
-            if (null != buckets)
+            _buckets = new int[buckets.Length];
+            for (var i = 0; i < buckets.Length; ++i)
             {
-                _buckets = new int[buckets.Length];
-                for (var i = 0; i < buckets.Length; ++i)
-                {
-                    _buckets[i] = buckets[i];
-                }
+                _buckets[i] = buckets[i];
             }
-            if (null != entries)
+            _entries = new Entry[entries.Length];
+            for (var i = 0; i < entries.Length; ++i)
             {
-                _entries = new Entry[entries.Length];
-                for (var i = 0; i < entries.Length; ++i)
-                {
-                    _entries[i] = entries[i];
-                }
+                _entries[i] = entries[i];
             }
             _freeIndex = freeIndex;
             _freeCount = freeCount;
@@ -95,6 +91,8 @@ namespace NCoreUtils.Collections
             _keyComparer = keyComparer;
             _valueComparer = valueComparer;
         }
+
+        #pragma warning disable CS8618
 
         /// <summary>
         /// Prepares instance for deserialization.
@@ -111,7 +109,7 @@ namespace NCoreUtils.Collections
         /// <param name="capacity">Capacity.</param>
         /// <param name="keyEqualityComparer">Key equality comparer.</param>
         /// <param name="valueEqualityComparer">Value equality comparer.</param>
-        public MultiValueDictionary(int capacity = 0, IEqualityComparer<TKey> keyEqualityComparer = null, IEqualityComparer<TValue> valueEqualityComparer = null)
+        public MultiValueDictionary(int capacity = 0, IEqualityComparer<TKey>? keyEqualityComparer = default, IEqualityComparer<TValue>? valueEqualityComparer = default)
         {
             RuntimeAssert.ArgumentInRange(capacity, 0, int.MaxValue, nameof(capacity));
             if (capacity > 0)
@@ -121,6 +119,8 @@ namespace NCoreUtils.Collections
             _keyComparer = keyEqualityComparer ?? EqualityComparer<TKey>.Default;
             _valueComparer = valueEqualityComparer ?? EqualityComparer<TValue>.Default;
         }
+
+        #pragma warning restore CS8618
 
         /// <summary>
         /// Initializes a new instance of the <see cref="T:NFS.Collections.MultiDictionary`2"/> class with default inital
@@ -277,8 +277,8 @@ namespace NCoreUtils.Collections
                         }
                         _entries[i].HashCode = -1;
                         _entries[i].Next = _freeIndex;
-                        _entries[i].Key = default(TKey);
-                        _entries[i].Value = default(TValue);
+                        _entries[i].Key = default!;
+                        _entries[i].Value = default!;
                         _freeIndex = i;
                         ++_freeCount;
                         ++_version;
@@ -480,7 +480,11 @@ namespace NCoreUtils.Collections
         /// Variable to store assigned values. After calling this function either references array containing the assigned
         /// values or null.
         /// </param>
+        #if NETSTANDARD2_1
+        public bool TryGetValues(TKey key, [NotNullWhen(true)] out TValue[]? values)
+        #else
         public bool TryGetValues(TKey key, out TValue[] values)
+        #endif
         {
             var buffer = new List<int>();
             var found = FindEntries(key, buffer);
@@ -493,12 +497,10 @@ namespace NCoreUtils.Collections
                     vs[i] = _entries[buffer[i]].Value;
                 }
                 values = vs;
+                return true;
             }
-            else
-            {
-                values = null;
-            }
-            return found;
+            values = default;
+            return false;
         }
 
         /// <summary>
@@ -512,7 +514,7 @@ namespace NCoreUtils.Collections
             var i = FindEntry(key);
             if (-1 == i)
             {
-                value = default(TValue);
+                value = default!;
                 return false;
             }
             value = _entries[i].Value;
@@ -616,8 +618,8 @@ namespace NCoreUtils.Collections
 
             public void Dispose()
             {
-                _source = null;
-                _current = default(KeyValuePair<TKey, TValue>);
+                _source = default!;
+                _current = default;
             }
 
             public bool MoveNext()
@@ -843,7 +845,7 @@ namespace NCoreUtils.Collections
             }
             else
             {
-                _buckets = null;
+                _buckets = default!;
             }
 
             _version = realVersion;

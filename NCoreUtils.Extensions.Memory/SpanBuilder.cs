@@ -73,6 +73,16 @@ namespace NCoreUtils
             Length += Int64Emplacer.Instance.Emplace(value, _span.Slice(Length));
         }
 
+        public void Append(float value, int maxPrecision = 8, string decimalDelimiter = ".")
+        {
+            Length += SingleEmplacer.Emplace(value, _span.Slice(Length), maxPrecision, decimalDelimiter);
+        }
+
+        public void Append(double value, int maxPrecision = 8, string decimalDelimiter = ".")
+        {
+            Length += DoubleEmplacer.Emplace(value, _span.Slice(Length), maxPrecision, decimalDelimiter);
+        }
+
         public void Append(char value)
         {
             _span[Length] = value;

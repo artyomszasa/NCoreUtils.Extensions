@@ -13,7 +13,7 @@ namespace NCoreUtils
 
         IAsyncEnumerator<T>? _enumerator;
 
-        public T Current => throw new System.NotImplementedException();
+        public T Current => _enumerator is null ? default! : _enumerator.Current;
 
         public DelayedAsyncEnumerator(LazyAsync<IAsyncEnumerable<T>> lazySource, CancellationToken cancellationToken)
         {

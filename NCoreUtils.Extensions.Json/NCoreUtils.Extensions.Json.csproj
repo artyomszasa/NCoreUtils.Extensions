@@ -1,20 +1,18 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <ItemGroup>
-    <ProjectReference Include="..\NCoreUtils.Extensions.Collections.Abstractions\NCoreUtils.Extensions.Collections.Abstractions.csproj" />
-  </ItemGroup>
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.1;netstandard2.0;net452</TargetFrameworks>
+    <TargetFrameworks>netstandard2.1;netstandard2.0;net461</TargetFrameworks>
     <LangVersion>8.0</LangVersion>
     <Nullable>enable</Nullable>
-    <Version>1.0.7</Version>
+    <RootNamespace>NCoreUtils</RootNamespace>
+    <Version>1.0.0</Version>
     <!-- NuGet -->
-    <PackageId>NCoreUtils.Extensions.Collections</PackageId>
+    <PackageId>NCoreUtils.Extensions.Json</PackageId>
     <Title>$(PackageId)</Title>
     <Authors>Artyom Antyipin</Authors>
-    <Description>Collection extensions.</Description>
+    <Description>Json serialization extensions.</Description>
     <Copyright>Artyom Antyipin</Copyright>
     <RepositoryUrl>https://github.com/artyomszasa/NCoreUtils.Extensions.git</RepositoryUrl>
-    <PackageReleaseNotes>Unit tests and more enumerable extensions.</PackageReleaseNotes>
+    <PackageReleaseNotes></PackageReleaseNotes>
     <!-- Assembly Info -->
     <Product>NCoreUtils</Product>
     <AssemblyName>$(PackageId)</AssemblyName>
@@ -22,16 +20,21 @@
     <!-- Compilation -->
     <OutputType>Library</OutputType>
     <DebugType>portable</DebugType>
+    <!--
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    -->
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <NoWarn>CS8618;CS8601;CS8625</NoWarn>
   </PropertyGroup>
   <!-- mono fix -->
   <PropertyGroup>
     <TargetIsMono Condition="$(TargetFramework.StartsWith('net4')) and '$(OS)' == 'Unix'">true</TargetIsMono>
     <BaseFrameworkPathOverrideForMono Condition="'$(BaseFrameworkPathOverrideForMono)' == '' AND '$(TargetIsMono)' == 'true' AND EXISTS('/usr/lib/mono')">/usr/lib/mono</BaseFrameworkPathOverrideForMono>
     <FrameworkPathOverride Condition="'$(BaseFrameworkPathOverrideForMono)' != '' AND '$(TargetFramework)' == 'net452'">$(BaseFrameworkPathOverrideForMono)/4.5.2-api</FrameworkPathOverride>
+    <FrameworkPathOverride Condition="'$(BaseFrameworkPathOverrideForMono)' != '' AND '$(TargetFramework)' == 'net461'">$(BaseFrameworkPathOverrideForMono)/4.6.1-api</FrameworkPathOverride>
     <EnableFrameworkPathOverride Condition="'$(BaseFrameworkPathOverrideForMono)' != ''">true</EnableFrameworkPathOverride>
     <AssemblySearchPaths Condition="'$(BaseFrameworkPathOverrideForMono)' != ''">$(FrameworkPathOverride)/Facades;$(AssemblySearchPaths)</AssemblySearchPaths>
   </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="System.Text.Json" Version="4.7.1" />
+  </ItemGroup>
 </Project>

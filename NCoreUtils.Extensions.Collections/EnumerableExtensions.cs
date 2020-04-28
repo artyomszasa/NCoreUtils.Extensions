@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Runtime.CompilerServices;
 
@@ -88,7 +89,7 @@ namespace NCoreUtils
                     switch (list.Count)
                     {
                         case 0:
-                            item = default(T);
+                            item = default!;
                             return false;
                         default:
                             item = list[0];
@@ -98,7 +99,7 @@ namespace NCoreUtils
                     switch (list.Count)
                     {
                         case 0:
-                            item = default(T);
+                            item = default!;
                             return false;
                         default:
                             item = list[0];
@@ -112,7 +113,7 @@ namespace NCoreUtils
                         item = enumerator.Current;
                         return true;
                     }
-                    item = default(T);
+                    item = default!;
                     return false;
                 }
             }
@@ -148,11 +149,11 @@ namespace NCoreUtils
                     {
                         if (0 == list.Count)
                         {
-                            item = default(T);
+                            item = default!;
                             return false;
                         }
                         var found = false;
-                        item = default(T);
+                        item = default!;
                         for (var i = 0; !found && i < list.Count; ++i)
                         {
                             var current = list[i];
@@ -168,11 +169,11 @@ namespace NCoreUtils
                     {
                         if (0 == list.Count)
                         {
-                            item = default(T);
+                            item = default!;
                             return false;
                         }
                         var found = false;
-                        item = default(T);
+                        item = default!;
                         for (var i = 0; !found && i < list.Count; ++i)
                         {
                             var current = list[i];
@@ -188,7 +189,7 @@ namespace NCoreUtils
                     using (var enumerator = source.GetEnumerator())
                     {
                         var found = false;
-                        item = default(T);
+                        item = default!;
                         while (!found && enumerator.MoveNext())
                         {
                             var current = enumerator.Current;
@@ -232,7 +233,7 @@ namespace NCoreUtils
                     switch (list.Count)
                     {
                         case 0:
-                            item = default(T);
+                            item = default!;
                             return false;
                         case 1:
                             item = list[0];
@@ -244,7 +245,7 @@ namespace NCoreUtils
                     switch (list.Count)
                     {
                         case 0:
-                            item = default(T);
+                            item = default!;
                             return false;
                         case 1:
                             item = list[0];
@@ -257,7 +258,7 @@ namespace NCoreUtils
                     {
                         if (!enumerator.MoveNext())
                         {
-                            item = default(T);
+                            item = default!;
                             return false;
                         }
                         var result = enumerator.Current;
@@ -304,11 +305,11 @@ namespace NCoreUtils
                     {
                         if (0 == list.Count)
                         {
-                            item = default(T);
+                            item = default!;
                             return false;
                         }
                         var found = false;
-                        item = default(T);
+                        item = default!;
                         for (var i = 0; i < list.Count; ++i)
                         {
                             var current = list[i];
@@ -328,11 +329,11 @@ namespace NCoreUtils
                     {
                         if (0 == list.Count)
                         {
-                            item = default(T);
+                            item = default!;
                             return false;
                         }
                         var found = false;
-                        item = default(T);
+                        item = default!;
                         for (var i = 0; i < list.Count; ++i)
                         {
                             var current = list[i];
@@ -352,7 +353,7 @@ namespace NCoreUtils
                     using (var enumerator = source.GetEnumerator())
                     {
                         var found = false;
-                        item = default(T);
+                        item = default!;
                         while (enumerator.MoveNext())
                         {
                             var current = enumerator.Current;
@@ -397,7 +398,7 @@ namespace NCoreUtils
                     switch (list.Count)
                     {
                         case 0:
-                            item = default(T);
+                            item = default!;
                             return false;
                         default:
                             item = list[list.Count - 1];
@@ -407,7 +408,7 @@ namespace NCoreUtils
                     switch (list.Count)
                     {
                         case 0:
-                            item = default(T);
+                            item = default!;
                             return false;
                         default:
                             item = list[list.Count - 1];
@@ -426,7 +427,7 @@ namespace NCoreUtils
                         item = result;
                         return true;
                     }
-                    item = default(T);
+                    item = default!;
                     return false;
                 }
             }
@@ -462,11 +463,11 @@ namespace NCoreUtils
                     {
                         if (0 == list.Count)
                         {
-                            item = default(T);
+                            item = default!;
                             return false;
                         }
                         var found = false;
-                        item = default(T);
+                        item = default!;
                         for (var i = list.Count - 1; !found && i >= 0; --i)
                         {
                             var current = list[i];
@@ -482,11 +483,11 @@ namespace NCoreUtils
                     {
                         if (0 == list.Count)
                         {
-                            item = default(T);
+                            item = default!;
                             return false;
                         }
                         var found = false;
-                        item = default(T);
+                        item = default!;
                         for (var i = list.Count - 1; !found && i >= 0; --i)
                         {
                             var current = list[i];
@@ -510,7 +511,7 @@ namespace NCoreUtils
         /// <param name="comparer">Comparer.</param>
         /// <returns>Minimum value.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static T MinBy<T>(this IEnumerable<T> source, IComparer<T> comparer = null)
+        public static T MinBy<T>(this IEnumerable<T> source, IComparer<T>? comparer = default)
         {
             var cmp = comparer ?? Comparer<T>.Default;
             switch (source)
@@ -597,7 +598,7 @@ namespace NCoreUtils
         /// <param name="comparer">Key comparer.</param>
         /// <returns>Minimum value.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static TValue MinBy<TValue, TKey>(this IEnumerable<TValue> source, Func<TValue, TKey> selector, IComparer<TKey> comparer = null)
+        public static TValue MinBy<TValue, TKey>(this IEnumerable<TValue> source, Func<TValue, TKey> selector, IComparer<TKey>? comparer = default)
         {
             if (selector == null)
             {
@@ -699,7 +700,7 @@ namespace NCoreUtils
         /// <param name="comparer">Comparer.</param>
         /// <returns>Maximum value.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static T MaxBy<T>(this IEnumerable<T> source, IComparer<T> comparer = null)
+        public static T MaxBy<T>(this IEnumerable<T> source, IComparer<T>? comparer = default)
         {
             var cmp = comparer ?? Comparer<T>.Default;
             switch (source)
@@ -786,7 +787,7 @@ namespace NCoreUtils
         /// <param name="comparer">Key comparer.</param>
         /// <returns>Maximum value.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static TValue MaxBy<TValue, TKey>(this IEnumerable<TValue> source, Func<TValue, TKey> selector, IComparer<TKey> comparer = null)
+        public static TValue MaxBy<TValue, TKey>(this IEnumerable<TValue> source, Func<TValue, TKey> selector, IComparer<TKey>? comparer = default)
         {
             if (selector == null)
             {

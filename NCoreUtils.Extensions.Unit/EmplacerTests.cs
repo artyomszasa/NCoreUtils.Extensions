@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using NCoreUtils.Memory;
 using Xunit;
 
@@ -182,6 +183,46 @@ namespace NCoreUtils.Extensions.Unit
             var expected = value.ToString();
             Span<char> span = stackalloc char[20];
             var length = Emplacer.GetDefault<long>().Emplace(value, span);
+            var actual = span.Slice(0, length).ToString();
+            Assert.Equal(expected, actual);
+        }
+
+        [Theory]
+        [InlineData(-100.0f, 3.0f, "G10")]
+        [InlineData(-10.0f, 3.0f, "G9")]
+        [InlineData(-10.0f, 4.0f, "G9")]
+        [InlineData(-10.0f, 6.0f, "G9")]
+        [InlineData((float)0, (float)1, "G")]
+        [InlineData(10.0f, 6.0f, "G9")]
+        [InlineData(10.0f, 4.0f, "G9")]
+        [InlineData(10.0f, 3.0f, "G9")]
+        [InlineData(100.0f, 3.0f, "G10")]
+        public void SingleSuccess(float a, float b, string format)
+        {
+            var value = a / b;
+            var expected = value.ToString(format, CultureInfo.InvariantCulture);
+            Span<char> span = stackalloc char[40];
+            var length = Emplacer.GetDefault<float>().Emplace(value, span);
+            var actual = span.Slice(0, length).ToString();
+            Assert.Equal(expected, actual);
+        }
+
+        [Theory]
+        [InlineData(-100.0, 3.0, "G10")]
+        [InlineData(-10.0, 3.0, "G9")]
+        [InlineData(-10.0, 4.0, "G9")]
+        [InlineData(-10.0, 6.0, "G9")]
+        [InlineData((double)0, (double)1, "G")]
+        [InlineData(10.0, 6.0, "G9")]
+        [InlineData(10.0, 4.0, "G9")]
+        [InlineData(10.0, 3.0, "G9")]
+        [InlineData(100.0, 3.0, "G10")]
+        public void DoubleSuccess(double a, double b, string format)
+        {
+            var value = a / b;
+            var expected = value.ToString(format, CultureInfo.InvariantCulture);
+            Span<char> span = stackalloc char[40];
+            var length = Emplacer.GetDefault<double>().Emplace(value, span);
             var actual = span.Slice(0, length).ToString();
             Assert.Equal(expected, actual);
         }

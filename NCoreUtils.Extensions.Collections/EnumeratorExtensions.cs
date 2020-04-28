@@ -17,12 +17,12 @@ namespace NCoreUtils
 
             readonly Func<TSource, TTarget> _selector;
 
-            public TTarget Current { get; private set; } = default(TTarget);
+            public TTarget Current { get; private set; } = default!;
 
             object IEnumerator.Current
             {
                 [ExcludeFromCodeCoverage]
-                get => Current;
+                get => Current!;
             }
 
             public SelectEnumerator(IEnumerator<TSource> source, Func<TSource, TTarget> selector)
@@ -40,7 +40,7 @@ namespace NCoreUtils
                     Current = _selector(_source.Current);
                     return true;
                 }
-                Current = default(TTarget);
+                Current = default!;
                 return false;
             }
 
@@ -48,7 +48,7 @@ namespace NCoreUtils
             public void Reset()
             {
                 _source.Reset();
-                Current = default(TTarget);
+                Current = default!;
             }
         }
 
@@ -60,12 +60,12 @@ namespace NCoreUtils
 
             int _index = -1;
 
-            public TTarget Current { get; private set; } = default(TTarget);
+            public TTarget Current { get; private set; } = default!;
 
             object IEnumerator.Current
             {
                 [ExcludeFromCodeCoverage]
-                get => Current;
+                get => Current!;
             }
 
             public IndexedSelectEnumerator(IEnumerator<TSource> source, Func<TSource, int, TTarget> selector)
@@ -83,7 +83,7 @@ namespace NCoreUtils
                     Current = _selector(_source.Current, ++_index);
                     return true;
                 }
-                Current = default(TTarget);
+                Current = default!;
                 return false;
             }
 
@@ -92,7 +92,7 @@ namespace NCoreUtils
             {
                 _source.Reset();
                 _index = -1;
-                Current = default(TTarget);
+                Current = default!;
             }
         }
 
@@ -102,12 +102,12 @@ namespace NCoreUtils
 
             readonly Func<T, bool> _predicate;
 
-            public T Current { get; private set; } = default(T);
+            public T Current { get; private set; } = default!;
 
             object IEnumerator.Current
             {
                 [ExcludeFromCodeCoverage]
-                get => Current;
+                get => Current!;
             }
 
             public WhereEnumerator(IEnumerator<T> source, Func<T, bool> predicate)
@@ -127,7 +127,7 @@ namespace NCoreUtils
                     if (!_source.MoveNext())
                     {
                         done = true;
-                        Current = default(T);
+                        Current = default!;
                     }
                     else
                     {
@@ -148,7 +148,7 @@ namespace NCoreUtils
             public void Reset()
             {
                 _source.Reset();
-                Current = default(T);
+                Current = default!;
             }
         }
 
@@ -160,12 +160,12 @@ namespace NCoreUtils
 
             int _index = -1;
 
-            public T Current { get; private set; } = default(T);
+            public T Current { get; private set; } = default!;
 
             object IEnumerator.Current
             {
                 [ExcludeFromCodeCoverage]
-                get => Current;
+                get => Current!;
             }
 
             public IndexedWhereEnumerator(IEnumerator<T> source, Func<T, int, bool> predicate)
@@ -185,7 +185,7 @@ namespace NCoreUtils
                     if (!_source.MoveNext())
                     {
                         done = true;
-                        Current = default(T);
+                        Current = default!;
                     }
                     else
                     {
@@ -207,7 +207,7 @@ namespace NCoreUtils
             {
                 _source.Reset();
                 _index = -1;
-                Current = default(T);
+                Current = default!;
             }
         }
 

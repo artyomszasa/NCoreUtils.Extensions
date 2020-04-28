@@ -6,7 +6,7 @@ namespace NCoreUtils.Collections
 {
     static class SerializationHelper
     {
-        static ConditionalWeakTable<object, SerializationInfo> _serializationInfoTable;
+        static ConditionalWeakTable<object, SerializationInfo>? _serializationInfoTable;
 
         internal static ConditionalWeakTable<object, SerializationInfo> SerializationInfoTable
         {

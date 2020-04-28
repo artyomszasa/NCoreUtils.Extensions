@@ -87,7 +87,7 @@ namespace NCoreUtils.Collections
                 value = _mapping(v);
                 return true;
             }
-            value = default(TResult);
+            value = default!;
             return false;
         }
 

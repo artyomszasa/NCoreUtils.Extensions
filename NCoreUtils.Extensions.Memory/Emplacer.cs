@@ -16,6 +16,8 @@ namespace NCoreUtils
             { typeof(ushort), UInt16Emplacer.Instance },
             { typeof(uint), UInt32Emplacer.Instance },
             { typeof(ulong), UInt64Emplacer.Instance },
+            { typeof(float), SingleEmplacer.Default },
+            { typeof(double), DoubleEmplacer.Default },
             { typeof(char), CharEmplacer.Instance },
             { typeof(string), StringEmplacer.Instance }
         };
