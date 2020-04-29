@@ -9,13 +9,14 @@ namespace NCoreUtils
 {
     public static class ExpressionExtensions
     {
-        sealed class ParameterSubstitution : ExpressionVisitor
+        sealed class ParameterSubstitution : ExtensionExpressionVisitor
         {
             readonly ParameterExpression _parameter;
 
             readonly Expression _replacement;
 
-            public ParameterSubstitution(ParameterExpression parameter, Expression replacement)
+            public ParameterSubstitution(ParameterExpression parameter, Expression replacement, bool keepExtensions)
+                : base(keepExtensions)
             {
                 _parameter = parameter;
                 _replacement = replacement;
@@ -31,9 +32,13 @@ namespace NCoreUtils
             }
         }
 
-        sealed class SpliceInliner : ExpressionVisitor
+        sealed class SpliceInliner : ExtensionExpressionVisitor
         {
-            public static SpliceInliner Instance { get; } = new SpliceInliner();
+            public static SpliceInliner ReduceInstance { get; } = new SpliceInliner(false);
+
+            public static SpliceInliner NoReduceInstance { get; } = new SpliceInliner(true);
+
+            public SpliceInliner(bool keepExtensions) : base(keepExtensions) { }
 
             protected override Expression VisitMethodCall(MethodCallExpression node)
             {
@@ -75,8 +80,9 @@ namespace NCoreUtils
         /// <param name="expression">Source expression.</param>
         /// <param name="parameter">Parameter expression to replace.</param>
         /// <param name="replacement">Replacement expression.</param>
+        /// <param name="keepExtensions">When <c>true</c> extension nodes will not be reduced.</param>
         /// <returns>Result expression.</returns>
-        public static T SubstituteParameter<T>(this T expression, ParameterExpression parameter, Expression replacement)
+        public static T SubstituteParameter<T>(this T expression, ParameterExpression parameter, Expression replacement, bool keepExtensions)
             where T : Expression
         {
             if (parameter == null)
@@ -87,14 +93,30 @@ namespace NCoreUtils
             {
                 throw new System.ArgumentNullException(nameof(replacement));
             }
-            var visitor = new ParameterSubstitution(parameter, replacement);
+            var visitor = new ParameterSubstitution(parameter, replacement, keepExtensions);
             return (T)visitor.Visit(expression);
         }
 
-        public static T InlineSplices<T>(this T expression) where T : Expression
-        {
-            return (T)SpliceInliner.Instance.Visit(expression);
-        }
+        /// <summary>
+        /// Replaces all <paramref name="parameter" /> occurrences within the source expression with the specified
+        /// expression.
+        /// </summary>
+        /// <typeparam name="T">Static type of the source expression.</typeparam>
+        /// <param name="expression">Source expression.</param>
+        /// <param name="parameter">Parameter expression to replace.</param>
+        /// <param name="replacement">Replacement expression.</param>
+        /// <returns>Result expression.</returns>
+        public static T SubstituteParameter<T>(this T expression, ParameterExpression parameter, Expression replacement)
+            where T : Expression
+            => expression.SubstituteParameter(parameter, replacement, false);
+
+        public static T InlineSplices<T>(this T expression, bool keepExtensions)
+            where T : Expression
+            => (T)(keepExtensions ? SpliceInliner.NoReduceInstance : SpliceInliner.ReduceInstance).Visit(expression);
+
+        public static T InlineSplices<T>(this T expression)
+            where T : Expression
+            => InlineSplices(expression, false);
 
         static Maybe<object> MaybeExtractConstantImpl(Expression source)
         {

@@ -2,7 +2,7 @@
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;net452</TargetFrameworks>
     <RootNamespace>NCoreUtils</RootNamespace>
-    <Version>1.0.5</Version>
+    <Version>1.0.6</Version>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="NCoreUtils.Maybe" Version="1.0.5" />
