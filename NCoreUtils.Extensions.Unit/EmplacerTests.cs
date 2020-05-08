@@ -28,6 +28,11 @@ namespace NCoreUtils.Extensions.Unit
             {
                 return Emplacer.GetDefault<T>().Emplace(Value, span);
             }
+
+            public bool TryEmplace(Span<char> span, out int used)
+            {
+                return Emplacer.GetDefault<T>().TryEmplace(Value, span, out used);
+            }
         }
 
         [Theory]

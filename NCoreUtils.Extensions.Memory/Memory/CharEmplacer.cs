@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.CompilerServices;
 
 namespace NCoreUtils.Memory
 {
@@ -6,16 +7,23 @@ namespace NCoreUtils.Memory
     {
         public static CharEmplacer Instance { get; } = new CharEmplacer();
 
-        CharEmplacer() { }
+        private CharEmplacer() { }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public int Emplace(char value, Span<char> span)
+            => Emplacer.Emplace(value, span);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool TryEmplace(char value, Span<char> span, out int used)
         {
             if (span.Length < 1)
             {
-                throw new InvalidOperationException($"Provided span must be at least 1 character long.");
+                used = default;
+                return false;
             }
             span[0] = value;
-            return 1;
+            used = 1;
+            return true;
         }
     }
 }

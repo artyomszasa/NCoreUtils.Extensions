@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.CompilerServices;
 
 namespace NCoreUtils.Memory
 {
@@ -6,20 +7,14 @@ namespace NCoreUtils.Memory
     {
         public static StringEmplacer Instance { get; } = new StringEmplacer();
 
-        StringEmplacer() { }
+        private StringEmplacer() { }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public int Emplace(string value, Span<char> span)
-        {
-            if (value is null)
-            {
-                return 0;
-            }
-            if (value.Length > span.Length)
-            {
-                throw new InvalidOperationException($"Provided span must be at least {value.Length} long.");
-            }
-            value.AsSpan().CopyTo(span);
-            return value.Length;
-        }
+            => Emplacer.Emplace(value, span);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool TryEmplace(string value, Span<char> span, out int used)
+            => Emplacer.TryEmplace(value, span, out used);
     }
 }

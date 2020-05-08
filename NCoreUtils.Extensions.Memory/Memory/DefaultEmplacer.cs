@@ -1,22 +1,16 @@
 using System;
+using System.Runtime.CompilerServices;
 
 namespace NCoreUtils.Memory
 {
-    public class DefaultEmplacer<T> : IEmplacer<T>
+    public sealed class DefaultEmplacer<T> : IEmplacer<T>
     {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public int Emplace(T value, Span<char> span)
-        {
-            var stringValue = value?.ToString();
-            if (stringValue is null)
-            {
-                return 0;
-            }
-            if (stringValue.Length > span.Length)
-            {
-                throw new InvalidOperationException($"Provided span must be at least {stringValue.Length} character(s) long.");
-            }
-            stringValue.AsSpan().CopyTo(span);
-            return stringValue.Length;
-        }
+            => Emplacer.Emplace(value?.ToString(), span);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool TryEmplace(T value, Span<char> span, out int used)
+            => Emplacer.TryEmplace(value?.ToString(), span, out used);
     }
 }
