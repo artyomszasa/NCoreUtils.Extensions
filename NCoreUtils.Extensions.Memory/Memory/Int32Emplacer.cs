@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.CompilerServices;
 
 namespace NCoreUtils.Memory
 {
@@ -8,10 +9,12 @@ namespace NCoreUtils.Memory
 
         private Int32Emplacer() { }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public int Emplace(int value, Span<char> span)
             => Emplacer.Emplace(value, span);
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool TryEmplace(int value, Span<char> span, out int used)
-            => TryEmplace(value, span, out used);
+            => Emplacer.TryEmplace(value, span, out used);
     }
 }

@@ -6,15 +6,17 @@ namespace NCoreUtils
 {
     public ref struct SpanBuilder
     {
-        readonly Span<char> _span;
+        internal readonly Span<char> _span;
 
-        public int Length { get; private set; }
+        internal int _length;
+
+        public int Length { get => _length; internal set => _length = value; }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public SpanBuilder(Span<char> span)
         {
             _span = span;
-            Length = 0;
+            _length = 0;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -27,12 +29,19 @@ namespace NCoreUtils
         public void Append<T>(T value)
             => Append(value, Emplacer.GetDefault<T>());
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Append(Span<char> value)
-        {
-            value.CopyTo(_span.Slice(Length));
-            Length += value.Length;
-        }
+        // [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        // public void Append(Span<char> value)
+        // {
+        //     value.CopyTo(_span.Slice(Length));
+        //     Length += value.Length;
+        // }
+
+        // [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        // public void Append(ReadOnlySpan<char> value)
+        // {
+        //     value.CopyTo(_span.Slice(Length));
+        //     Length += value.Length;
+        // }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Append(byte value)
@@ -121,6 +130,28 @@ namespace NCoreUtils
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool TryAppend<T>(T value)
             => TryAppend(value, Emplacer.GetDefault<T>());
+
+        // [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        // public bool TryAppend(Span<char> value)
+        // {
+        //     if (value.TryCopyTo(_span.Slice(Length)))
+        //     {
+        //         Length += value.Length;
+        //         return true;
+        //     }
+        //     return false;
+        // }
+
+        // [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        // public bool TryAppend(ReadOnlySpan<char> value)
+        // {
+        //     if (value.TryCopyTo(_span.Slice(Length)))
+        //     {
+        //         Length += value.Length;
+        //         return true;
+        //     }
+        //     return false;
+        // }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool TryAppend(char value)
