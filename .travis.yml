@@ -2,7 +2,7 @@ dist: xenial
 language: csharp
 solution: NCoreUtils.Extensions.sln
 mono: none
-dotnet: 3.1.201
+dotnet: 3.1.404
 script:
   - dotnet restore
   - dotnet test -c Debug -f netcoreapp3.1 NCoreUtils.Extensions.Unit

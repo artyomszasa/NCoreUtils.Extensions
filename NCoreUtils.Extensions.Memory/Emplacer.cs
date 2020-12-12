@@ -52,7 +52,7 @@ namespace NCoreUtils
             {
                 return length;
             }
-            throw new InvalidOperationException($"Provided span must be at least {length} character(s) long.");
+            throw new InsufficientBufferSizeException(span, length);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -140,7 +140,7 @@ namespace NCoreUtils
             {
                 return length;
             }
-            throw new InvalidOperationException($"Provided span must be at least {length} character(s) long.");
+            throw new InsufficientBufferSizeException(span, length);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -206,7 +206,7 @@ namespace NCoreUtils
             {
                 return length;
             }
-            throw new InvalidOperationException($"Provided span must be at least {length} character(s) long.");
+            throw new InsufficientBufferSizeException(span, length);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -283,7 +283,7 @@ namespace NCoreUtils
             {
                 return length;
             }
-            throw new InvalidOperationException($"Provided span must be at least {length} character(s) long.");
+            throw new InsufficientBufferSizeException(span, length);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -370,7 +370,7 @@ namespace NCoreUtils
             {
                 return length;
             }
-            throw new InvalidOperationException($"Provided span must be at least {length} character(s) long.");
+            throw new InsufficientBufferSizeException(span, length);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -419,7 +419,7 @@ namespace NCoreUtils
             {
                 return length;
             }
-            throw new InvalidOperationException($"Provided span must be at least {length} long.");
+            throw new InsufficientBufferSizeException(span, length);
         }
 
         public static bool TryEmplace(string? value, Span<char> span, out int used)
@@ -505,7 +505,7 @@ namespace NCoreUtils
             {
                 return length;
             }
-            throw new InvalidOperationException($"Provided span must be at least {length} character(s) long.");
+            throw new InsufficientBufferSizeException(span, length);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

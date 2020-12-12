@@ -1,88 +1,50 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netcoreapp3.1;net461</TargetFrameworks>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
     <LangVersion>8.0</LangVersion>
     <IsPackable>false</IsPackable>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="coverlet.msbuild" Version="2.7.0">
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-      <PrivateAssets>all</PrivateAssets>
-    </PackageReference>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.4.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.0.1" />
     <PackageReference Include="xunit" Version="2.4.1" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="2.4.1">
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.4.1" />
+    <PackageReference Include="ReportGenerator" Version="4.5.3">
       <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
-    <!--
-    <PackageReference Include="coverlet.collector" Version="1.0.1" />
-    -->
-    <PackageReference Include="ReportGenerator" Version="4.1.5" PrivateAssets="All" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <DotNetCliToolReference Include="dotnet-reportgenerator-cli" Version="4.3.6" />
+    <PackageReference Include="coverlet.msbuild" Version="2.9.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\NCoreUtils.Extensions.Collections\NCoreUtils.Extensions.Collections.csproj" />
     <ProjectReference Include="..\NCoreUtils.Extensions.Nullable\NCoreUtils.Extensions.Nullable.csproj" />
-    <ProjectReference Include="..\NCoreUtils.Extensions.JsonSerialization\NCoreUtils.Extensions.JsonSerialization.csproj" />
     <ProjectReference Include="..\NCoreUtils.Extensions.Memory\NCoreUtils.Extensions.Memory.csproj" />
+    <ProjectReference Include="..\NCoreUtils.Extensions.Globalization\NCoreUtils.Extensions.Globalization.csproj" />
+    <ProjectReference Include="..\NCoreUtils.Extensions.IO\NCoreUtils.Extensions.IO.csproj" />
   </ItemGroup>
 
-  <Target Name="RunCoverageTests">
+  <!-- **** -->
+  <Target Name="BeforeRunCoverageTests">
     <PropertyGroup>
-      <ReportGeneratorPaths>$([System.IO.Directory]::GetFiles($(NuGetPackageRoot), "ReportGenerator.exe", System.IO.SearchOption.AllDirectories))</ReportGeneratorPaths>
+      <CollectCoverage>true</CollectCoverage>
+      <CoverletOutputFormat>opencover</CoverletOutputFormat>
+      <CoverletOutput>$([System.IO.Path]::Combine($(MSBuildProjectDirectory), "coverage.opencover.xml"))</CoverletOutput>
+      <Threshold>0</Threshold>
+      <ThresholdType>line</ThresholdType>
+      <ThresholdStat>total</ThresholdStat>
     </PropertyGroup>
-    <ItemGroup>
-      <ReportGeneratorVersion Include="%(PackageReference.Version)" Condition="%(PackageReference.Identity) == 'ReportGenerator'" />
-    </ItemGroup>
-    <PropertyGroup>
-      <UseReportGeneratorVersion>@(ReportGeneratorVersion)</UseReportGeneratorVersion>
-    </PropertyGroup>
-    <ItemGroup>
-      <ReportGeneratorCandidates Include="$(ReportGeneratorPaths)" />
-      <ReportGeneratorPath Include="%(ReportGeneratorCandidates.Identity)" Condition="$([System.String]::new('%(ReportGeneratorCandidates.Identity)').Contains($(UseReportGeneratorVersion)))" />
-    </ItemGroup>
-    <PropertyGroup>
-      <UseReportGeneratorPath>@(ReportGeneratorPath)</UseReportGeneratorPath>
-    </PropertyGroup>
-    <Message Importance="High" Text="Version = @(ReportGeneratorVersion)" />
-    <Message Importance="High" Text="Candidates = %(ReportGeneratorCandidates.Identity)" />
-    <Message Importance="High" Text="Chosen path = $(UseReportGeneratorPath)" />
-    <PropertyGroup>
-      <CollectCoverage>True</CollectCoverage>
-      <CoverletOutputFormat>cobertura</CoverletOutputFormat>
-    </PropertyGroup>
-    <!-- msbuild not integrated this yet...
-    <CallTarget Targets="VSTest" />
-    -->
-    <Exec Command="dotnet test -f netcoreapp3.0 --logger &quot;trx;LogFileName=TestResults.trx&quot;  --results-directory TestResults /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura /p:Include=&quot;[NCoreUtils.Extensions*]*&quot; /p:Exclude=&quot;[NCoreUtils.Extensions.Unit]*&quot; /p:ParallelizeTestCollections=false" />
-    <Exec Command="dotnet reportgenerator -reports:coverage.cobertura.xml -targetdir:report -reporttypes:Html" />
-    <!--
-    <Exec Command="mono $(UseReportGeneratorPath) -reports:coverage.opencover.xml -targetdir:report -reporttypes:Html" Condition="'$(OS)' == 'Unix'" />
-    <Exec Command="$(UseReportGeneratorPath) -reports:coverage.opencover.xml -targetdir:report -reporttypes:Html" Condition="'$(OS)' != 'Unix'" />
-    -->
   </Target>
-
-  <ItemGroup Condition="$(TargetFramework.StartsWith('net4'))">
-    <Reference Include="System.Runtime" />
-    <Reference Include="System.Threading.Tasks" />
-  </ItemGroup>
-
-  <!-- mono fix -->
-  <PropertyGroup>
-    <TargetIsMono Condition="$(TargetFramework.StartsWith('net4')) and '$(OS)' == 'Unix'">true</TargetIsMono>
-    <BaseFrameworkPathOverrideForMono Condition="'$(BaseFrameworkPathOverrideForMono)' == '' AND '$(TargetIsMono)' == 'true' AND EXISTS('/usr/lib/mono')">/usr/lib/mono</BaseFrameworkPathOverrideForMono>
-    <FrameworkPathOverride Condition="'$(BaseFrameworkPathOverrideForMono)' != '' AND '$(TargetFramework)' == 'net452'">$(BaseFrameworkPathOverrideForMono)/4.5.2-api</FrameworkPathOverride>
-    <FrameworkPathOverride Condition="'$(BaseFrameworkPathOverrideForMono)' != '' AND '$(TargetFramework)' == 'net461'">$(BaseFrameworkPathOverrideForMono)/4.6.1-api</FrameworkPathOverride>
-    <EnableFrameworkPathOverride Condition="'$(BaseFrameworkPathOverrideForMono)' != ''">true</EnableFrameworkPathOverride>
-    <AssemblySearchPaths Condition="'$(BaseFrameworkPathOverrideForMono)' != ''">$(FrameworkPathOverride)/Facades;$(AssemblySearchPaths)</AssemblySearchPaths>
-  </PropertyGroup>
+  <Target Name="GenerateReport">
+    <Message Text="Generating report for $(CoverletOutput)" Importance="high" />
+    <ReportGenerator ReportFiles="$(CoverletOutput)" TargetDirectory="report" ReportTypes="Html" VerbosityLevel="Verbose" />
+  </Target>
+  <Target Name="RunCoverageTests" DependsOnTargets="BeforeRunCoverageTests">
+    <CallTarget Targets="VSTest" />
+    <MSBuild Projects="$(MSBuildProjectFile)" Targets="GenerateReport" Properties="TargetFramework=$(TargetFramework);CoverletOutput=$(CoverletOutput)" />
+  </Target>
 </Project>

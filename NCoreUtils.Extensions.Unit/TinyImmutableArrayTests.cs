@@ -212,5 +212,73 @@ namespace NCoreUtils.Extensions.Unit
             Assert.Equal(2, enumerator.Current);
             Assert.False(enumerator.MoveNext());
         }
+
+        [Fact]
+        public void RandomAccess()
+        {
+            var array0 = TinyImmutableArray.Empty<int>();
+            var array1 = TinyImmutableArray.Create(1);
+            var array2 = TinyImmutableArray.Create(1, 2);
+            var array3 = TinyImmutableArray.Create(1, 2, 3);
+            var array100 = TinyImmutableArray.Create(System.Linq.Enumerable.Range(1, 100));
+            // array0
+            Assert.Throws<IndexOutOfRangeException>(() => array0[-1]);
+            for (var i = 0; i < 4; ++i)
+            {
+                Assert.Throws<IndexOutOfRangeException>(() => array0[i]);
+            }
+            // array1
+            Assert.Throws<IndexOutOfRangeException>(() => array1[-1]);
+            for (var i = 0; i < 4; ++i)
+            {
+                if (i > 0)
+                {
+                    Assert.Throws<IndexOutOfRangeException>(() => array1[i]);
+                }
+                else
+                {
+                    Assert.Equal(i + 1, array1[i]);
+                }
+            }
+            // array2
+            Assert.Throws<IndexOutOfRangeException>(() => array2[-1]);
+            for (var i = 0; i < 4; ++i)
+            {
+                if (i > 1)
+                {
+                    Assert.Throws<IndexOutOfRangeException>(() => array2[i]);
+                }
+                else
+                {
+                    Assert.Equal(i + 1, array2[i]);
+                }
+            }
+            // array3
+            Assert.Throws<IndexOutOfRangeException>(() => array3[-1]);
+            for (var i = 0; i < 4; ++i)
+            {
+                if (i > 2)
+                {
+                    Assert.Throws<IndexOutOfRangeException>(() => array3[i]);
+                }
+                else
+                {
+                    Assert.Equal(i + 1, array3[i]);
+                }
+            }
+            // array100
+            Assert.Throws<IndexOutOfRangeException>(() => array100[-1]);
+            for (var i = 0; i < 101; ++i)
+            {
+                if (i > 99)
+                {
+                    Assert.Throws<IndexOutOfRangeException>(() => array100[i]);
+                }
+                else
+                {
+                    Assert.Equal(i + 1, array100[i]);
+                }
+            }
+        }
     }
 }

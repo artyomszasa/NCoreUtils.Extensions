@@ -92,17 +92,25 @@ namespace NCoreUtils
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Append(float value, int maxPrecision = 8, string decimalDelimiter = ".")
+        public void Append(float value, int maxPrecision, string decimalDelimiter = SingleEmplacer.DefaultDecimalSeparator)
         {
             Length += Emplacer.Emplace(value, _span.Slice(Length), maxPrecision, decimalDelimiter);
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void Append(float value)
+            => Append(value, SingleEmplacer.DefaultMaxPrecision);
 
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Append(double value, int maxPrecision = 8, string decimalDelimiter = ".")
+        public void Append(double value, int maxPrecision, string decimalDelimiter = DoubleEmplacer.DefaultDecimalSeparator)
         {
             Length += Emplacer.Emplace(value, _span.Slice(Length), maxPrecision, decimalDelimiter);
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void Append(double value)
+            => Append(value, DoubleEmplacer.DefaultMaxPrecision);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Append(char value)
@@ -253,7 +261,7 @@ namespace NCoreUtils
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool TryAppend(double value, int maxPrecision = DoubleEmplacer.DefaultMaxPrecision, string decimalSeparator = DoubleEmplacer.DefaultDecimalSeparator)
+        public bool TryAppend(double value, int maxPrecision, string decimalSeparator = DoubleEmplacer.DefaultDecimalSeparator)
         {
             if (Emplacer.TryEmplace(value, _span.Slice(Length), maxPrecision, decimalSeparator, out var used))
             {
@@ -262,6 +270,10 @@ namespace NCoreUtils
             }
             return false;
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool TryAppend(double value)
+            => TryAppend(value, DoubleEmplacer.DefaultMaxPrecision);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool TryAppend(float value, int maxPrecision = SingleEmplacer.DefaultMaxPrecision, string decimalSeparator = SingleEmplacer.DefaultDecimalSeparator)
@@ -273,6 +285,10 @@ namespace NCoreUtils
             }
             return false;
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool TryAppend(float value)
+            => TryAppend(value, SingleEmplacer.DefaultMaxPrecision);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool TryAppend(string value)

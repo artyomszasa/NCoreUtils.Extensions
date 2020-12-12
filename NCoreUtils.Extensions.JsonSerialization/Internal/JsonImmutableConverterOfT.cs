@@ -50,7 +50,10 @@ namespace NCoreUtils.JsonSerialization.Internal
                 if (!_descriptor.Properties.TryGetValue(propName, out var prop))
                 {
                     reader.Read();
-                    reader.Skip();
+                    if (!reader.TrySkip())
+                    {
+                        throw new JsonException();
+                    }
                 }
                 else
                 {

@@ -10,6 +10,12 @@ namespace NCoreUtils
     public class UnmanagedMemoryPool<T> : MemoryPool<T>
         where T : unmanaged
     {
+        public const int DefaultMinBufferSize = 4 * 1024;
+
+        public const int DefaultMaxBufferSize = 1024 * 1024;
+
+        public const int DefaultDefaultBufferSize = 32 * 1024;
+
         private static int[] _pow2 = { 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024 };
 
         private static UnmanagedMemoryPool<T>? _shared;
@@ -44,7 +50,7 @@ namespace NCoreUtils
             {
                 throw new ArgumentException("Buffer size must be divisible by 1024.", parameterName);
             }
-            if (-1 == Array.BinarySearch(_pow2, value / 1024))
+            if (0 > Array.BinarySearch(_pow2, value / 1024))
             {
                 throw new ArgumentException("Buffer must be 1024 * power of 2.", parameterName);
             }
@@ -53,6 +59,9 @@ namespace NCoreUtils
         private int _isDisposed = 0;
 
         private (int MaxSize, ConcurrentQueue<UnmanagedMemoryManager<T>> Queue)[] _store;
+
+        // UNIT only
+        internal IReadOnlyList<(int MaxSize, ConcurrentQueue<UnmanagedMemoryManager<T>> Queue)> Store => _store;
 
         public int DefaultBufferSize { get; }
 
@@ -64,7 +73,7 @@ namespace NCoreUtils
 
         public override int MaxBufferSize { get; }
 
-        public UnmanagedMemoryPool(int minBufferSize = 4 * 1024, int maxBufferSize = 1024 * 1024, int defaultBufferSize = 32 * 1024)
+        public UnmanagedMemoryPool(int minBufferSize = DefaultMinBufferSize, int maxBufferSize = DefaultMaxBufferSize, int defaultBufferSize = DefaultDefaultBufferSize)
         {
             EnsureValidSize(minBufferSize, nameof(minBufferSize));
             EnsureValidSize(maxBufferSize, nameof(maxBufferSize));
@@ -77,7 +86,7 @@ namespace NCoreUtils
             {
                 throw new InvalidOperationException("Default buffer size must be less than or equal to the maximum buffer size.");
             }
-            if (defaultBufferSize > minBufferSize)
+            if (defaultBufferSize < minBufferSize)
             {
                 throw new InvalidOperationException("Default buffer size must be grater than or equal to the minimum buffer size.");
             }
