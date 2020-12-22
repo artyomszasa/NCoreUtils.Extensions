@@ -8,6 +8,9 @@ namespace NCoreUtils.Google
     {
         private GoogleCredential? _googleCredential;
 
+        public GoogleAccessTokenProvider(GoogleCredential? googleCredential = default)
+            => _googleCredential = googleCredential;
+
         public async ValueTask<string> GetAccessTokenAsync(string[] scopes, CancellationToken cancellationToken)
         {
             if (null == _googleCredential)
@@ -15,7 +18,8 @@ namespace NCoreUtils.Google
                 var googleCredential = await GoogleCredential.GetApplicationDefaultAsync();
                 _googleCredential = googleCredential.CreateScoped(scopes);
             }
-            return await _googleCredential.UnderlyingCredential
+            return await _googleCredential
+                .UnderlyingCredential
                 .GetAccessTokenForRequestAsync(cancellationToken: cancellationToken);
         }
     }

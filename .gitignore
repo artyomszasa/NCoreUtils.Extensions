@@ -8,3 +8,5 @@ coverage.opencover.xml
 coverage.cobertura.xml
 NCoreUtils.Extensions.Unit/TestResults
 NCoreUtils.Extensions.Unit/report
+NCoreUtils.Extensions.Intergration/TestResults
+NCoreUtils.Extensions.Intergration/report

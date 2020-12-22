@@ -17,8 +17,10 @@ namespace NCoreUtils.Extensions.Unit
             var array4 = TinyImmutableArray.Create<int>(new [] { 1, 2, 3, 4 });
             var array5 = TinyImmutableArray.Create<int>(new [] { 1, 2, 3, 4, 5 });
 
+#pragma warning disable xUnit2013
             Assert.Equal(0, array0.Count);
             Assert.Equal(1, array1.Count);
+#pragma warning restore xUnit2013
             Assert.Equal(2, array2.Count);
             Assert.Equal(3, array3.Count);
             Assert.Equal(4, array4.Count);

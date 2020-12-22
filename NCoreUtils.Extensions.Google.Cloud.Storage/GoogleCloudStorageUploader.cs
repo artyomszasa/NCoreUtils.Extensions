@@ -11,7 +11,7 @@ using NCoreUtils.Google;
 
 namespace NCoreUtils
 {
-    public sealed class GoogleCloudStorageUploader : IDisposable
+    public sealed class GoogleCloudStorageUploader : IDisposable, IAsyncDisposable
     {
         private sealed class SliceMemoryOwner : IMemoryOwner<byte>
         {
@@ -178,6 +178,7 @@ namespace NCoreUtils
                 {
                     throw new GoogleCloudStorageUploadException($"Upload final chunk failed with status code {response.StatusCode}.");
                 }
+                Sent += read;
             }
         }
 
@@ -185,8 +186,19 @@ namespace NCoreUtils
         {
             if (0 == Interlocked.CompareExchange(ref _isDisposed, 1, 0))
             {
-                ((IDisposable)_buffer).Dispose();
+                _buffer.Dispose();
+                Client.Dispose();
             }
+        }
+
+        public ValueTask DisposeAsync()
+        {
+            if (0 == Interlocked.CompareExchange(ref _isDisposed, 1, 0))
+            {
+                _buffer.Dispose();
+                Client.Dispose();
+            }
+            return default;
         }
     }
 }

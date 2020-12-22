@@ -19,7 +19,9 @@ namespace NCoreUtils.Google
         {
             if (request.Headers.Authorization is null || string.IsNullOrEmpty(request.Headers.Authorization.Parameter))
             {
-                var scope = request.Method == HttpMethod.Get ? GoogleCloudStorageUtils.ReadOnlyScope : GoogleCloudStorageUtils.ReadWriteScope;
+                var scope = request.TryGetRequiredGCSScope(out var requiredScope)
+                    ? requiredScope
+                    : request.Method == HttpMethod.Get ? GoogleCloudStorageUtils.ReadOnlyScope : GoogleCloudStorageUtils.ReadWriteScope;
                 var accessToken = await AccessTokenProvider.GetAccessTokenAsync(scope, cancellationToken);
                 request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
             }

@@ -26,6 +26,7 @@
     <ProjectReference Include="..\NCoreUtils.Extensions.Memory\NCoreUtils.Extensions.Memory.csproj" />
     <ProjectReference Include="..\NCoreUtils.Extensions.Globalization\NCoreUtils.Extensions.Globalization.csproj" />
     <ProjectReference Include="..\NCoreUtils.Extensions.IO\NCoreUtils.Extensions.IO.csproj" />
+    <ProjectReference Include="..\NCoreUtils.Extensions.Collections.Optimized\NCoreUtils.Extensions.Collections.Optimized.csproj" />
   </ItemGroup>
 
   <!-- **** -->
