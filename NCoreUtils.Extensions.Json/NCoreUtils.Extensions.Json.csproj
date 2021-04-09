@@ -4,7 +4,7 @@
     <LangVersion>8.0</LangVersion>
     <Nullable>enable</Nullable>
     <RootNamespace>NCoreUtils</RootNamespace>
-    <Version>1.0.2</Version>
+    <Version>1.0.3</Version>
     <!-- NuGet -->
     <PackageId>NCoreUtils.Extensions.Json</PackageId>
     <Title>$(PackageId)</Title>
@@ -35,6 +35,6 @@
     <AssemblySearchPaths Condition="'$(BaseFrameworkPathOverrideForMono)' != ''">$(FrameworkPathOverride)/Facades;$(AssemblySearchPaths)</AssemblySearchPaths>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="System.Text.Json" Version="4.7.1" />
+    <PackageReference Include="System.Text.Json" Version="4.7.2" />
   </ItemGroup>
 </Project>

@@ -1,3 +1,6 @@
+using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Google.Apis.Auth.OAuth2;
@@ -8,17 +11,28 @@ namespace NCoreUtils.Google
     {
         private GoogleCredential? _googleCredential;
 
-        public GoogleAccessTokenProvider(GoogleCredential? googleCredential = default)
-            => _googleCredential = googleCredential;
+        private ConcurrentDictionary<HashSet<string>, GoogleCredential> _scopedCredentials
+            = new ConcurrentDictionary<HashSet<string>, GoogleCredential>(HashSet<string>.CreateSetComparer());
 
-        public async ValueTask<string> GetAccessTokenAsync(string[] scopes, CancellationToken cancellationToken)
+        private Func<HashSet<string>, GoogleCredential> _scopedFactory;
+
+        public GoogleAccessTokenProvider(GoogleCredential? googleCredential = default)
+        {
+            _googleCredential = googleCredential;
+            _scopedFactory = scopes => _googleCredential!.CreateScoped(scopes);
+        }
+
+        public ValueTask<string> GetAccessTokenAsync(string[] scopes, CancellationToken cancellationToken)
+            => GetAccessTokenAsync(new HashSet<string>(scopes), cancellationToken);
+
+        public async ValueTask<string> GetAccessTokenAsync(HashSet<string> scopes, CancellationToken cancellationToken)
         {
             if (null == _googleCredential)
             {
-                var googleCredential = await GoogleCredential.GetApplicationDefaultAsync();
-                _googleCredential = googleCredential.CreateScoped(scopes);
+                _googleCredential = await GoogleCredential.GetApplicationDefaultAsync();
             }
-            return await _googleCredential
+            var scopedCredentials = _scopedCredentials.GetOrAdd(scopes, _scopedFactory);
+            return await scopedCredentials
                 .UnderlyingCredential
                 .GetAccessTokenForRequestAsync(cancellationToken: cancellationToken);
         }

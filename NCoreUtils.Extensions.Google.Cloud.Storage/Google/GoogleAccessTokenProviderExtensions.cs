@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -9,6 +10,10 @@ namespace NCoreUtils.Google
             this IGoogleAccessTokenProvider tokenProvider,
             string scope,
             CancellationToken cancellationToken = default)
-            => tokenProvider.GetAccessTokenAsync(new [] { scope }, cancellationToken);
+            => tokenProvider switch
+            {
+                GoogleAccessTokenProvider defaultTokenProvider => defaultTokenProvider.GetAccessTokenAsync(new HashSet<string> { scope }, cancellationToken),
+                _ => tokenProvider.GetAccessTokenAsync(new [] { scope }, cancellationToken)
+            };
     }
 }
