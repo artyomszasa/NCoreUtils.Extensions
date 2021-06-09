@@ -24,12 +24,16 @@ namespace NCoreUtils.Internal
             => GetObjectDescription(type, jsonNamingPolicy, ImmutableJsonCoverterOptions.Default);
     }
 
-    public sealed class ImmutableJsonConverter<T> : JsonConverter<T>
+    public sealed class ImmutableJsonConverter<T> : JsonConverter<T>, IImmutableJsonConverter<T>
     {
-        private ImmutableJsonCoverterOptions _options;
+#if NETSTANDARD2_0
+        Type IImmutableJsonConverter.TargetType => typeof(T);
+#endif
+
+        public ImmutableJsonCoverterOptions Options { get; }
 
         public ImmutableJsonConverter(ImmutableJsonCoverterOptions options)
-            => _options = options ?? ImmutableJsonCoverterOptions.Default;
+            => Options = options ?? ImmutableJsonCoverterOptions.Default;
 
         public ImmutableJsonConverter() : this(default!) { }
 
@@ -39,7 +43,7 @@ namespace NCoreUtils.Internal
             {
                 throw new InvalidOperationException($"Expected {JsonTokenType.StartObject}, found {reader.TokenType}.");
             }
-            var desc = ImmutableJsonConverter.GetObjectDescription(typeof(T), options.PropertyNamingPolicy, _options);
+            var desc = ImmutableJsonConverter.GetObjectDescription(typeof(T), options.PropertyNamingPolicy, Options);
             var buffer = new ValueBuffer(32);
             reader.Read();
             while (reader.TokenType != JsonTokenType.EndObject)
@@ -95,7 +99,7 @@ namespace NCoreUtils.Internal
 
         public override void Write(Utf8JsonWriter writer, T value, JsonSerializerOptions options)
         {
-            var desc = ImmutableJsonConverter.GetObjectDescription(typeof(T), options.PropertyNamingPolicy, _options);
+            var desc = ImmutableJsonConverter.GetObjectDescription(typeof(T), options.PropertyNamingPolicy, Options);
             writer.WriteStartObject();
             foreach (var member in desc.Members)
             {

@@ -183,6 +183,9 @@ namespace NCoreUtils
                 _ => throw new InvalidOperationException($"Unable to compare {obj.GetType()} to RawDateTime.")
             };
 
+        public DateTimeOffset ToDateTimeOffset(TimeSpan offset)
+            => new DateTimeOffset(Year, Month, Day, Hour, Minute, Second, Millisecond, offset);
+
         public DateTimeOffset ToDateTimeOffset(TimeZoneInfo tz)
         {
             var offset = tz.BaseUtcOffset;
@@ -200,6 +203,9 @@ namespace NCoreUtils
             var dtNoTicks = new DateTimeOffset(Year, Month, Day, Hour, Minute, Second, Millisecond, offset);
             return new DateTimeOffset(dtNoTicks.Ticks + Ticks, dtNoTicks.Offset);
         }
+
+        public DateTime ToLocalDateTime()
+            => new DateTime(Year, Month, Day, Hour, Minute, Second, Millisecond, DateTimeKind.Local);
 
         public string ToString(string format, IFormatProvider formatProvider)
             => new DateTime(Year, Month, Day, Hour, Minute, Second, Millisecond, DateTimeKind.Unspecified).ToString(format, formatProvider);
