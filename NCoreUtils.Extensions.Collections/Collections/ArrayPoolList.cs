@@ -24,7 +24,7 @@ namespace NCoreUtils.Collections
 #if !NETSTANDARD2_1
             return true;
 #else
-            return IsReferenceOrContainsReferences();
+            return RuntimeHelpers.IsReferenceOrContainsReferences<T>();
 #endif
         }
 
@@ -262,16 +262,17 @@ namespace NCoreUtils.Collections
             return Array.BinarySearch<T>(_items, index, count, item, comparer);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public int BinarySearch(T item)
             => BinarySearch(0, Count, item, null);
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public int BinarySearch(T item, IComparer<T>? comparer)
             => BinarySearch(0, Count, item, comparer);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Clear()
+        private void ClearNoCheck()
         {
-            ThrowIfDisposed();
             _version++;
             if (IsReferenceOrContainsReferences())
             {
@@ -288,6 +289,14 @@ namespace NCoreUtils.Collections
             }
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void Clear()
+        {
+            ThrowIfDisposed();
+            ClearNoCheck();
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Contains(T item)
         {
             return _size != 0 && IndexOf(item) != -1;
@@ -349,14 +358,15 @@ namespace NCoreUtils.Collections
         /// Disposes the object but instead of returning the underlying array to the pool returns it to the caller.
         /// Caller takes responsibility for returning array to the pool.
         /// </summary>
-        public T[] Disown()
+        public ArraySegment<T> Disown()
         {
             if (0 == Interlocked.CompareExchange(ref _isDisposed, 1, 0))
             {
                 var items = _items;
+                var size = _size;
                 _size = 0;
                 _items = _emptyArray;
-                return items;
+                return new ArraySegment<T>(items, 0, size);
             }
             throw new ObjectDisposedException(nameof(ArrayPool<T>));
         }
@@ -365,7 +375,7 @@ namespace NCoreUtils.Collections
         {
             if (0 == Interlocked.CompareExchange(ref _isDisposed, 1, 0))
             {
-                Clear();
+                ClearNoCheck();
                 Capacity = 0;
             }
         }
