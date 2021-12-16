@@ -6,6 +6,7 @@
     <TrimmerRootAssembly Include="NCoreUtils.Extensions.Google.Cloud.Storage" />
     <TrimmerRootAssembly Include="NCoreUtils.Extensions.Globalization" />
     <TrimmerRootAssembly Include="NCoreUtils.Extensions.Memory" />
+    <TrimmerRootAssembly Include="NCoreUtils.Extensions.AsyncEnumerable" />
   </ItemGroup>
 
   <PropertyGroup>

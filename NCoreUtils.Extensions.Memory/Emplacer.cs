@@ -564,10 +564,8 @@ namespace NCoreUtils
 
 
         [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(EmplaceableEmplacer<>))]
-#if NET6_0_OR_GREATER
         [UnconditionalSuppressMessage("ReflectionAnalysis", "IL2026",
             Justification = "Type is bound through attributes.")]
-#endif
         public static IEmplacer<T> GetDefault<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] T>()
         {
             if (_emplacers.TryGetValue(typeof(T), out var boxed))
