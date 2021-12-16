@@ -11,7 +11,7 @@ namespace NCoreUtils.Google
             => reader.TokenType switch
             {
                 JsonTokenType.Null => default,
-                JsonTokenType.String => ulong.Parse(reader.GetString(), NumberStyles.Integer, CultureInfo.InvariantCulture),
+                JsonTokenType.String => ulong.Parse(reader.GetString() ?? string.Empty, NumberStyles.Integer, CultureInfo.InvariantCulture),
                 _ => reader.GetUInt64()
             };
 

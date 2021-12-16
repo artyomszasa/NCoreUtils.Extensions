@@ -8,8 +8,16 @@ namespace NCoreUtils.Internal
 
         public static ByPositionComparer Instance { get; } = new ByPositionComparer();
 
-        public int Compare(LinkedProperty x, LinkedProperty y)
+        public int Compare(LinkedProperty? x, LinkedProperty? y)
         {
+            if (x is null)
+            {
+                return y is null ? 0 : -1;
+            }
+            if (y is null)
+            {
+                return 1;
+            }
             return IntComparer.Compare(x.Parameter.Position, y.Parameter.Position);
         }
     }

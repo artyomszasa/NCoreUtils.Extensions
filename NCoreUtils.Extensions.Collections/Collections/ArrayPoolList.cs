@@ -21,7 +21,7 @@ namespace NCoreUtils.Collections
 
         private static bool IsReferenceOrContainsReferences()
         {
-#if !NETSTANDARD2_1
+#if NETFRAMEWORK
             return true;
 #else
             return RuntimeHelpers.IsReferenceOrContainsReferences<T>();
@@ -256,9 +256,8 @@ namespace NCoreUtils.Collections
             }
             if (_size - index < count)
             {
-                throw new ArgumentException();
+                throw new ArgumentException($"'{nameof(index)}' and/or '{nameof(count)}' are out of range.");
             }
-
             return Array.BinarySearch<T>(_items, index, count, item, comparer);
         }
 
@@ -333,7 +332,7 @@ namespace NCoreUtils.Collections
         {
             if ((array != null) && (array.Rank != 1))
             {
-                throw new ArgumentException();
+                throw new ArgumentException($"Parameter '{nameof(array)}' must be non-null single dimension array.");
             }
 
             // Array.Copy will check for NULL.
@@ -344,7 +343,7 @@ namespace NCoreUtils.Collections
         {
             if (_size - index < count)
             {
-                throw new ArgumentException();
+                throw new ArgumentException($"'{nameof(index)}' and/or '{nameof(count)}' are out of range.");
             }
             Array.Copy(_items, index, array, arrayIndex, count);
         }
@@ -465,7 +464,7 @@ namespace NCoreUtils.Collections
             }
             if (count < 0 || startIndex > _size - count)
             {
-                throw new ArgumentException();
+                throw new ArgumentException($"'{nameof(startIndex)}' and/or '{nameof(count)}' are out of range.");
             }
             if (match is null)
             {
@@ -527,7 +526,7 @@ namespace NCoreUtils.Collections
             // 2nd have of this also catches when startIndex == MAXINT, so MAXINT - 0 + 1 == -1, which is < 0.
             if (count < 0 || startIndex - count + 1 < 0)
             {
-                throw new ArgumentException();
+                throw new ArgumentException($"'{nameof(startIndex)}' and/or '{nameof(count)}' are out of range.");
             }
             int endIndex = startIndex - count;
             for (int i = startIndex; i > endIndex; i--)
@@ -565,13 +564,13 @@ namespace NCoreUtils.Collections
         }
 
         public Enumerator GetEnumerator()
-            => new Enumerator(this);
+            => new(this);
 
         IEnumerator<T> IEnumerable<T>.GetEnumerator()
-            => new Enumerator(this);
+            => GetEnumerator();
 
         IEnumerator IEnumerable.GetEnumerator()
-            => new Enumerator(this);
+            => GetEnumerator();
 
         public ArrayPoolList<T> GetRange(int index, int count)
         {
@@ -585,10 +584,10 @@ namespace NCoreUtils.Collections
             }
             if (_size - index < count)
             {
-                throw new ArgumentException();
+                throw new ArgumentException($"'{nameof(index)}' and/or '{nameof(count)}' are out of range.");
             }
 
-            ArrayPoolList<T> list = new ArrayPoolList<T>(count, _pool);
+            ArrayPoolList<T> list = new(count, _pool);
             Array.Copy(_items, index, list._items, 0, count);
             list._size = count;
             return list;
@@ -623,7 +622,7 @@ namespace NCoreUtils.Collections
             }
             if (count < 0 || index > _size - count)
             {
-                throw new ArgumentException();
+                throw new ArgumentException($"'{nameof(index)}' and/or '{nameof(count)}' are out of range.");
             }
             return Array.IndexOf(_items, item, index, count);
         }
@@ -827,7 +826,7 @@ namespace NCoreUtils.Collections
             }
             if (_size - index < count)
             {
-                throw new ArgumentException();
+                throw new ArgumentException($"'{nameof(index)}' and/or '{nameof(count)}' are out of range.");
             }
             if (count > 0)
             {
@@ -860,7 +859,7 @@ namespace NCoreUtils.Collections
             }
             if (_size - index < count)
             {
-                throw new ArgumentException();
+                throw new ArgumentException($"'{nameof(index)}' and/or '{nameof(count)}' are out of range.");
             }
             if (count > 1)
             {
@@ -884,7 +883,7 @@ namespace NCoreUtils.Collections
             }
             if (_size - index < count)
             {
-                throw new ArgumentException();
+                throw new ArgumentException($"'{nameof(index)}' and/or '{nameof(count)}' are out of range.");
             }
             if (count > 1)
             {

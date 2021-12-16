@@ -1,0 +1,9 @@
+<Project>
+  <PropertyGroup>
+    <LangVersion>10.0</LangVersion>
+    <Nullable>enable</Nullable>
+    <FxNugetVersion>6.0.0</FxNugetVersion>
+    <Fx3NugetVersion>3.1.16</Fx3NugetVersion>
+    <IsTrimmable>true</IsTrimmable>
+  </PropertyGroup>
+</Project>

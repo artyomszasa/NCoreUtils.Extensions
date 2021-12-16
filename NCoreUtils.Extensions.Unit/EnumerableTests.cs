@@ -15,7 +15,7 @@ namespace NCoreUtils.Extensions.Unit
 
             int _index = -1;
 
-            object IEnumerator.Current => Current;
+            object? IEnumerator.Current => Current;
 
             public T Current
             {
@@ -23,7 +23,7 @@ namespace NCoreUtils.Extensions.Unit
                 {
                     if (_index < 0 || _index >= _source.Length)
                     {
-                        return default(T);
+                        return default!;
                     }
                     return _source[_index];
                 }
@@ -147,11 +147,11 @@ namespace NCoreUtils.Extensions.Unit
 
             public Box(T value) => Value = value;
 
-            public bool Equals(Box<T> other) => other != null && _eqComparer.Equals(Value, other.Value);
+            public bool Equals(Box<T>? other) => other is not null && _eqComparer.Equals(Value, other.Value);
 
-            public override bool Equals(object obj) => Equals(obj as Box<T>);
+            public override bool Equals(object? obj) => Equals(obj as Box<T>);
 
-            public override int GetHashCode() => _eqComparer.GetHashCode(Value);
+            public override int GetHashCode() => _eqComparer.GetHashCode(Value!);
         }
 
         [Fact]
@@ -159,15 +159,15 @@ namespace NCoreUtils.Extensions.Unit
         {
             int value;
             // null parameter case
-            Assert.Throws<ArgumentNullException>(() => EnumerableExtensions.TryGetFirst(null, out value));
+            Assert.Throws<ArgumentNullException>(() => EnumerableExtensions.TryGetFirst(null!, out value));
 
             // empty seq case
             value = 10; // non default
-            Assert.False(new int[0].TryGetFirst(out value));
-            Assert.Equal(default(int), value);
+            Assert.False(Array.Empty<int>().TryGetFirst(out value));
+            Assert.Equal(default, value);
             value = 10; // non default
-            Assert.False(new HiddenArray<int>(new int[0]).TryGetFirst(out value));
-            Assert.Equal(default(int), value);
+            Assert.False(new HiddenArray<int>(Array.Empty<int>()).TryGetFirst(out value));
+            Assert.Equal(default, value);
 
             // non-empty case
             var array = new int[] { 1, 2, 3, 4, 5, 6 };
@@ -183,7 +183,7 @@ namespace NCoreUtils.Extensions.Unit
                 var list = new IndexAccessOnlyList<int>{ 1, 2, 3, 4 };
                 value = 10; // non default
                 Assert.False(list0.TryGetFirst(out value));
-                Assert.Equal(default(int), value);
+                Assert.Equal(default, value);
                 Assert.True(list.TryGetFirst(out value));
                 Assert.Equal(1, value);
             }
@@ -194,7 +194,7 @@ namespace NCoreUtils.Extensions.Unit
                 var list = new IndexAccessOnlyReadOnlyList<int>(new [] { 1, 2, 3, 4 });
                 value = 10; // non default
                 Assert.False(list0.TryGetFirst(out value));
-                Assert.Equal(default(int), value);
+                Assert.Equal(default, value);
                 Assert.True(list.TryGetFirst(out value));
                 Assert.Equal(1, value);
             }
@@ -204,7 +204,7 @@ namespace NCoreUtils.Extensions.Unit
         public void TryGetFirstWithPredicate()
         {
             int value;
-            var array0 = new int[0];
+            var array0 = Array.Empty<int>();
             var array = new int[] { 1, 2, 3, 4, 5, 6 };
             var seq0 = new HiddenArray<int>(array0);
             var seq = new HiddenArray<int>(array);
@@ -213,41 +213,43 @@ namespace NCoreUtils.Extensions.Unit
             var rolist0 = new IndexAccessOnlyReadOnlyList<int>();
             var rolist = new IndexAccessOnlyReadOnlyList<int>(array);
 
+#pragma warning disable IDE0039
             Func<int, bool> predicate2 = i => i % 2 == 0;
             Func<int, bool> predicate5 = i => i % 5 == 0;
             Func<int, bool> predicate9 = i => i % 9 == 0;
+#pragma warning restore IDE0039
 
             // null parameter case
-            Assert.Throws<ArgumentNullException>(() => EnumerableExtensions.TryGetFirst(null, predicate5, out value));
-            Assert.Throws<ArgumentNullException>(() => EnumerableExtensions.TryGetFirst(array, null, out value));
+            Assert.Throws<ArgumentNullException>(() => EnumerableExtensions.TryGetFirst(null!, predicate5, out value));
+            Assert.Throws<ArgumentNullException>(() => EnumerableExtensions.TryGetFirst(array, null!, out value));
 
             // empty case
             value = 10;
             Assert.False(array0.TryGetFirst(predicate5, out value));
-            Assert.Equal(default(int), value);
+            Assert.Equal(default, value);
             value = 10;
             Assert.False(seq0.TryGetFirst(predicate5, out value));
-            Assert.Equal(default(int), value);
+            Assert.Equal(default, value);
             value = 10;
             Assert.False(list0.TryGetFirst(predicate5, out value));
-            Assert.Equal(default(int), value);
+            Assert.Equal(default, value);
             value = 10;
             Assert.False(rolist0.TryGetFirst(predicate5, out value));
-            Assert.Equal(default(int), value);
+            Assert.Equal(default, value);
 
             // non-matching case
             value = 10;
             Assert.False(array.TryGetFirst(predicate9, out value));
-            Assert.Equal(default(int), value);
+            Assert.Equal(default, value);
             value = 10;
             Assert.False(seq.TryGetFirst(predicate9, out value));
-            Assert.Equal(default(int), value);
+            Assert.Equal(default, value);
             value = 10;
             Assert.False(list.TryGetFirst(predicate9, out value));
-            Assert.Equal(default(int), value);
+            Assert.Equal(default, value);
             value = 10;
             Assert.False(rolist.TryGetFirst(predicate9, out value));
-            Assert.Equal(default(int), value);
+            Assert.Equal(default, value);
 
             // matching case
             Assert.True(array.TryGetFirst(predicate5, out value));
@@ -275,7 +277,7 @@ namespace NCoreUtils.Extensions.Unit
         public void TryGetSingle()
         {
             int value;
-            var array0 = new int[0];
+            var array0 = Array.Empty<int>();
             var array1 = new int[] { 1 };
             var array = new int[] { 1, 2, 3, 4, 5, 6 };
             var seq0 = new HiddenArray<int>(array0);
@@ -289,21 +291,21 @@ namespace NCoreUtils.Extensions.Unit
             var rolist = new IndexAccessOnlyReadOnlyList<int>(array);
 
             // null parameter case
-            Assert.Throws<ArgumentNullException>(() => EnumerableExtensions.TryGetSingle(null, out value));
+            Assert.Throws<ArgumentNullException>(() => EnumerableExtensions.TryGetSingle(null!, out value));
 
             // empty case
             value = 10;
             Assert.False(array0.TryGetSingle(out value));
-            Assert.Equal(default(int), value);
+            Assert.Equal(default, value);
             value = 10;
             Assert.False(seq0.TryGetSingle(out value));
-            Assert.Equal(default(int), value);
+            Assert.Equal(default, value);
             value = 10;
             Assert.False(list0.TryGetSingle(out value));
-            Assert.Equal(default(int), value);
+            Assert.Equal(default, value);
             value = 10;
             Assert.False(rolist0.TryGetSingle(out value));
-            Assert.Equal(default(int), value);
+            Assert.Equal(default, value);
 
             // single element case
             Assert.True(array1.TryGetSingle(out value));
@@ -326,7 +328,7 @@ namespace NCoreUtils.Extensions.Unit
         public void TryGetSingleWithPredicate()
         {
             int value;
-            var array0 = new int[0];
+            var array0 = Array.Empty<int>();
             var array = new int[] { 1, 2, 3, 4, 5, 6 };
             var seq0 = new HiddenArray<int>(array0);
             var seq = new HiddenArray<int>(array);
@@ -335,41 +337,43 @@ namespace NCoreUtils.Extensions.Unit
             var rolist0 = new IndexAccessOnlyReadOnlyList<int>();
             var rolist = new IndexAccessOnlyReadOnlyList<int>(array);
 
+#pragma warning disable IDE0039
             Func<int, bool> predicate2 = i => i % 2 == 0;
             Func<int, bool> predicate5 = i => i % 5 == 0;
             Func<int, bool> predicate9 = i => i % 9 == 0;
+#pragma warning restore IDE0039
 
             // null parameter case
-            Assert.Throws<ArgumentNullException>(() => EnumerableExtensions.TryGetSingle(null, predicate5, out value));
-            Assert.Throws<ArgumentNullException>(() => EnumerableExtensions.TryGetSingle(array, null, out value));
+            Assert.Throws<ArgumentNullException>(() => EnumerableExtensions.TryGetSingle(null!, predicate5, out value));
+            Assert.Throws<ArgumentNullException>(() => EnumerableExtensions.TryGetSingle(array, null!, out value));
 
             // empty case
             value = 10;
             Assert.False(array0.TryGetSingle(predicate5, out value));
-            Assert.Equal(default(int), value);
+            Assert.Equal(default, value);
             value = 10;
             Assert.False(seq0.TryGetSingle(predicate5, out value));
-            Assert.Equal(default(int), value);
+            Assert.Equal(default, value);
             value = 10;
             Assert.False(list0.TryGetSingle(predicate5, out value));
-            Assert.Equal(default(int), value);
+            Assert.Equal(default, value);
             value = 10;
             Assert.False(rolist0.TryGetSingle(predicate5, out value));
-            Assert.Equal(default(int), value);
+            Assert.Equal(default, value);
 
             // non-matching case
             value = 10;
             Assert.False(array.TryGetSingle(predicate9, out value));
-            Assert.Equal(default(int), value);
+            Assert.Equal(default, value);
             value = 10;
             Assert.False(seq.TryGetSingle(predicate9, out value));
-            Assert.Equal(default(int), value);
+            Assert.Equal(default, value);
             value = 10;
             Assert.False(list.TryGetSingle(predicate9, out value));
-            Assert.Equal(default(int), value);
+            Assert.Equal(default, value);
             value = 10;
             Assert.False(rolist.TryGetSingle(predicate9, out value));
-            Assert.Equal(default(int), value);
+            Assert.Equal(default, value);
 
             // single match case
             Assert.True(array.TryGetSingle(predicate5, out value));
@@ -393,15 +397,15 @@ namespace NCoreUtils.Extensions.Unit
         {
             int value;
             // null parameter case
-            Assert.Throws<ArgumentNullException>(() => EnumerableExtensions.TryGetLast(null, out value));
+            Assert.Throws<ArgumentNullException>(() => EnumerableExtensions.TryGetLast(null!, out value));
 
             // empty seq case
             value = 10; // non default
-            Assert.False(new int[0].TryGetLast(out value));
-            Assert.Equal(default(int), value);
+            Assert.False(Array.Empty<int>().TryGetLast(out value));
+            Assert.Equal(default, value);
             value = 10; // non default
-            Assert.False(new HiddenArray<int>(new int[0]).TryGetLast(out value));
-            Assert.Equal(default(int), value);
+            Assert.False(new HiddenArray<int>(Array.Empty<int>()).TryGetLast(out value));
+            Assert.Equal(default, value);
 
             // non-empty case
             var array = new int[] { 1, 2, 3, 4, 5, 6 };
@@ -417,7 +421,7 @@ namespace NCoreUtils.Extensions.Unit
                 var list = new IndexAccessOnlyList<int>{ 1, 2, 3, 4 };
                 value = 10; // non default
                 Assert.False(list0.TryGetLast(out value));
-                Assert.Equal(default(int), value);
+                Assert.Equal(default, value);
                 Assert.True(list.TryGetLast(out value));
                 Assert.Equal(4, value);
             }
@@ -428,7 +432,7 @@ namespace NCoreUtils.Extensions.Unit
                 var list = new IndexAccessOnlyReadOnlyList<int>(new [] { 1, 2, 3, 4 });
                 value = 10; // non default
                 Assert.False(list0.TryGetLast(out value));
-                Assert.Equal(default(int), value);
+                Assert.Equal(default, value);
                 Assert.True(list.TryGetLast(out value));
                 Assert.Equal(4, value);
             }
@@ -438,7 +442,7 @@ namespace NCoreUtils.Extensions.Unit
         public void TryGetLastWithPredicate()
         {
             int value;
-            var array0 = new int[0];
+            var array0 = Array.Empty<int>();
             var array = new int[] { 1, 2, 3, 4, 5, 6 };
             var seq0 = new HiddenArray<int>(array0);
             var seq = new HiddenArray<int>(array);
@@ -447,41 +451,43 @@ namespace NCoreUtils.Extensions.Unit
             var rolist0 = new IndexAccessOnlyReadOnlyList<int>();
             var rolist = new IndexAccessOnlyReadOnlyList<int>(array);
 
+#pragma warning disable IDE0039
             Func<int, bool> predicate2 = i => i % 2 == 0;
             Func<int, bool> predicate5 = i => i % 5 == 0;
             Func<int, bool> predicate9 = i => i % 9 == 0;
+#pragma warning restore IDE0039
 
             // null parameter case
-            Assert.Throws<ArgumentNullException>(() => EnumerableExtensions.TryGetLast(null, predicate5, out value));
-            Assert.Throws<ArgumentNullException>(() => EnumerableExtensions.TryGetLast(array, null, out value));
+            Assert.Throws<ArgumentNullException>(() => EnumerableExtensions.TryGetLast(null!, predicate5, out value));
+            Assert.Throws<ArgumentNullException>(() => EnumerableExtensions.TryGetLast(array, null!, out value));
 
             // empty case
             value = 10;
             Assert.False(array0.TryGetLast(predicate5, out value));
-            Assert.Equal(default(int), value);
+            Assert.Equal(default, value);
             value = 10;
             Assert.False(seq0.TryGetLast(predicate5, out value));
-            Assert.Equal(default(int), value);
+            Assert.Equal(default, value);
             value = 10;
             Assert.False(list0.TryGetLast(predicate5, out value));
-            Assert.Equal(default(int), value);
+            Assert.Equal(default, value);
             value = 10;
             Assert.False(rolist0.TryGetLast(predicate5, out value));
-            Assert.Equal(default(int), value);
+            Assert.Equal(default, value);
 
             // non-matching case
             value = 10;
             Assert.False(array.TryGetLast(predicate9, out value));
-            Assert.Equal(default(int), value);
+            Assert.Equal(default, value);
             value = 10;
             Assert.False(seq.TryGetLast(predicate9, out value));
-            Assert.Equal(default(int), value);
+            Assert.Equal(default, value);
             value = 10;
             Assert.False(list.TryGetLast(predicate9, out value));
-            Assert.Equal(default(int), value);
+            Assert.Equal(default, value);
             value = 10;
             Assert.False(rolist.TryGetLast(predicate9, out value));
-            Assert.Equal(default(int), value);
+            Assert.Equal(default, value);
 
             // matching case
             Assert.True(array.TryGetLast(predicate5, out value));
@@ -513,11 +519,11 @@ namespace NCoreUtils.Extensions.Unit
             var rolist = new IndexAccessOnlyReadOnlyList<int>(array);
             var col = new AsCollection<int>(array);
 
-            Func<int, int> selector = i => i * 2;
+            static int selector(int i) => i * 2;
 
             // null parameter case
-            Assert.Throws<ArgumentNullException>(() => EnumerableExtensions.MapToArray(null, selector));
-            Assert.Throws<ArgumentNullException>(() => EnumerableExtensions.MapToArray<int, int>(array, null));
+            Assert.Throws<ArgumentNullException>(() => EnumerableExtensions.MapToArray(null!, (Func<int, int>)selector));
+            Assert.Throws<ArgumentNullException>(() => EnumerableExtensions.MapToArray<int, int>(array, null!));
 
             var expected = new int[] { 2, 4, 6, 8, 10, 12 };
 
@@ -531,7 +537,7 @@ namespace NCoreUtils.Extensions.Unit
         [Fact]
         public void MinBy()
         {
-            var array0 = new int[0];
+            var array0 = Array.Empty<int>();
             var array = new int[] { 2, 1, 3, 10, 4, 5, 6 };
             var seq0 = new HiddenArray<int>(array0);
             var seq = new HiddenArray<int>(array);
@@ -542,7 +548,7 @@ namespace NCoreUtils.Extensions.Unit
 
             var comparer = Comparer<int>.Default;
 
-            Assert.Throws<ArgumentNullException>(() => EnumerableExtensions.MinBy(null, comparer));
+            Assert.Throws<ArgumentNullException>(() => EnumerableExtensions.MinBy(null!, comparer));
 
             Assert.Throws<InvalidOperationException>(() => array0.MinBy());
             Assert.Throws<InvalidOperationException>(() => seq0.MinBy());
@@ -563,7 +569,7 @@ namespace NCoreUtils.Extensions.Unit
         [Fact]
         public void MinByWithSelector()
         {
-            var array0 = new Box<int>[0];
+            var array0 = Array.Empty<Box<int>>();
             var array = new int[] { 2, 1, 3, 10, 4, 5, 6 }.Map(i => new Box<int>(i));
             var seq0 = new HiddenArray<Box<int>>(array0);
             var seq = new HiddenArray<Box<int>>(array);
@@ -573,10 +579,11 @@ namespace NCoreUtils.Extensions.Unit
             var rolist = new IndexAccessOnlyReadOnlyList<Box<int>>(array);
 
             var comparer = Comparer<int>.Default;
-            Func<Box<int>, int> selector = b => b.Value;
 
-            Assert.Throws<ArgumentNullException>(() => EnumerableExtensions.MinBy(null, selector, comparer));
-            Assert.Throws<ArgumentNullException>(() => EnumerableExtensions.MinBy(seq, null, comparer));
+            static int selector(Box<int> b) => b.Value;
+
+            Assert.Throws<ArgumentNullException>(() => EnumerableExtensions.MinBy(null!, (Func<Box<int>, int>)selector, comparer));
+            Assert.Throws<ArgumentNullException>(() => EnumerableExtensions.MinBy(seq, null!, comparer));
 
             Assert.Throws<InvalidOperationException>(() => array0.MinBy(selector));
             Assert.Throws<InvalidOperationException>(() => seq0.MinBy(selector));
@@ -597,7 +604,7 @@ namespace NCoreUtils.Extensions.Unit
         [Fact]
         public void MaxBy()
         {
-            var array0 = new int[0];
+            var array0 = Array.Empty<int>();
             var array = new int[] { 1, 2, 3, 10, 4, 5, 6 };
             var seq0 = new HiddenArray<int>(array0);
             var seq = new HiddenArray<int>(array);
@@ -608,7 +615,7 @@ namespace NCoreUtils.Extensions.Unit
 
             var comparer = Comparer<int>.Default;
 
-            Assert.Throws<ArgumentNullException>(() => EnumerableExtensions.MaxBy(null, comparer));
+            Assert.Throws<ArgumentNullException>(() => EnumerableExtensions.MaxBy(null!, comparer));
 
             Assert.Throws<InvalidOperationException>(() => array0.MaxBy());
             Assert.Throws<InvalidOperationException>(() => seq0.MaxBy());
@@ -629,7 +636,7 @@ namespace NCoreUtils.Extensions.Unit
         [Fact]
         public void MaxByWithSelector()
         {
-            var array0 = new Box<int>[0];
+            var array0 = Array.Empty<Box<int>>();
             var array = new int[] { 1, 2, 3, 10, 4, 5, 6 }.Map(i => new Box<int>(i));
             var seq0 = new HiddenArray<Box<int>>(array0);
             var seq = new HiddenArray<Box<int>>(array);
@@ -639,10 +646,10 @@ namespace NCoreUtils.Extensions.Unit
             var rolist = new IndexAccessOnlyReadOnlyList<Box<int>>(array);
 
             var comparer = Comparer<int>.Default;
-            Func<Box<int>, int> selector = b => b.Value;
+            static int selector(Box<int> b) => b.Value;
 
-            Assert.Throws<ArgumentNullException>(() => EnumerableExtensions.MaxBy(null, selector, comparer));
-            Assert.Throws<ArgumentNullException>(() => EnumerableExtensions.MaxBy(seq, null, comparer));
+            Assert.Throws<ArgumentNullException>(() => EnumerableExtensions.MaxBy(null!, (Func<Box<int>, int>)selector, comparer));
+            Assert.Throws<ArgumentNullException>(() => EnumerableExtensions.MaxBy(seq, null!, comparer));
 
 
             Assert.Throws<InvalidOperationException>(() => array0.MaxBy(selector));
@@ -687,15 +694,15 @@ namespace NCoreUtils.Extensions.Unit
             }
             Assert.True(Enumerable.SequenceEqual(new int[] { 0,2,4,6,8 }, l));
 
-            Assert.Throws<ArgumentNullException>(() => EnumeratorExtensions.Select<int, int>(null, i => i));
-            Assert.Throws<ArgumentNullException>(() => EnumeratorExtensions.Select<int, int>(null, (i, _) => i));
-            Assert.Throws<ArgumentNullException>(() => EnumeratorExtensions.Select<int, int>(l.GetEnumerator(), (Func<int, int>)null));
-            Assert.Throws<ArgumentNullException>(() => EnumeratorExtensions.Select<int, int>(l.GetEnumerator(), (Func<int, int, int>)null));
-            Assert.Throws<ArgumentNullException>(() => EnumeratorExtensions.Where<int>(null, i => true));
-            Assert.Throws<ArgumentNullException>(() => EnumeratorExtensions.Where<int>(null, (i, _) => true));
-            Assert.Throws<ArgumentNullException>(() => EnumeratorExtensions.Where<int>(l.GetEnumerator(), (Func<int, bool>)null));
-            Assert.Throws<ArgumentNullException>(() => EnumeratorExtensions.Where<int>(l.GetEnumerator(), (Func<int, int, bool>)null));
-            Assert.Throws<ArgumentNullException>(() => EnumeratorExtensions.ToList<int>(null));
+            Assert.Throws<ArgumentNullException>(() => EnumeratorExtensions.Select<int, int>(null!, i => i));
+            Assert.Throws<ArgumentNullException>(() => EnumeratorExtensions.Select<int, int>(null!, (i, _) => i));
+            Assert.Throws<ArgumentNullException>(() => EnumeratorExtensions.Select<int, int>(l.GetEnumerator(), (Func<int, int>)null!));
+            Assert.Throws<ArgumentNullException>(() => EnumeratorExtensions.Select<int, int>(l.GetEnumerator(), (Func<int, int, int>)null!));
+            Assert.Throws<ArgumentNullException>(() => EnumeratorExtensions.Where<int>(null!, i => true));
+            Assert.Throws<ArgumentNullException>(() => EnumeratorExtensions.Where<int>(null!, (i, _) => true));
+            Assert.Throws<ArgumentNullException>(() => EnumeratorExtensions.Where<int>(l.GetEnumerator(), (Func<int, bool>)null!));
+            Assert.Throws<ArgumentNullException>(() => EnumeratorExtensions.Where<int>(l.GetEnumerator(), (Func<int, int, bool>)null!));
+            Assert.Throws<ArgumentNullException>(() => EnumeratorExtensions.ToList<int>(null!));
         }
 
         [Fact]
@@ -707,8 +714,8 @@ namespace NCoreUtils.Extensions.Unit
             var lcount = l.Count;
             Assert.Equal(10, lcount);
             Assert.Equal((IEnumerable<int>)new int[] { 0,2,4,6,8,10,12,14,16,18 }, (IEnumerable<int>)l);
-            Assert.Throws<ArgumentNullException>(() => new MappingReadOnlyList<int, int>(null, i => i * 2));
-            Assert.Throws<ArgumentNullException>(() => new MappingReadOnlyList<int, int>(new int[0], null));
+            Assert.Throws<ArgumentNullException>(() => new MappingReadOnlyList<int, int>(null!, i => i * 2));
+            Assert.Throws<ArgumentNullException>(() => new MappingReadOnlyList<int, int>(Array.Empty<int>(), null!));
         }
 
         [Fact]
@@ -740,8 +747,8 @@ namespace NCoreUtils.Extensions.Unit
             Assert.Equal((IEnumerable<int>)new int[] { 0,2,4,6,8,10,12,14,16,18 }, d.Values);
             Assert.True(HashSet<int>.CreateSetComparer().Equals(new HashSet<int> { 0,1,2,3,4,5,6,7,8,9 }, new HashSet<int>(d.Select(kv => kv.Key))));
             Assert.True(HashSet<int>.CreateSetComparer().Equals(new HashSet<int> { 0,2,4,6,8,10,12,14,16,18 }, new HashSet<int>(d.Select(kv => kv.Value))));
-            Assert.Throws<ArgumentNullException>(() => new MappingReadOnlyDictionary<int, int, int>(null, i => i * 2));
-            Assert.Throws<ArgumentNullException>(() => new MappingReadOnlyDictionary<int, int, int>(new Dictionary<int, int>(), null));
+            Assert.Throws<ArgumentNullException>(() => new MappingReadOnlyDictionary<int, int, int>(null!, i => i * 2));
+            Assert.Throws<ArgumentNullException>(() => new MappingReadOnlyDictionary<int, int, int>(new Dictionary<int, int>(), null!));
         }
     }
 }

@@ -62,7 +62,7 @@ namespace NCoreUtils
         /// <param name="value">Value to fill array with.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         [DebuggerStepThrough]
-        public static void Fill<T>(this T[] array, T value = default(T))
+        public static void Fill<T>(this T[] array, T value = default)
         {
             if (array == null)
             {

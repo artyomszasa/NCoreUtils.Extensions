@@ -15,7 +15,7 @@ namespace NCoreUtils
             ImmutableHeadArray<int> array = default;
             Assert.Equal(0, array.Length);
             Assert.Equal(0, new ImmutableHeadArray<int>(Enumerable.Empty<int>().ToList()).Length);
-            Assert.Equal(0, new ImmutableHeadArray<int>(new int[0].AsSpan()).Length);
+            Assert.Equal(0, new ImmutableHeadArray<int>(Array.Empty<int>().AsSpan()).Length);
             Assert.Throws<IndexOutOfRangeException>(() => array[0]);
             Assert.False(array.GetEnumerator().MoveNext());
             foreach (ref readonly int i in array)
@@ -28,12 +28,12 @@ namespace NCoreUtils
             Assert.False(enumerator.MoveNext());
 
             // null arg
-            Assert.Throws<ArgumentNullException>(() => new ImmutableHeadArray<int>(default(IReadOnlyList<int>)));
+            Assert.Throws<ArgumentNullException>(() => new ImmutableHeadArray<int>(default(IReadOnlyList<int>)!));
         }
 
-        private void CheckHeadOnly(in ImmutableHeadArray<int> array)
+        private static void CheckHeadOnly(in ImmutableHeadArray<int> array)
         {
-            Assert.False(array.SequenceEqual(new int[] { }));
+            Assert.False(array.SequenceEqual(Array.Empty<int>()));
             Assert.True(array.SequenceEqual(new int[] { 1 }));
             Assert.False(array.SequenceEqual(new int[] { 2 }));
             Assert.False(array.SequenceEqual(new int[] { 1, 2 }));
@@ -55,12 +55,12 @@ namespace NCoreUtils
         public void HeadOnly()
         {
             ImmutableHeadArray<int> empty = default;
-            ImmutableHeadArray<int> array0 = new ImmutableHeadArray<int>(1);
+            ImmutableHeadArray<int> array0 = new(1);
             ImmutableHeadArray<int> array1 = default(ImmutableHeadArray<int>).Append(1);
             ImmutableHeadArray<int> array2 = default(ImmutableHeadArray<int>).Prepend(1);
-            ImmutableHeadArray<int> array3 = new ImmutableHeadArray<int>(new int[] { 1 }.AsSpan());
-            ImmutableHeadArray<int> array4 = new ImmutableHeadArray<int>((IReadOnlyList<int>)new int[] { 1 });
-            Assert.Throws<ArgumentNullException>(() => array0.SequenceEqual(default(IEnumerable<int>)));
+            ImmutableHeadArray<int> array3 = new(new int[] { 1 }.AsSpan());
+            ImmutableHeadArray<int> array4 = new((IReadOnlyList<int>)new int[] { 1 });
+            Assert.Throws<ArgumentNullException>(() => array0.SequenceEqual(default!));
             Assert.True(array0.SequenceEqual(in array1));
             Assert.False(array0.SequenceEqual(in empty));
             Assert.Throws<IndexOutOfRangeException>(() => array0[1]);
@@ -79,11 +79,11 @@ namespace NCoreUtils
         public void Tail()
         {
             ImmutableHeadArray<int> array0 = default;
-            ImmutableHeadArray<int> array1 = new ImmutableHeadArray<int>(1);
-            ImmutableHeadArray<int> array2 = new ImmutableHeadArray<int>((IReadOnlyList<int>)new int[] { 1, 2 });
-            ImmutableHeadArray<int> array3 = new ImmutableHeadArray<int>(new int[] { 1, 2, 3 }.AsSpan());
+            ImmutableHeadArray<int> array1 = new(1);
+            ImmutableHeadArray<int> array2 = new((IReadOnlyList<int>)new int[] { 1, 2 });
+            ImmutableHeadArray<int> array3 = new(new int[] { 1, 2, 3 }.AsSpan());
             Assert.True(array0.SequenceEqual(in array0));
-            Assert.Equal(new int[] {}, array0.ToArray());
+            Assert.Equal(Array.Empty<int>(), array0.ToArray());
             Assert.False(array0.SequenceEqual(in array1));
             Assert.False(array0.SequenceEqual(in array2));
             Assert.False(array0.SequenceEqual(in array3));
@@ -151,7 +151,7 @@ namespace NCoreUtils
             });
             var size = array12.Append(array34).CopyTo(buffer);
             Assert.Equal(4, size);
-            Assert.True(new int[] { 1, 2, 3, 4 }.AsSpan().IsSame(buffer.Slice(0, size)));
+            Assert.True(new int[] { 1, 2, 3, 4 }.AsSpan().IsSame(buffer[..size]));
 
             Assert.True(array0.Append(array12).Append(3).SequenceEqual(array12.Append(3)));
             Assert.True(array0.Prepend(array23).Prepend(1).SequenceEqual(array12.Append(3)));

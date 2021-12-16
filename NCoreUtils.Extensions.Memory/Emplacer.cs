@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using NCoreUtils.Memory;
 
@@ -7,7 +8,7 @@ namespace NCoreUtils
 {
     public static class Emplacer
     {
-        private static readonly Dictionary<Type, object> _emplacers = new Dictionary<Type, object>
+        private static readonly Dictionary<Type, object> _emplacers = new()
         {
             { typeof(sbyte), Int8Emplacer.Instance },
             { typeof(short), Int16Emplacer.Instance },
@@ -98,7 +99,7 @@ namespace NCoreUtils
         [MethodImpl(MethodImplOptions.NoInlining)]
         private static bool TryEmplaceInternal(int value, Span<char> span, out int total)
         {
-            if (value == Int32.MinValue)
+            if (value == int.MinValue)
             {
                 return TryEmplaceInternal("-2147483648", span, out total);
             }
@@ -124,11 +125,19 @@ namespace NCoreUtils
             }
             if (0 != isSigned)
             {
-                span.Slice(1, total -1).Reverse();
+#if NETFRAMEWORK
+                span.Slice(1, total - 1).Reverse();
+#else
+                span[1..total].Reverse();
+#endif
             }
             else
             {
+#if NETFRAMEWORK
                 span.Slice(0, total).Reverse();
+#else
+                span[..total].Reverse();
+#endif
             }
             return true;
         }
@@ -161,7 +170,7 @@ namespace NCoreUtils
 
         private static bool TryEmplaceInternal(long value, Span<char> span, out int total)
         {
-            if (value == Int64.MinValue)
+            if (value == long.MinValue)
             {
                 return TryEmplaceInternal("-9223372036854775808", span, out total);
             }
@@ -190,11 +199,19 @@ namespace NCoreUtils
             }
             if (0 != isSigned)
             {
-                span.Slice(1, total -1).Reverse();
+#if NETFRAMEWORK
+                span.Slice(1, total - 1).Reverse();
+#else
+                span[1..total].Reverse();
+#endif
             }
             else
             {
+#if NETFRAMEWORK
                 span.Slice(0, total).Reverse();
+#else
+                span[..total].Reverse();
+#endif
             }
             return true;
         }
@@ -239,7 +256,7 @@ namespace NCoreUtils
             var isNegative = ivalue < 0 ? 1 : 0;
             var uivalue = Math.Abs(ivalue);
             // floating part
-            var fvalue = uvalue - (float)uivalue;
+            var fvalue = uvalue - uivalue;
             // intgeral part length...
             var ilength = (int)Math.Floor(Math.Log10(uivalue)) + 1 + isNegative;
             // stringify floating part locally to get value...
@@ -247,7 +264,7 @@ namespace NCoreUtils
             var flast = maxPrecision - 1;
             while (flength < maxPrecision)
             {
-                var v = fvalue * Math.Pow(10.0, (double)(flength + 1));
+                var v = fvalue * Math.Pow(10.0, flength + 1);
                 if (0.0 == v % 10.0)
                 {
                     break;
@@ -267,11 +284,16 @@ namespace NCoreUtils
             {
                 return false;
             }
-            Emplacer.Emplace(ivalue, span);
+            Emplace(ivalue, span);
             if (flength > 0)
             {
+#if NETFRAMEWORK
                 decimalSeparator.AsSpan().CopyTo(span.Slice(ilength));
                 fbuffer.Slice(0, flength).CopyTo(span.Slice(ilength + decimalSeparator.Length));
+#else
+                decimalSeparator.AsSpan().CopyTo(span[ilength..]);
+                fbuffer[..flength].CopyTo(span[(ilength + decimalSeparator.Length)..]);
+#endif
             }
             return true;
         }
@@ -324,7 +346,7 @@ namespace NCoreUtils
             var isNegative = ivalue < 0L ? 1 : 0;
             var uivalue = Math.Abs(ivalue);
             // floating part
-            var fvalue = uvalue - (double)uivalue;
+            var fvalue = uvalue - uivalue;
             // intgeral part length...
             var ilength = (int)Math.Floor(Math.Log10(uivalue)) + 1 + isNegative;
             // stringify floating part locally to get value...
@@ -332,7 +354,7 @@ namespace NCoreUtils
             var flast = maxPrecision - 1;
             while (flength < maxPrecision)
             {
-                var v = fvalue * Math.Pow(10.0, (double)(flength + 1));
+                var v = fvalue * Math.Pow(10.0, flength + 1);
                 if (0.0 == v % 10.0)
                 {
                     break;
@@ -352,11 +374,16 @@ namespace NCoreUtils
             {
                 return false;
             }
-            Emplacer.Emplace(ivalue, span);
+            Emplace(ivalue, span);
             if (flength > 0)
             {
+#if NETFRAMEWORK
                 decimalSeparator.AsSpan().CopyTo(span.Slice(ilength));
                 fbuffer.Slice(0, flength).CopyTo(span.Slice(ilength + decimalSeparator.Length));
+#else
+                decimalSeparator.AsSpan().CopyTo(span[ilength..]);
+                fbuffer[..flength].CopyTo(span[(ilength + decimalSeparator.Length)..]);
+#endif
             }
             return true;
 
@@ -494,7 +521,11 @@ namespace NCoreUtils
                     span[offset] = I((int)part);
                 }
             }
+#if NETFRAMEWORK
             span.Slice(0, total).Reverse();
+#else
+            span[..total].Reverse();
+#endif
             return true;
         }
 
@@ -523,16 +554,21 @@ namespace NCoreUtils
         #endregion
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int Emplace<T>(T value, Span<char> span)
+        public static int Emplace<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] T>(T value, Span<char> span)
             => GetDefault<T>().Emplace(value, span);
 
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool TryEmplace<T>(T value, Span<char> span, out int used)
+        public static bool TryEmplace<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] T>(T value, Span<char> span, out int used)
             => GetDefault<T>().TryEmplace(value, span, out used);
 
 
-        public static IEmplacer<T> GetDefault<T>()
+        [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(EmplaceableEmplacer<>))]
+#if NET6_0_OR_GREATER
+        [UnconditionalSuppressMessage("ReflectionAnalysis", "IL2026",
+            Justification = "Type is bound through attributes.")]
+#endif
+        public static IEmplacer<T> GetDefault<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] T>()
         {
             if (_emplacers.TryGetValue(typeof(T), out var boxed))
             {
@@ -540,7 +576,7 @@ namespace NCoreUtils
             }
             if (typeof(IEmplaceable<T>).IsAssignableFrom(typeof(T)))
             {
-                return (IEmplacer<T>)Activator.CreateInstance(typeof(EmplaceableEmplacer<>).MakeGenericType(typeof(T)), true);
+                return (IEmplacer<T>)Activator.CreateInstance(typeof(EmplaceableEmplacer<>).MakeGenericType(typeof(T)), true)!;
             }
             return new DefaultEmplacer<T>();
         }

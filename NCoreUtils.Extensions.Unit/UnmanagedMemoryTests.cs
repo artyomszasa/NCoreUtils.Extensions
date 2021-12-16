@@ -39,14 +39,14 @@ namespace NCoreUtils
             {
                 var owner = pool.Rent(4100);
                 Assert.Equal(8 * 1024, owner.Memory.Length);
-                Assert.True(store.All(item => item.Queue.Count == 0));
+                Assert.True(store.All(item => item.Queue.IsEmpty));
                 owner.Dispose();
                 Assert.Single(store, item => item.MaxSize == 8 * 1024 && item.Queue.Count == 1);
             }
             Assert.Single(store, item => item.MaxSize == 8 * 1024 && item.Queue.Count == 1);
             pool.Dispose();
             Assert.Throws<ObjectDisposedException>(() => pool.Rent());
-            Assert.True(store.All(item => item.Queue.Count == 0));
+            Assert.True(store.All(item => item.Queue.IsEmpty));
         }
     }
 }

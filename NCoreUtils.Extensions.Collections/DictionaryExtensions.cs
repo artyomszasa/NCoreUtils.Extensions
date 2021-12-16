@@ -20,7 +20,7 @@ namespace NCoreUtils
         public static TValue GetOrDefault<TKey, TValue>(
             this IReadOnlyDictionary<TKey, TValue> dictionary,
             TKey key,
-            TValue defaultValue = default(TValue))
+            TValue defaultValue = default)
         {
             if (dictionary == null)
             {

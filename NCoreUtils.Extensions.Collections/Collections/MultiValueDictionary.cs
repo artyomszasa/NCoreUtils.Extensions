@@ -15,7 +15,7 @@ namespace NCoreUtils.Collections
     public class MultiValueDictionary<TKey, TValue> : IMultiValueDictionary<TKey, TValue>, IEquatable<MultiValueDictionary<TKey, TValue>>, ISerializable, IDeserializationCallback
         where TKey : notnull
     {
-        struct Entry
+        struct Entry : IEquatable<Entry>
         {
             /// <summary>
             /// Lower 31 bits of the hash code.
@@ -41,11 +41,15 @@ namespace NCoreUtils.Collections
             public bool Equals(Entry that, IEqualityComparer<TKey> keyComparer, IEqualityComparer<TValue> valueComparer)
                 => HashCode == that.HashCode && Next == that.Next && keyComparer.Equals(Key, that.Key) && valueComparer.Equals(Value, that.Value);
 
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public bool Equals(Entry that)
+                => Equals(that, EqualityComparer<TKey>.Default, EqualityComparer<TValue>.Default);
+
             public override int GetHashCode()
                 => (HashCode << 8) ^ Next ^ Key.GetHashCode() ^ (Value?.GetHashCode() ?? 0);
 
-            public override bool Equals(object obj)
-                => null != obj && obj is Entry entry && Equals(entry, EqualityComparer<TKey>.Default, EqualityComparer<TValue>.Default);
+            public override bool Equals(object? obj)
+                => obj is Entry entry && Equals(entry, EqualityComparer<TKey>.Default, EqualityComparer<TValue>.Default);
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static bool operator ==(Entry a, Entry b) => a.Equals(b);
@@ -360,7 +364,7 @@ namespace NCoreUtils.Collections
         /// </summary>
         /// <returns></returns>
         public MultiValueDictionary<TKey, TValue> Clone()
-            => new MultiValueDictionary<TKey, TValue>(_buckets, _entries, _freeIndex, _freeCount, _count, _keyComparer, _valueComparer);
+            => new(_buckets, _entries, _freeIndex, _freeCount, _count, _keyComparer, _valueComparer);
 
 
         /// <summary>
@@ -480,10 +484,10 @@ namespace NCoreUtils.Collections
         /// Variable to store assigned values. After calling this function either references array containing the assigned
         /// values or null.
         /// </param>
-        #if NETSTANDARD2_1
-        public bool TryGetValues(TKey key, [NotNullWhen(true)] out TValue[]? values)
-        #else
+        #if NETFRAMEWORK
         public bool TryGetValues(TKey key, out TValue[] values)
+        #else
+        public bool TryGetValues(TKey key, [NotNullWhen(true)] out TValue[]? values)
         #endif
         {
             var buffer = new List<int>();
@@ -665,14 +669,18 @@ namespace NCoreUtils.Collections
         #region equality
 
         /// <summary>
-        /// Determines whether the specified <see cref="T:NFS.Collections.MultiDictionary`2"/> is equal to the
-        /// current <see cref="T:NFS.Collections.MultiDictionary`2"/>.
+        /// Determines whether the specified <see cref="MultiValueDictionary{TKey, TValue}"/> is equal to the
+        /// current <see cref="MultiValueDictionary{TKey, TValue}"/>.
         /// </summary>
-        /// <param name="that">The <see cref="T:NFS.Collections.MultiDictionary`2"/> to compare with the current <see cref="T:NFS.Collections.MultiDictionary`2"/>.</param>
-        /// <returns><c>true</c> if the specified <see cref="T:NFS.Collections.MultiDictionary`2"/> is equal to the current
-        /// <see cref="T:NFS.Collections.MultiDictionary`2"/>; otherwise, <c>false</c>.</returns>
-        public bool Equals(MultiValueDictionary<TKey, TValue> that)
+        /// <param name="that">The <see cref="MultiValueDictionary{TKey, TValue}"/> to compare with the current <see cref="MultiValueDictionary{TKey, TValue}"/>.</param>
+        /// <returns><c>true</c> if the specified <see cref="MultiValueDictionary{TKey, TValue}"/> is equal to the current
+        /// <see cref="MultiValueDictionary{TKey, TValue}"/>; otherwise, <c>false</c>.</returns>
+        public bool Equals(MultiValueDictionary<TKey, TValue>? that)
         {
+            if (that is null)
+            {
+                return false;
+            }
             if (_freeCount != that._freeCount)
             {
                 return false;
@@ -719,23 +727,16 @@ namespace NCoreUtils.Collections
         }
 
         /// <summary>
-        /// Determines whether the specified <see cref="object"/> is equal to the current <see cref="T:NFS.Collections.MultiDictionary`2"/>.
+        /// Determines whether the specified <see cref="object"/> is equal to the current <see cref="MultiValueDictionary{TKey, TValue}"/>.
         /// </summary>
-        /// <param name="obj">The <see cref="object"/> to compare with the current <see cref="T:NFS.Collections.MultiDictionary`2"/>.</param>
+        /// <param name="obj">The <see cref="object"/> to compare with the current <see cref="MultiValueDictionary{TKey, TValue}"/>.</param>
         /// <returns><c>true</c> if the specified <see cref="object"/> is equal to the current
-        /// <see cref="T:NFS.Collections.MultiDictionary`2"/>; otherwise, <c>false</c>.</returns>
-        public override bool Equals(object obj)
-        {
-            var that = obj as MultiValueDictionary<TKey, TValue>;
-            if (null == that)
-            {
-                return false;
-            }
-            return Equals(that);
-        }
+        /// <see cref="MultiValueDictionary{TKey, TValue}"/>; otherwise, <c>false</c>.</returns>
+        public override bool Equals(object? obj)
+            => obj is MultiValueDictionary<TKey, TValue> that && Equals(that);
 
         /// <summary>
-        /// Serves as a hash function for a <see cref="T:NFS.Collections.MultiDictionary`2"/> object.
+        /// Serves as a hash function for a <see cref="MultiValueDictionary{TKey, TValue}"/> object.
         /// </summary>
         /// <returns>A hash code for this instance that is suitable for use in hashing algorithms and data structures such as a hash table.</returns>
         public override int GetHashCode()
@@ -798,18 +799,16 @@ namespace NCoreUtils.Collections
             }
         }
 
-        void IDeserializationCallback.OnDeserialization(object sender) => OnDeserialization(sender);
+        void IDeserializationCallback.OnDeserialization(object? sender) => OnDeserialization(sender);
 
         /// <summary>
         /// Runs when the entire object graph has been deserialized.
         /// </summary>
         /// <param name="sender">The object that initiated the callback.</param>
-        protected virtual void OnDeserialization(object sender)
+        protected virtual void OnDeserialization(object? sender)
         {
-            SerializationInfo siInfo;
-            SerializationHelper.SerializationInfoTable.TryGetValue(this, out siInfo);
-
-            if (siInfo == null)
+            SerializationHelper.SerializationInfoTable.TryGetValue(this, out var siInfo);
+            if (siInfo is null)
             {
                 // Derived type handled deserialization.
                 return;

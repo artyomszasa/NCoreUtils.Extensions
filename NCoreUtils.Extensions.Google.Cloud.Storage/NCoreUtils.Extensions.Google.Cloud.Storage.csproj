@@ -1,24 +1,29 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.1;netstandard2.0</TargetFrameworks>
-    <LangVersion>8.0</LangVersion>
-    <Nullable>enable</Nullable>
+    <TargetFrameworks>net6.0;netstandard2.1</TargetFrameworks>
     <RootNamespace>NCoreUtils</RootNamespace>
-    <Version>3.1.2.1</Version>
+    <Version>6.0.0.1</Version>
   </PropertyGroup>
-  <ItemGroup>
-    <PackageReference Include="Google.Apis.Auth" Version="1.48.0" />
-    <PackageReference Include="Microsoft.Extensions.Http" Version="3.1.0" />
-    <PackageReference Include="NCoreUtils.Extensions.AsyncEnumerable" Version="1.0.0" />
-    <PackageReference Include="System.Net.Http" Version="4.3.4" />
-    <PackageReference Include="System.Net.Http.Json" Version="3.2.1" />
-    <PackageReference Include="System.Text.Json" Version="4.7.2" />
+  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.1' ">
+    <Compile Remove="Google\HttpRequestMessageExtensions.Net6.cs" />
   </ItemGroup>
-  <ItemGroup Condition=" '$(TargetFramework)' != 'netstandard2.1' ">
-    <PackageReference Include="NCoreUtils.Backports" Version="3.1.0" />
-    <PackageReference Include="Nullable" Version="1.3.0">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
-    </PackageReference>
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net6.0' ">
+    <Compile Remove="Google\HttpRequestMessageExtensions.Legacy.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Google.Apis.Auth" Version="1.55.0" />
+    <PackageReference Include="System.Net.Http" Version="4.3.4" />
+    <PackageReference Include="System.Net.Http.Json" Version="6.0.0" />
+    <PackageReference Include="System.Text.Json" Version="6.0.0" />
+  </ItemGroup>
+  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.1' ">
+    <PackageReference Include="Microsoft.Extensions.Http" Version="$(Fx3NugetVersion)" />
+  </ItemGroup>
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net6.0' ">
+    <PackageReference Include="Microsoft.Extensions.Http" Version="$(FxNugetVersion)" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\NCoreUtils.Extensions.AsyncEnumerable\NCoreUtils.Extensions.AsyncEnumerable.csproj" />
+    <ProjectReference Include="..\NCoreUtils.Extensions.Memory\NCoreUtils.Extensions.Memory.csproj" />
   </ItemGroup>
 </Project>

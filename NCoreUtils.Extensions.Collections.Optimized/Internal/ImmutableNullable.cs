@@ -19,7 +19,7 @@ namespace NCoreUtils.Collections.Internal
                 {
                     throw new InvalidOperationException("Trying to access empty value.");
                 }
-                return ref Unsafe.AsRef<T>(Unsafe.AsPointer<T>(ref _value));
+                return ref Unsafe.AsRef<T>(Unsafe.AsPointer(ref _value));
             }
         }
 

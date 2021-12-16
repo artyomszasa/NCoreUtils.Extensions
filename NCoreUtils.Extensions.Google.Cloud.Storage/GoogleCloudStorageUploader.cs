@@ -24,7 +24,7 @@ namespace NCoreUtils
                 _source = source ?? throw new ArgumentNullException(nameof(source));
                 if (source.Memory.Length < size)
                 {
-                    throw new ArgumentException(nameof(source), "Supplied memory is smaller than the requested slice size.");
+                    throw new ArgumentException("Supplied memory is smaller than the requested slice size.", nameof(source));
                 }
                 _size = size;
             }

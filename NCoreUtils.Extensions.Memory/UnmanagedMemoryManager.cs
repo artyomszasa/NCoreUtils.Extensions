@@ -21,8 +21,8 @@ namespace NCoreUtils
             _ptr = Marshal.AllocHGlobal(Marshal.SizeOf<T>() * size);
         }
 
-        ~UnmanagedMemoryManager()
-            => Dispose(false);
+        // ~UnmanagedMemoryManager()
+        //     => Dispose(false);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         void ThrowIfDisposed()

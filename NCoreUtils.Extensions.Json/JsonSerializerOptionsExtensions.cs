@@ -18,27 +18,10 @@ namespace NCoreUtils
         /// </summary>
         /// <param name="options">The options instance to copy options from.</param>
         /// <returns>New instance of the <see cref="JsonSerializerOptions" />.</returns>
+        [Obsolete("Use native implementation")]
         public static JsonSerializerOptions Clone(this JsonSerializerOptions options)
         {
-            var clone = new JsonSerializerOptions
-            {
-                AllowTrailingCommas = options.AllowTrailingCommas,
-                DefaultBufferSize = options.DefaultBufferSize,
-                DictionaryKeyPolicy = options.DictionaryKeyPolicy,
-                Encoder = options.Encoder,
-                IgnoreNullValues = options.IgnoreNullValues,
-                IgnoreReadOnlyProperties = options.IgnoreReadOnlyProperties,
-                MaxDepth = options.MaxDepth,
-                PropertyNameCaseInsensitive = options.PropertyNameCaseInsensitive,
-                PropertyNamingPolicy = options.PropertyNamingPolicy,
-                ReadCommentHandling = options.ReadCommentHandling,
-                WriteIndented = options.WriteIndented
-            };
-            foreach (var converter in options.Converters)
-            {
-                clone.Converters.Add(converter);
-            }
-            return clone;
+            return new JsonSerializerOptions(options);
         }
 
         public static JsonSerializerOptions AddConverter(this JsonSerializerOptions options, JsonConverter converter)

@@ -1,10 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.1;netstandard2.0;net461</TargetFrameworks>
-    <LangVersion>8.0</LangVersion>
-    <Nullable>enable</Nullable>
+    <TargetFrameworks>net6;netstandard2.1;net461</TargetFrameworks>
     <RootNamespace>NCoreUtils</RootNamespace>
-    <Version>1.1.0</Version>
+    <Version>2.0.0</Version>
     <!-- NuGet -->
     <PackageId>NCoreUtils.Extensions.Json</PackageId>
     <Title>$(PackageId)</Title>
@@ -35,6 +33,6 @@
     <AssemblySearchPaths Condition="'$(BaseFrameworkPathOverrideForMono)' != ''">$(FrameworkPathOverride)/Facades;$(AssemblySearchPaths)</AssemblySearchPaths>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="System.Text.Json" Version="4.7.2" />
+    <PackageReference Include="System.Text.Json" Version="6.0.0" />
   </ItemGroup>
 </Project>

@@ -1,8 +1,9 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 
 namespace NCoreUtils.Memory
 {
-    public class EmplaceableEmplacer<T> : IEmplacer<T>
+    public class EmplaceableEmplacer<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] T> : IEmplacer<T>
         where T : IEmplaceable<T>
     {
         public int Emplace(T value, Span<char> span)

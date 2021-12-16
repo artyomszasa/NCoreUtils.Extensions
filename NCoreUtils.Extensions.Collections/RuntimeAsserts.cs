@@ -42,7 +42,7 @@ namespace NCoreUtils
             static NonNullAssertions()
             {
                 var assertionType = typeof(T).IsValueType ? typeof(ValueTypeNotNullAssertion<>) : typeof(ReferenceTypeNotNullAssertion<>);
-                SharedAssertion = (INotNullAssertion<T>)Activator.CreateInstance(assertionType.MakeGenericType(typeof(T)));
+                SharedAssertion = (INotNullAssertion<T>)Activator.CreateInstance(assertionType.MakeGenericType(typeof(T)))!;
             }
         }
 

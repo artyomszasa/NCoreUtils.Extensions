@@ -169,7 +169,7 @@ namespace NCoreUtils
         /// </returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         [DebuggerStepThrough]
-        public static T GetOrDefault<T>(this Nullable<T> source, T defaultValue = default(T))
+        public static T GetOrDefault<T>(this Nullable<T> source, T defaultValue = default)
             where T : struct
             => source.HasValue ? source.Value : defaultValue;
 
@@ -306,7 +306,7 @@ namespace NCoreUtils
                 value = source.Value;
                 return true;
             }
-            value = default(T);
+            value = default;
             return false;
         }
     }

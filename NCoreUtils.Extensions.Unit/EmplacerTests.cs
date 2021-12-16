@@ -15,7 +15,7 @@ namespace NCoreUtils.Extensions.Unit
 
             public Box(T value) => Value = value;
 
-            public override string ToString() => Value?.ToString();
+            public override string? ToString() => Value?.ToString();
         }
 
         sealed class EmplaceableBox<T> : IEmplaceable<EmplaceableBox<T>>
@@ -24,7 +24,7 @@ namespace NCoreUtils.Extensions.Unit
 
             public EmplaceableBox(T value) => Value = value;
 
-            public override string ToString() => Value?.ToString();
+            public override string? ToString() => Value?.ToString();
 
             public bool TryEmplace(Span<char> span, out int used)
             {
@@ -32,15 +32,17 @@ namespace NCoreUtils.Extensions.Unit
             }
         }
 
-        private static readonly BinaryFormatter _formatter = new BinaryFormatter();
+        private static readonly BinaryFormatter _formatter = new();
 
+#pragma warning disable SYSLIB0011
         private static T Reserialize<T>(T value)
         {
             using var buffer = new MemoryStream();
-            _formatter.Serialize(buffer, value);
+            _formatter.Serialize(buffer, value!);
             buffer.Seek(0L, SeekOrigin.Begin);
             return (T)_formatter.Deserialize(buffer);
         }
+#pragma warning restore SYSLIB0011
 
         [Theory]
         [InlineData((byte)0)]
@@ -52,13 +54,13 @@ namespace NCoreUtils.Extensions.Unit
             var expected = value.ToString();
             Span<char> span = stackalloc char[3];
             var length = Emplacer.GetDefault<byte>().Emplace(value, span);
-            var actual = span.Slice(0, length).ToString();
+            var actual = span[..length].ToString();
             Assert.Equal(expected, actual);
             Assert.True(Emplacer.TryEmplace(value, span, out length));
-            actual = span.Slice(0, length).ToString();
+            actual = span[..length].ToString();
             Assert.Equal(expected, actual);
             Assert.True(Emplacer.GetDefault<byte>().TryEmplace(value, span, out length));
-            actual = span.Slice(0, length).ToString();
+            actual = span[..length].ToString();
             Assert.Equal(expected, actual);
         }
 
@@ -74,13 +76,13 @@ namespace NCoreUtils.Extensions.Unit
             var expected = value.ToString();
             Span<char> span = stackalloc char[5];
             var length = Emplacer.GetDefault<ushort>().Emplace(value, span);
-            var actual = span.Slice(0, length).ToString();
+            var actual = span[..length].ToString();
             Assert.Equal(expected, actual);
             Assert.True(Emplacer.TryEmplace(value, span, out length));
-            actual = span.Slice(0, length).ToString();
+            actual = span[..length].ToString();
             Assert.Equal(expected, actual);
             Assert.True(Emplacer.GetDefault<ushort>().TryEmplace(value, span, out length));
-            actual = span.Slice(0, length).ToString();
+            actual = span[..length].ToString();
             Assert.Equal(expected, actual);
         }
 
@@ -101,13 +103,13 @@ namespace NCoreUtils.Extensions.Unit
             var expected = value.ToString();
             Span<char> span = stackalloc char[10];
             var length = Emplacer.GetDefault<uint>().Emplace(value, span);
-            var actual = span.Slice(0, length).ToString();
+            var actual = span[..length].ToString();
             Assert.Equal(expected, actual);
             Assert.True(Emplacer.TryEmplace(value, span, out length));
-            actual = span.Slice(0, length).ToString();
+            actual = span[..length].ToString();
             Assert.Equal(expected, actual);
             Assert.True(Emplacer.GetDefault<uint>().TryEmplace(value, span, out length));
-            actual = span.Slice(0, length).ToString();
+            actual = span[..length].ToString();
             Assert.Equal(expected, actual);
         }
 
@@ -129,13 +131,13 @@ namespace NCoreUtils.Extensions.Unit
             var expected = value.ToString();
             Span<char> span = stackalloc char[20];
             var length = Emplacer.GetDefault<ulong>().Emplace(value, span);
-            var actual = span.Slice(0, length).ToString();
+            var actual = span[..length].ToString();
             Assert.Equal(expected, actual);
             Assert.True(Emplacer.TryEmplace(value, span, out length));
-            actual = span.Slice(0, length).ToString();
+            actual = span[..length].ToString();
             Assert.Equal(expected, actual);
             Assert.True(Emplacer.GetDefault<ulong>().TryEmplace(value, span, out length));
-            actual = span.Slice(0, length).ToString();
+            actual = span[..length].ToString();
             Assert.Equal(expected, actual);
         }
 
@@ -152,13 +154,13 @@ namespace NCoreUtils.Extensions.Unit
             var expected = value.ToString();
             Span<char> span = stackalloc char[4];
             var length = Emplacer.GetDefault<sbyte>().Emplace(value, span);
-            var actual = span.Slice(0, length).ToString();
+            var actual = span[..length].ToString();
             Assert.Equal(expected, actual);
             Assert.True(Emplacer.TryEmplace(value, span, out length));
-            actual = span.Slice(0, length).ToString();
+            actual = span[..length].ToString();
             Assert.Equal(expected, actual);
             Assert.True(Emplacer.GetDefault<sbyte>().TryEmplace(value, span, out length));
-            actual = span.Slice(0, length).ToString();
+            actual = span[..length].ToString();
             Assert.Equal(expected, actual);
         }
 
@@ -179,13 +181,13 @@ namespace NCoreUtils.Extensions.Unit
             var expected = value.ToString();
             Span<char> span = stackalloc char[6];
             var length = Emplacer.GetDefault<short>().Emplace(value, span);
-            var actual = span.Slice(0, length).ToString();
+            var actual = span[..length].ToString();
             Assert.Equal(expected, actual);
             Assert.True(Emplacer.TryEmplace(value, span, out length));
-            actual = span.Slice(0, length).ToString();
+            actual = span[..length].ToString();
             Assert.Equal(expected, actual);
             Assert.True(Emplacer.GetDefault<short>().TryEmplace(value, span, out length));
-            actual = span.Slice(0, length).ToString();
+            actual = span[..length].ToString();
             Assert.Equal(expected, actual);
         }
 
@@ -208,13 +210,13 @@ namespace NCoreUtils.Extensions.Unit
             var expected = value.ToString();
             Span<char> span = stackalloc char[11];
             var length = Emplacer.GetDefault<int>().Emplace(value, span);
-            var actual = span.Slice(0, length).ToString();
+            var actual = span[..length].ToString();
             Assert.Equal(expected, actual);
             Assert.True(Emplacer.TryEmplace(value, span, out length));
-            actual = span.Slice(0, length).ToString();
+            actual = span[..length].ToString();
             Assert.Equal(expected, actual);
             Assert.True(Emplacer.GetDefault<int>().TryEmplace(value, span, out length));
-            actual = span.Slice(0, length).ToString();
+            actual = span[..length].ToString();
             Assert.Equal(expected, actual);
         }
 
@@ -237,13 +239,13 @@ namespace NCoreUtils.Extensions.Unit
             var expected = value.ToString();
             Span<char> span = stackalloc char[20];
             var length = Emplacer.GetDefault<long>().Emplace(value, span);
-            var actual = span.Slice(0, length).ToString();
+            var actual = span[..length].ToString();
             Assert.Equal(expected, actual);
             Assert.True(Emplacer.TryEmplace(value, span, out length));
-            actual = span.Slice(0, length).ToString();
+            actual = span[..length].ToString();
             Assert.Equal(expected, actual);
             Assert.True(Emplacer.GetDefault<long>().TryEmplace(value, span, out length));
-            actual = span.Slice(0, length).ToString();
+            actual = span[..length].ToString();
             Assert.Equal(expected, actual);
         }
 
@@ -265,13 +267,13 @@ namespace NCoreUtils.Extensions.Unit
             var expected = value.ToString(format, CultureInfo.InvariantCulture);
             Span<char> span = stackalloc char[40];
             var length = Emplacer.GetDefault<float>().Emplace(value, span);
-            var actual = span.Slice(0, length).ToString();
+            var actual = span[..length].ToString();
             Assert.Equal(expected, actual);
             Assert.True(Emplacer.TryEmplace(value, span, out length));
-            actual = span.Slice(0, length).ToString();
+            actual = span[..length].ToString();
             Assert.Equal(expected, actual);
             Assert.True(Emplacer.GetDefault<float>().TryEmplace(value, span, out length));
-            actual = span.Slice(0, length).ToString();
+            actual = span[..length].ToString();
             Assert.Equal(expected, actual);
         }
 
@@ -293,13 +295,13 @@ namespace NCoreUtils.Extensions.Unit
             var expected = value.ToString(format, CultureInfo.InvariantCulture);
             Span<char> span = stackalloc char[40];
             var length = Emplacer.GetDefault<double>().Emplace(value, span);
-            var actual = span.Slice(0, length).ToString();
+            var actual = span[..length].ToString();
             Assert.Equal(expected, actual);
             Assert.True(Emplacer.TryEmplace(value, span, out length));
-            actual = span.Slice(0, length).ToString();
+            actual = span[..length].ToString();
             Assert.Equal(expected, actual);
             Assert.True(Emplacer.GetDefault<double>().TryEmplace(value, span, out length));
-            actual = span.Slice(0, length).ToString();
+            actual = span[..length].ToString();
             Assert.Equal(expected, actual);
         }
 
@@ -309,13 +311,13 @@ namespace NCoreUtils.Extensions.Unit
             var expected = "0123456789";
             Span<char> span = stackalloc char[10];
             var length = Emplacer.GetDefault<string>().Emplace(expected, span);
-            var actual = span.Slice(0, length).ToString();
+            var actual = span[..length].ToString();
             Assert.Equal(expected, actual);
             Assert.True(Emplacer.TryEmplace(expected, span, out length));
-            actual = span.Slice(0, length).ToString();
+            actual = span[..length].ToString();
             Assert.Equal(expected, actual);
             Assert.True(Emplacer.GetDefault<string>().TryEmplace(expected, span, out length));
-            actual = span.Slice(0, length).ToString();
+            actual = span[..length].ToString();
             Assert.Equal(expected, actual);
         }
 
@@ -343,19 +345,19 @@ namespace NCoreUtils.Extensions.Unit
             var ivalue = new Box<int>(2);
             var iexpected = ivalue.ToString();
             var ilength = Emplacer.GetDefault<Box<int>>().Emplace(ivalue, span);
-            var iactual = span.Slice(0, ilength).ToString();
+            var iactual = span[..ilength].ToString();
             Assert.Equal(iexpected, iactual);
             ilength = Emplacer.Emplace(ivalue, span);
-            iactual = span.Slice(0, ilength).ToString();
+            iactual = span[..ilength].ToString();
             Assert.Equal(iexpected, iactual);
-            var nvalue = new Box<string>(null);
+            var nvalue = new Box<string?>(null);
             var nexpected = "";
-            var nlength = Emplacer.GetDefault<Box<string>>().Emplace(nvalue, span);
-            var nactual = span.Slice(0, nlength).ToString();
+            var nlength = Emplacer.GetDefault<Box<string?>>().Emplace(nvalue, span);
+            var nactual = span[..nlength].ToString();
             Assert.Equal(nexpected, nactual);
             var xexpected = "";
-            var xlength = Emplacer.GetDefault<Box<string>>().Emplace(null, span);
-            var xactual = span.Slice(0, xlength).ToString();
+            var xlength = Emplacer.GetDefault<Box<string?>>().Emplace(null!, span);
+            var xactual = span[..xlength].ToString();
             Assert.Equal(xexpected, xactual);
         }
 
@@ -367,7 +369,7 @@ namespace NCoreUtils.Extensions.Unit
                 var ivalue = new EmplaceableBox<int>(2);
                 var iexpected = ivalue.ToString();
                 var ilength = Emplacer.GetDefault<EmplaceableBox<int>>().Emplace(ivalue, span);
-                var iactual = span.Slice(0, ilength).ToString();
+                var iactual = span[..ilength].ToString();
                 Assert.Equal(iexpected, iactual);
             }
             {
@@ -375,15 +377,15 @@ namespace NCoreUtils.Extensions.Unit
                 var ivalue = new EmplaceableBox<int>(2);
                 var iexpected = ivalue.ToString();
                 Assert.True(Emplacer.GetDefault<EmplaceableBox<int>>().TryEmplace(ivalue, span, out var ilength));
-                var iactual = span.Slice(0, ilength).ToString();
+                var iactual = span[..ilength].ToString();
                 Assert.Equal(iexpected, iactual);
             }
             {
                 Span<char> span = stackalloc char[20];
-                var nvalue = new EmplaceableBox<string>(null);
+                var nvalue = new EmplaceableBox<string?>(null);
                 var nexpected = "";
-                var nlength = Emplacer.GetDefault<EmplaceableBox<string>>().Emplace(nvalue, span);
-                var nactual = span.Slice(0, nlength).ToString();
+                var nlength = Emplacer.GetDefault<EmplaceableBox<string?>>().Emplace(nvalue, span);
+                var nactual = span[..nlength].ToString();
                 Assert.Equal(nexpected, nactual);
             }
         }

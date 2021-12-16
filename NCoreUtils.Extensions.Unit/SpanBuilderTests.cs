@@ -110,41 +110,41 @@ namespace NCoreUtils.Extensions.Unit
                 Span<char> span = stackalloc char[500];
                 var builder = new SpanBuilder(span);
                 builder.Append("01234");
-                builder.Append(span.Slice(0, builder.Length));
+                builder.Append(span[..builder.Length]);
                 Assert.Equal("0123401234", builder.ToString());
             }
             {
                 Span<char> span = stackalloc char[500];
                 var builder = new SpanBuilder(span);
                 builder.Append("01234");
-                builder.Append(((ReadOnlySpan<char>)span).Slice(0, builder.Length));
-                Assert.Equal("0123401234", builder.ToString());
-            }
-            {
-                Span<char> span = stackalloc char[500];
-                var builder = new SpanBuilder(span);
-                Assert.True(builder.TryAppend("01234"));
-                Assert.True(builder.TryAppend(span.Slice(0, builder.Length)));
+                builder.Append(((ReadOnlySpan<char>)span)[..builder.Length]);
                 Assert.Equal("0123401234", builder.ToString());
             }
             {
                 Span<char> span = stackalloc char[500];
                 var builder = new SpanBuilder(span);
                 Assert.True(builder.TryAppend("01234"));
-                Assert.True(builder.TryAppend(((ReadOnlySpan<char>)span).Slice(0, builder.Length)));
+                Assert.True(builder.TryAppend(span[..builder.Length]));
+                Assert.Equal("0123401234", builder.ToString());
+            }
+            {
+                Span<char> span = stackalloc char[500];
+                var builder = new SpanBuilder(span);
+                Assert.True(builder.TryAppend("01234"));
+                Assert.True(builder.TryAppend(((ReadOnlySpan<char>)span)[..builder.Length]));
                 Assert.Equal("0123401234", builder.ToString());
             }
             {
                 Span<char> span = stackalloc char[6];
                 var builder = new SpanBuilder(span);
                 builder.Append("01234");
-                Assert.False(builder.TryAppend(span.Slice(0, builder.Length)));
+                Assert.False(builder.TryAppend(span[..builder.Length]));
             }
             {
                 Span<char> span = stackalloc char[6];
                 var builder = new SpanBuilder(span);
                 builder.Append("01234");
-                Assert.False(builder.TryAppend(((ReadOnlySpan<char>)span).Slice(0, builder.Length)));
+                Assert.False(builder.TryAppend(((ReadOnlySpan<char>)span)[..builder.Length]));
             }
         }
 

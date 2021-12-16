@@ -11,7 +11,7 @@ namespace NCoreUtils
         {
             private bool _isDisposed;
 
-            private byte[] _data;
+            private readonly byte[] _data;
 
             public bool IsDisposed => _isDisposed;
 

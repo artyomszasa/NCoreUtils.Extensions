@@ -72,7 +72,7 @@ namespace NCoreUtils
         public TimeSpan Time
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => new TimeSpan(_value & 0x00_00_00_FF_FF_FF_FF_FFL);
+            get => new(_value & 0x00_00_00_FF_FF_FF_FF_FFL);
         }
 
         public long Ticks
@@ -184,7 +184,7 @@ namespace NCoreUtils
             };
 
         public DateTimeOffset ToDateTimeOffset(TimeSpan offset)
-            => new DateTimeOffset(Year, Month, Day, Hour, Minute, Second, Millisecond, offset);
+            => new(Year, Month, Day, Hour, Minute, Second, Millisecond, offset);
 
         public DateTimeOffset ToDateTimeOffset(TimeZoneInfo tz)
         {
@@ -205,15 +205,15 @@ namespace NCoreUtils
         }
 
         public DateTime ToLocalDateTime()
-            => new DateTime(Year, Month, Day, Hour, Minute, Second, Millisecond, DateTimeKind.Local);
+            => new(Year, Month, Day, Hour, Minute, Second, Millisecond, DateTimeKind.Local);
 
-        public string ToString(string format, IFormatProvider formatProvider)
+        public string ToString(string? format, IFormatProvider? formatProvider)
             => new DateTime(Year, Month, Day, Hour, Minute, Second, Millisecond, DateTimeKind.Unspecified).ToString(format, formatProvider);
 
         public string ToString(string format)
             => ToString(format, CultureInfo.CurrentCulture);
 
-        public string ToString(IFormatProvider formatProvider)
+        public string ToString(IFormatProvider? formatProvider)
             => ToString("G", formatProvider);
 
         public override string ToString()

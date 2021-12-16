@@ -8,8 +8,6 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Runtime.CompilerServices;
-using System.Text;
-using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using NCoreUtils.Google;
@@ -26,15 +24,6 @@ namespace NCoreUtils
 
         public const string FullControlScope = "https://www.googleapis.com/auth/devstorage.full_control";
 
-        private static readonly MediaTypeHeaderValue _jsonMediaType = MediaTypeHeaderValue.Parse("application/json; charset=utf-8");
-
-        private static readonly JsonSerializerOptions _jsonOptions = new JsonSerializerOptions
-        {
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-            IgnoreNullValues = true,
-            WriteIndented = false
-        };
-
         private static readonly IReadOnlyList<GoogleAccessControlEntry> _publicRead = new GoogleAccessControlEntry[]
         {
             new GoogleAccessControlEntry
@@ -44,16 +33,7 @@ namespace NCoreUtils
             }
         };
 
-        public static string DefaultCacheControl => "private, max-age=31536000";
-
-        private readonly IHttpClientFactory _httpClientFactory;
-
-        public GoogleCloudStorageUtils(IHttpClientFactory httpClientFactory)
-        {
-            _httpClientFactory = httpClientFactory ?? throw new ArgumentNullException(nameof(httpClientFactory));
-        }
-
-        private async ValueTask HandleErrors(HttpResponseMessage response)
+        private static async ValueTask HandleErrors(HttpResponseMessage response)
         {
             if (!response.IsSuccessStatusCode)
             {
@@ -69,19 +49,80 @@ namespace NCoreUtils
             }
         }
 
+        // FIXME: make no-alloc
+        private static string CreateListEndpoint(string bucket, string? prefix, bool? includeAcl, string? pageToken)
+        {
+            var buffer = ArrayPool<char>.Shared.Rent(8192);
+            try
+            {
+                var builder = new SpanBuilder(buffer);
+                builder.Append("https://storage.googleapis.com/storage/v1/b/");
+                builder.Append(bucket);
+                builder.Append("/o");
+                bool first = true;
+                if (!string.IsNullOrEmpty(prefix))
+                {
+                    builder.Append("?prefix=");
+                    builder.Append(Uri.EscapeDataString(prefix));
+                    first = false;
+                }
+                if (includeAcl.HasValue)
+                {
+                    if (first)
+                    {
+                        builder.Append('?');
+                        first = false;
+                    }
+                    else
+                    {
+                        builder.Append('&');
+                    }
+                    builder.Append("projection=");
+                    builder.Append(includeAcl.Value ? "full" : "noAcl");
+                }
+                if (!string.IsNullOrEmpty(pageToken))
+                {
+                    if (first)
+                    {
+                        builder.Append('?');
+                    }
+                    else
+                    {
+                        builder.Append('&');
+                    }
+                    builder.Append("pageToken=");
+                    builder.Append(Uri.EscapeDataString(pageToken));
+                }
+                return builder.ToString();
+            }
+            finally
+            {
+                ArrayPool<char>.Shared.Return(buffer);
+            }
+        }
+
+        public static string DefaultCacheControl => "private, max-age=31536000";
+
+        private IHttpClientFactory? HttpClientFactory { get; }
+
+        public GoogleCloudStorageUtils(IHttpClientFactory? httpClientFactory)
+        {
+            HttpClientFactory = httpClientFactory;
+        }
+
         /// <summary>
-        /// Creates new http client. When <see cref="System.Net.Http.IHttpClientFactory" /> is provided the client is
+        /// Creates new http client. When <see cref="IHttpClientFactory" /> is provided the client is
         /// configured using the configuration that responds to the the logical name specified by
-        /// <see cref="NCoreUtils.GoogleCloudStorageUtils.HttpClientConfigurationName" />.
+        /// <see cref="HttpClientConfigurationName" />.
         /// </summary>
         /// <returns>Configured http client.</returns>
         public HttpClient CreateHttpClient()
         {
-            if (_httpClientFactory is null)
+            if (HttpClientFactory is null)
             {
                 return new HttpClient();
             }
-            return _httpClientFactory.CreateClient(HttpClientConfigurationName);
+            return HttpClientFactory.CreateClient(HttpClientConfigurationName);
         }
 
         public async Task CopyAsync(
@@ -111,7 +152,7 @@ namespace NCoreUtils
                     Role = "READER"
                 });
             }
-            request.Content = JsonContent.Create(obj, _jsonMediaType, _jsonOptions);
+            request.Content = new JsonContent<GoogleObjectData>(obj, GoogleJsonContext.Default.GoogleObjectData);
             if (!string.IsNullOrEmpty(accessToken))
             {
                 request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
@@ -161,7 +202,11 @@ namespace NCoreUtils
             await response
                 .EnsureSuccessStatusCode()
                 .Content
+#if NETSTANDARD2_1
                 .CopyToAsync(destination)
+#else
+                .CopyToAsync(destination, cancellationToken)
+#endif
                 .ConfigureAwait(false);
             await destination.FlushAsync(cancellationToken)
                 .ConfigureAwait(false);
@@ -190,7 +235,7 @@ namespace NCoreUtils
             await HandleErrors(response).ConfigureAwait(false);
             return await response
                 .Content
-                .ReadFromJsonAsync<GoogleObjectData>(_jsonOptions, cancellationToken)
+                .ReadFromJsonAsync(GoogleJsonContext.Default.GoogleObjectData, cancellationToken)
                 .ConfigureAwait(false);
         }
 
@@ -212,23 +257,20 @@ namespace NCoreUtils
             var requestUri = $"https://storage.googleapis.com/storage/v1/b/{bucket}/o/{Uri.EscapeDataString(name)}{projection}";
             using var client = CreateHttpClient();
             using var request = new HttpRequestMessage(
-#if NETSTANDARD2_1
                 HttpMethod.Patch,
-#else
-                new HttpMethod("PATCH"),
-#endif
                 requestUri
             );
             if (!string.IsNullOrEmpty(accessToken))
             {
                 request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
             }
-            request.Content = JsonContent.Create(patch, _jsonMediaType, _jsonOptions);
+            // request.Content = JsonContent.Create(patch, _jsonMediaType, GoogleJsonContext.Default.Options);
+            request.Content = new JsonContent<GoogleObjectPatchData>(patch, GoogleJsonContext.Default.GoogleObjectPatchData);
             request.SetRequiredGSCScope(patch.Acl?.Count > 0 ? FullControlScope : ReadWriteScope);
             using var response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken)
                 .ConfigureAwait(false);
             await HandleErrors(response).ConfigureAwait(false);
-            return await response.Content.ReadFromJsonAsync<GoogleObjectData>(_jsonOptions, cancellationToken);
+            return (await response.Content.ReadFromJsonAsync(GoogleJsonContext.Default.GoogleObjectData, cancellationToken))!;
         }
 
         public async Task<string> InitializeResumableUploadAsync(
@@ -249,12 +291,13 @@ namespace NCoreUtils
                 ContentType = contentType,
                 CacheControl = cacheControl ?? DefaultCacheControl,
             };
-            if (!(acl is null))
+            if (acl is not null)
             {
                 obj.Acl.AddRange(acl);
             }
             using var request = new HttpRequestMessage(HttpMethod.Post, uri);
-            request.Content = JsonContent.Create(obj, _jsonMediaType, _jsonOptions);
+            // request.Content = JsonContent.Create(obj, _jsonMediaType, GoogleJsonContext.Default.Options);
+            request.Content = new JsonContent<GoogleObjectData>(obj, GoogleJsonContext.Default.GoogleObjectData);
             if (!string.IsNullOrEmpty(accessToken))
             {
                 request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
@@ -271,6 +314,10 @@ namespace NCoreUtils
             using var response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken)
                 .ConfigureAwait(false);
             await HandleErrors(response).ConfigureAwait(false);
+            if (response.Headers.Location is null)
+            {
+                throw new GoogleCloudStorageUploadException("No location has been returned when creating resumable upload enpoint.");
+            }
             return response.Headers.Location.AbsoluteUri;
         }
 
@@ -338,7 +385,7 @@ namespace NCoreUtils
                 CacheControl = cacheControl ?? DefaultCacheControl,
                 Size = unchecked((ulong)size),
             };
-            if (!(acl1 is null))
+            if (acl1 is not null)
             {
                 obj.Acl.AddRange(acl1);
             }
@@ -369,52 +416,6 @@ namespace NCoreUtils
                 cancellationToken
             );
 
-        // FIXME: make no-alloc
-        private string CreateListEndpoint(string bucket, string? prefix, bool? includeAcl, string? pageToken)
-        {
-            var uriBuilder = new StringBuilder($"https://storage.googleapis.com/storage/v1/b/{bucket}/o");
-            bool first = true;
-            if (!string.IsNullOrEmpty(prefix))
-            {
-                uriBuilder
-                    .Append('?')
-                    .Append("prefix=")
-                    .Append(Uri.EscapeDataString(prefix));
-                first = false;
-            }
-            if (includeAcl.HasValue)
-            {
-                if (first)
-                {
-                    uriBuilder.Append('?');
-                    first = false;
-                }
-                else
-                {
-                    uriBuilder.Append('&');
-                }
-                uriBuilder
-                    .Append("projection=")
-                    .Append(includeAcl.Value ? "full" : "noAcl");
-            }
-            if (!string.IsNullOrEmpty(pageToken))
-            {
-                if (first)
-                {
-                    uriBuilder.Append('?');
-                    first = false;
-                }
-                else
-                {
-                    uriBuilder.Append('&');
-                }
-                uriBuilder
-                    .Append("pageToken=")
-                    .Append(Uri.EscapeDataString(pageToken));
-            }
-            return uriBuilder.ToString();
-        }
-
         private async IAsyncEnumerable<GoogleObjectsPage> ListAsync(string bucket, string? prefix, bool? includeAcl, string? accessToken, [EnumeratorCancellation] CancellationToken cancellationToken)
         {
             using var client = CreateHttpClient();
@@ -431,12 +432,19 @@ namespace NCoreUtils
                     .ConfigureAwait(false);
                 await HandleErrors(response).ConfigureAwait(false);
                 var page = await response.Content
-                    .ReadFromJsonAsync<GoogleObjectsData>(_jsonOptions, cancellationToken)
+                    .ReadFromJsonAsync(GoogleJsonContext.Default.GoogleObjectsData, cancellationToken)
                     .ConfigureAwait(false);
-                yield return new GoogleObjectsPage(page.Prefixes, page.Items);
-                pageToken = page.NextPageToken;
+                if (page is null)
+                {
+                    pageToken = default;
+                }
+                else
+                {
+                    yield return new GoogleObjectsPage(page.Prefixes, page.Items);
+                    pageToken = page.NextPageToken;
+                }
             }
-            while (!(pageToken is null));
+            while (pageToken is not null);
         }
 
         public IAsyncEnumerable<GoogleObjectsPage> ListAsync(string bucket, string? prefix, bool? includeAcl = false, string? accessToken = default)

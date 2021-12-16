@@ -9,6 +9,7 @@ using Xunit;
 namespace NCoreUtils.Extensions.Unit
 {
     public abstract class MultiDictionaryTests<TKey, TValue>
+        where TKey : notnull
     {
         protected abstract TKey NextKey();
 
@@ -27,11 +28,13 @@ namespace NCoreUtils.Extensions.Unit
             Assert.Empty(xvs);
             var count = empty.Count;
             Assert.Equal(0, count);
+#pragma warning disable CA1829
             count = empty.Count();
+#pragma warning restore CA1829
             Assert.Equal(0, count);
             Assert.Empty(empty.Keys);
             Assert.Equal(0, empty.Remove(key));
-            Assert.False(((ICollection<KeyValuePair<TKey, TValue>>)empty).Remove(new KeyValuePair<TKey, TValue>(key, default(TValue))));
+            Assert.False(((ICollection<KeyValuePair<TKey, TValue>>)empty).Remove(new KeyValuePair<TKey, TValue>(key, default!)));
             Assert.False(((ICollection<KeyValuePair<TKey, TValue>>)empty).IsReadOnly);
         }
 
@@ -44,17 +47,15 @@ namespace NCoreUtils.Extensions.Unit
             var value01 = NextValue();
             var value10 = NextValue();
             var value11 = NextValue();
-            TValue v;
-            TValue[] vs;
             var xvs = new List<TValue>();
             // single key, single value
             data.Add(key0, value00);
             Assert.True(data.ContainsKey(key0));
             Assert.True(((ICollection<KeyValuePair<TKey, TValue>>)data).Contains(new KeyValuePair<TKey, TValue>(key0, value00)));
             Assert.False(((ICollection<KeyValuePair<TKey, TValue>>)data).Contains(new KeyValuePair<TKey, TValue>(key0, value01)));
-            Assert.True(data.TryGetValue(key0, out v));
+            Assert.True(data.TryGetValue(key0, out TValue v));
             Assert.Equal(value00, v);
-            Assert.True(data.TryGetValues(key0, out vs));
+            Assert.True(data.TryGetValues(key0, out TValue[]? vs));
             Assert.NotNull(vs);
             Assert.Single(vs, v);
             xvs.Clear();
@@ -62,7 +63,9 @@ namespace NCoreUtils.Extensions.Unit
             Assert.Single(xvs, v);
             var count = data.Count;
             Assert.Equal(1, count);
+#pragma warning disable CA1829
             count = data.Count();
+#pragma warning restore CA1829
             Assert.Equal(1, count);
             Assert.Single(data.Keys, key0);
             data.Clear();
@@ -77,7 +80,7 @@ namespace NCoreUtils.Extensions.Unit
             Assert.True(EqualityComparer<TValue>.Default.Equals(value00, v) || EqualityComparer<TValue>.Default.Equals(value01, v));
             Assert.True(data.TryGetValues(key0, out vs));
             Assert.NotNull(vs);
-            Assert.True(HashSet<TValue>.CreateSetComparer().Equals(new HashSet<TValue>(vs), new HashSet<TValue> { value00, value01 }));
+            Assert.True(HashSet<TValue>.CreateSetComparer().Equals(new HashSet<TValue>(vs ?? Array.Empty<TValue>()), new HashSet<TValue> { value00, value01 }));
             xvs.Clear();
             Assert.True(data.TryGetValues(key0, xvs));
             count = xvs.Count;
@@ -86,13 +89,17 @@ namespace NCoreUtils.Extensions.Unit
             Assert.Contains(value01, xvs);
             count = data.Count;
             Assert.Equal(2, count);
+#pragma warning disable CA1829
             count = data.Count();
+#pragma warning restore CA1829
             Assert.Equal(2, count);
             Assert.Single(data.Keys, key0);
             Assert.True(((ICollection<KeyValuePair<TKey, TValue>>)data).Remove(new KeyValuePair<TKey, TValue>(key0, value00)));
             count = data.Count;
             Assert.Equal(1, count);
+#pragma warning disable CA1829
             count = data.Count();
+#pragma warning restore CA1829
             Assert.Equal(1, count);
             data.Add(key0, value00);
             Assert.Equal(2, data.Remove(key0));
@@ -104,16 +111,20 @@ namespace NCoreUtils.Extensions.Unit
             Assert.True(EqualityComparer<TValue>.Default.Equals(value00, v) || EqualityComparer<TValue>.Default.Equals(value01, v));
             Assert.True(data.TryGetValues(key0, out vs));
             Assert.NotNull(vs);
-            Assert.True(HashSet<TValue>.CreateSetComparer().Equals(new HashSet<TValue>(vs), new HashSet<TValue> { value00, value01 }));
+            Assert.True(HashSet<TValue>.CreateSetComparer().Equals(new HashSet<TValue>(vs ?? Array.Empty<TValue>()), new HashSet<TValue> { value00, value01 }));
             count = data.Count;
             Assert.Equal(2, count);
+#pragma warning disable CA1829
             count = data.Count();
+#pragma warning restore CA1829
             Assert.Equal(2, count);
             Assert.Single(data.Keys, key0);
             data.Set(key0, value01);
             count = data.Count;
             Assert.Equal(1, count);
+#pragma warning disable CA1829
             count = data.Count();
+#pragma warning restore CA1829
             Assert.Equal(1, count);
             data.Set(key0, value00, value01);
             Assert.Equal(2, data.Remove(key0));
@@ -128,16 +139,20 @@ namespace NCoreUtils.Extensions.Unit
             Assert.True(EqualityComparer<TValue>.Default.Equals(value00, v) || EqualityComparer<TValue>.Default.Equals(value01, v));
             Assert.True(data.TryGetValues(key0, out vs));
             Assert.NotNull(vs);
-            Assert.True(HashSet<TValue>.CreateSetComparer().Equals(new HashSet<TValue>(vs), new HashSet<TValue> { value00, value01 }));
+            Assert.True(HashSet<TValue>.CreateSetComparer().Equals(new HashSet<TValue>(vs ?? Array.Empty<TValue>()), new HashSet<TValue> { value00, value01 }));
             count = data.Count;
             Assert.Equal(2, count);
+#pragma warning disable CA1829
             count = data.Count();
+#pragma warning restore CA1829
             Assert.Equal(2, count);
             Assert.Single(data.Keys, key0);
             Assert.True(((ICollection<KeyValuePair<TKey, TValue>>)data).Remove(new KeyValuePair<TKey, TValue>(key0, value00)));
             count = data.Count;
             Assert.Equal(1, count);
+#pragma warning disable CA1829
             count = data.Count();
+#pragma warning restore CA1829
             Assert.Equal(1, count);
             data.Add(key0, value00);
             Assert.Equal(2, data.Remove(key0));
@@ -161,7 +176,7 @@ namespace NCoreUtils.Extensions.Unit
             Assert.True(EqualityComparer<TValue>.Default.Equals(value00, v) || EqualityComparer<TValue>.Default.Equals(value01, v));
             Assert.True(data.TryGetValues(key0, out vs));
             Assert.NotNull(vs);
-            Assert.True(HashSet<TValue>.CreateSetComparer().Equals(new HashSet<TValue>(vs), new HashSet<TValue> { value00, value01 }));
+            Assert.True(HashSet<TValue>.CreateSetComparer().Equals(new HashSet<TValue>(vs ?? Array.Empty<TValue>()), new HashSet<TValue> { value00, value01 }));
             xvs.Clear();
             Assert.True(data.TryGetValues(key0, xvs));
             count = xvs.Count;
@@ -172,7 +187,7 @@ namespace NCoreUtils.Extensions.Unit
             Assert.True(EqualityComparer<TValue>.Default.Equals(value10, v) || EqualityComparer<TValue>.Default.Equals(value11, v));
             Assert.True(data.TryGetValues(key1, out vs));
             Assert.NotNull(vs);
-            Assert.True(HashSet<TValue>.CreateSetComparer().Equals(new HashSet<TValue>(vs), new HashSet<TValue> { value10, value11 }));
+            Assert.True(HashSet<TValue>.CreateSetComparer().Equals(new HashSet<TValue>(vs ?? Array.Empty<TValue>()), new HashSet<TValue> { value10, value11 }));
             xvs.Clear();
             Assert.True(data.TryGetValues(key1, xvs));
             count = xvs.Count;
@@ -181,7 +196,9 @@ namespace NCoreUtils.Extensions.Unit
             Assert.Contains(value11, xvs);
             count = data.Count;
             Assert.Equal(4, count);
+#pragma warning disable CA1829
             count = data.Count();
+#pragma warning restore CA1829
             Assert.Equal(4, count);
             Assert.True(HashSet<TKey>.CreateSetComparer().Equals(new HashSet<TKey>(data.Keys), new HashSet<TKey> { key0, key1 }));
             count = data.Keys.Count();
@@ -189,7 +206,9 @@ namespace NCoreUtils.Extensions.Unit
             Assert.Equal(2, data.Remove(key0));
             count = data.Count;
             Assert.Equal(2, count);
+#pragma warning disable CA1829
             count = data.Count();
+#pragma warning restore CA1829
             Assert.Equal(2, count);
             data.Clear();
             Assert.Empty(data);
@@ -217,9 +236,9 @@ namespace NCoreUtils.Extensions.Unit
                 Assert.True(data.TryGetValue(key, out var v));
                 Assert.Contains(v, items[key]);
                 Assert.True(data.TryGetValues(key, out var vs));
-                count = vs.Length;
+                count = vs?.Length ?? 0;
                 Assert.Equal(100, count);
-                Assert.True(HashSet<TValue>.CreateSetComparer().Equals(new HashSet<TValue>(vs), new HashSet<TValue>(items[key])));
+                Assert.True(HashSet<TValue>.CreateSetComparer().Equals(new HashSet<TValue>(vs ?? Array.Empty<TValue>()), new HashSet<TValue>(items[key])));
                 var vsx = new List<TValue>();
                 Assert.True(data.TryGetValues(key, vsx));
                 count = vsx.Count;
@@ -243,6 +262,7 @@ namespace NCoreUtils.Extensions.Unit
             }
             var binaryFormatter = new BinaryFormatter();
             byte[] bin;
+#pragma warning disable SYSLIB0011
             using (var buffer = new MemoryStream())
             {
                 binaryFormatter.Serialize(buffer, data0);
@@ -253,12 +273,13 @@ namespace NCoreUtils.Extensions.Unit
             {
                 data1 = (MultiValueDictionary<TKey, TValue>)binaryFormatter.Deserialize(buffer);
             }
+#pragma warning restore SYSLIB0011
             Assert.Equal(data0, data1);
             Assert.Equal(data0.GetHashCode(), data1.GetHashCode());
             var data2 = data0.Clone();
             Assert.True(((object)data0).Equals(data2));
             Assert.False(((object)data0).Equals(null));
-            Assert.False(((object)data0).Equals(2));
+            Assert.False(((object)data0!).Equals(2));
         }
     }
 
@@ -270,9 +291,19 @@ namespace NCoreUtils.Extensions.Unit
 
         public bool Equals(MyInt other) => _i == other._i;
 
-        public override bool Equals(object obj) => obj is MyInt other && Equals(other);
+        public override bool Equals(object? obj) => obj is MyInt other && Equals(other);
 
         public override int GetHashCode() => _i / 2;
+
+        public static bool operator ==(MyInt left, MyInt right)
+        {
+            return left.Equals(right);
+        }
+
+        public static bool operator !=(MyInt left, MyInt right)
+        {
+            return !(left == right);
+        }
     }
 
     public class IntIntMultiDictionaryTests : MultiDictionaryTests<int, int>
@@ -306,7 +337,7 @@ namespace NCoreUtils.Extensions.Unit
 
         int _valueSeed;
 
-        protected override MyInt NextKey() => new MyInt(++_keySeed);
+        protected override MyInt NextKey() => new(++_keySeed);
 
         protected override int NextValue() => ++_valueSeed;
 

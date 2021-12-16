@@ -26,7 +26,7 @@ namespace NCoreUtils.Internal
                     {
                         throw new InvalidOperationException($"No ctor parameter found for property {property}.");
                     }
-                    var name = JsonEncodedText.Encode(namingPolicy == null ? parameter.Name : namingPolicy.ConvertName(parameter.Name));
+                    var name = JsonEncodedText.Encode(namingPolicy == null ? parameter.Name! : namingPolicy.ConvertName(parameter.Name!));
                     return new LinkedProperty(parameter, property, name);
                 })
                 .ToArray();
@@ -37,7 +37,7 @@ namespace NCoreUtils.Internal
         public static ObjectDescription Create(Type type, JsonNamingPolicy? namingPolicy)
             => Create(type, namingPolicy, ImmutableJsonCoverterOptions.Default);
 
-        public Type Type => Ctor.DeclaringType;
+        public Type Type => Ctor.DeclaringType!;
 
         public ConstructorInfo Ctor { get; }
 

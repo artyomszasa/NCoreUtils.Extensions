@@ -12,7 +12,7 @@ namespace NCoreUtils.Extensions.Unit
             var list = new List<int> { 1, 2 };
             var list0 = new List<int>();
 
-            Assert.Throws<ArgumentNullException>(() => ListExtensions.Pop<int>(null));
+            Assert.Throws<ArgumentNullException>(() => ListExtensions.Pop<int>(null!));
             Assert.Throws<InvalidOperationException>(() => list0.Pop());
 
             Assert.Equal(2, list.Pop());

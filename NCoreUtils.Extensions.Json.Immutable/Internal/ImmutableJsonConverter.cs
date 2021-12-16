@@ -8,10 +8,9 @@ namespace NCoreUtils.Internal
 {
     public static class ImmutableJsonConverter
     {
-        private static ConcurrentDictionary<(Type, JsonNamingPolicy?, ImmutableJsonCoverterOptions), ObjectDescription> _cache
-            = new ConcurrentDictionary<(Type, JsonNamingPolicy?, ImmutableJsonCoverterOptions), ObjectDescription>();
+        private static readonly ConcurrentDictionary<(Type, JsonNamingPolicy?, ImmutableJsonCoverterOptions), ObjectDescription> _cache = new();
 
-        private static Func<(Type, JsonNamingPolicy?, ImmutableJsonCoverterOptions), ObjectDescription> _factory =
+        private static readonly Func<(Type, JsonNamingPolicy?, ImmutableJsonCoverterOptions), ObjectDescription> _factory =
             args => ObjectDescription.Create(args.Item1, args.Item2, args.Item3);
 
         public static void ClearObjectDescriptionCache()
@@ -26,10 +25,6 @@ namespace NCoreUtils.Internal
 
     public sealed class ImmutableJsonConverter<T> : JsonConverter<T>, IImmutableJsonConverter<T>
     {
-#if NETSTANDARD2_0
-        Type IImmutableJsonConverter.TargetType => typeof(T);
-#endif
-
         public ImmutableJsonCoverterOptions Options { get; }
 
         public ImmutableJsonConverter(ImmutableJsonCoverterOptions options)
@@ -71,7 +66,7 @@ namespace NCoreUtils.Internal
                 }
                 else
                 {
-                    buffer.Add((prop, JsonSerializer.Deserialize(ref reader, prop.Parameter.ParameterType, options)));
+                    buffer.Add((prop, JsonSerializer.Deserialize(ref reader, prop.Parameter.ParameterType, options)!));
                 }
                 reader.Read();
             }
@@ -104,7 +99,7 @@ namespace NCoreUtils.Internal
             foreach (var member in desc.Members)
             {
                 var v = member.Property.GetValue(value!, null);
-                if (v != null || !options.IgnoreNullValues)
+                if (v != null || options.DefaultIgnoreCondition == JsonIgnoreCondition.Never)
                 {
                     writer.WritePropertyName(member.Name);
                     JsonSerializer.Serialize(writer, v, member.Parameter.ParameterType, options);

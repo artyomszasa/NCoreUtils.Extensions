@@ -16,7 +16,7 @@ namespace NCoreUtils.Collections
         {
             private static readonly T _dummy;
 
-            private void* _ref;
+            private readonly void* _ref;
 
             /// <summary>
             /// Current popition:
@@ -93,7 +93,7 @@ namespace NCoreUtils.Collections
             {
                 result[source.Length] = value._head.Value;
             }
-            if (!(value._tail is null))
+            if (value._tail is not null)
             {
                 for (var i = 0; i < value._tail.Length; ++i)
                 {
@@ -106,7 +106,11 @@ namespace NCoreUtils.Collections
         private static T[] ArrayPop(T[] source, out T value)
         {
             var result = new T[source.Length - 1];
+#if NETFRAMEWORK
             value = source[source.Length - 1];
+#else
+            value = source[^1];
+#endif
             for (var i = 0; i < source.Length - 1; ++i)
             {
                 result[i] = source[i];
@@ -160,7 +164,7 @@ namespace NCoreUtils.Collections
 
         private ImmutableNullable<T> _head;
 
-        private T[]? _tail;
+        private readonly T[]? _tail;
 
         public int Length
         {
@@ -210,7 +214,11 @@ namespace NCoreUtils.Collections
                 if (source.Length > 1)
                 {
                     _tail = new T[source.Length - 1];
+#if NETFRAMEWORK
                     source.Slice(1).CopyTo(_tail.AsSpan());
+#else
+                    source[1..].CopyTo(_tail.AsSpan());
+#endif
                 }
                 else
                 {

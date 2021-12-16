@@ -16,11 +16,11 @@ namespace NCoreUtils
             => TargetType = targetType ?? throw new ArgumentNullException(nameof(targetType));
 
         public ImmutableJsonCoverterOptions Build()
-            => new ImmutableJsonCoverterOptions(Ignored.ToArray());
+            => new(Ignored.ToArray());
 
         public ImmutableJsonCoverterOptionsBuilder Ignore(PropertyInfo property)
         {
-            if (property.DeclaringType == TargetType || property.DeclaringType.IsAssignableFrom(TargetType))
+            if (property.DeclaringType == TargetType || (property.DeclaringType is not null && property.DeclaringType.IsAssignableFrom(TargetType)))
             {
                 Ignored.Add(property);
             }

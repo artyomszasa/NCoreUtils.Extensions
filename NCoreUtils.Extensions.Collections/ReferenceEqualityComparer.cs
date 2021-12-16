@@ -22,7 +22,7 @@ namespace NCoreUtils
         /// </summary>
         /// <param name="x">First object.</param>
         /// <param name="y">Second object.</param>
-        public bool Equals(T x, T y)
+        public bool Equals(T? x, T? y)
             => ReferenceEquals(x, y);
 
         /// <summary>

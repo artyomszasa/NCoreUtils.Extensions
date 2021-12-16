@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using NCoreUtils.Memory;
 
@@ -26,7 +27,7 @@ namespace NCoreUtils
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Append<T>(T value)
+        public void Append<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] T>(T value)
             => Append(value, Emplacer.GetDefault<T>());
 
         // [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -136,7 +137,7 @@ namespace NCoreUtils
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool TryAppend<T>(T value)
+        public bool TryAppend<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] T>(T value)
             => TryAppend(value, Emplacer.GetDefault<T>());
 
         // [MethodImpl(MethodImplOptions.AggressiveInlining)]

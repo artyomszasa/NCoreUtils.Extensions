@@ -27,7 +27,7 @@ namespace NCoreUtils.Google
             => reader.TokenType switch
             {
                 JsonTokenType.Null => default,
-                JsonTokenType.String => (DateTimeOffset?)DateTimeOffset.ParseExact(reader.GetString(), _formats, CultureInfo.InvariantCulture, DateTimeStyles.AllowWhiteSpaces),
+                JsonTokenType.String => (DateTimeOffset?)DateTimeOffset.ParseExact(reader.GetString() ?? string.Empty, _formats, CultureInfo.InvariantCulture, DateTimeStyles.AllowWhiteSpaces),
                 var tokenType => throw new JsonException($"Unable to convert sequence starting with {tokenType} to DateTimeOffset.")
             };
 

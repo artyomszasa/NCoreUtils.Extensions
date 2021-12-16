@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Concurrent;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
 using System.Text.Json.Serialization;
@@ -9,7 +10,9 @@ namespace NCoreUtils
 {
     public static class ImmutableJsonConverterFactory
     {
-        private static MethodInfo _gmCreateOfT1 = typeof(ImmutableJsonConverterFactory)
+        [DynamicDependency(DynamicallyAccessedMemberTypes.PublicMethods, "NCoreUtils.ImmutableJsonConverterFactory", "NCoreUtils.Extensions.Json.Immutable")]
+        [DynamicDependency(DynamicallyAccessedMemberTypes.All, "NCoreUtils.ImmutableJsonCoverterOptionsBuilder", "NCoreUtils.Extensions.Json.Immutable")]
+        private static readonly MethodInfo _gmCreateOfT1 = typeof(ImmutableJsonConverterFactory)
             .GetMethods(BindingFlags.Public | BindingFlags.Static)
             .First(m =>
             {
@@ -30,7 +33,7 @@ namespace NCoreUtils
                 return p0.ParameterType == desiredP0Type;
             });
 
-        private static MethodInfo _gmGetOrCreateOfT0 = typeof(ImmutableJsonConverterFactory)
+        private static readonly MethodInfo _gmGetOrCreateOfT0 = typeof(ImmutableJsonConverterFactory)
             .GetMethods(BindingFlags.Public | BindingFlags.Static)
             .First(m =>
             {
@@ -41,7 +44,7 @@ namespace NCoreUtils
                 return m.GetParameters().Length == 0;
             });
 
-        private static MethodInfo _gmGetOrCreateOfT1 = typeof(ImmutableJsonConverterFactory)
+        private static readonly MethodInfo _gmGetOrCreateOfT1 = typeof(ImmutableJsonConverterFactory)
             .GetMethods(BindingFlags.Public | BindingFlags.Static)
             .First(m =>
             {
@@ -62,17 +65,17 @@ namespace NCoreUtils
                 return p0.ParameterType == desiredP0Type;
             });
 
-        private static ConcurrentDictionary<Type, object> _cache = new ConcurrentDictionary<Type, object>();
+        private static readonly ConcurrentDictionary<Type, object> _cache = new ConcurrentDictionary<Type, object>();
 
-        private static Func<Type, object> _defFactory =
-            type => Activator.CreateInstance(typeof(ImmutableJsonConverter<>).MakeGenericType(type), true);
+        private static readonly Func<Type, object> _defFactory =
+            type => Activator.CreateInstance(typeof(ImmutableJsonConverter<>).MakeGenericType(type), true)!;
 
-        private static object Factory(Type type, ImmutableJsonCoverterOptions options)
+        private static object Factory([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] Type type, ImmutableJsonCoverterOptions options)
         {
             var ctor = typeof(ImmutableJsonConverter<>)
                 .MakeGenericType(type)
                 .GetConstructor(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance, null, new [] { typeof(ImmutableJsonCoverterOptions) }, null);
-            return ctor.Invoke(new object[] { options });
+            return ctor!.Invoke(new object[] { options });
         }
 
         /// <summary>
@@ -90,7 +93,7 @@ namespace NCoreUtils
             var ctor = typeof(ImmutableJsonConverter<>)
                 .MakeGenericType(type)
                 .GetConstructor(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance, null, Type.EmptyTypes, null);
-            return (JsonConverter)ctor.Invoke(new object[0]);
+            return (JsonConverter)ctor!.Invoke(Array.Empty<object>());
         }
 
         /// <summary>
@@ -119,7 +122,7 @@ namespace NCoreUtils
         /// <paramref name="type" /> parameter.
         /// </returns>
         public static JsonConverter Create(Type type, Action<ImmutableJsonCoverterOptionsBuilder> configure)
-            => (JsonConverter)_gmCreateOfT1.MakeGenericMethod(type).Invoke(default, new object[] { configure });
+            => (JsonConverter)_gmCreateOfT1.MakeGenericMethod(type).Invoke(default, new object[] { configure })!;
 
         /// <summary>
         /// Initializes new instance of <see cref="ImmutableJsonConverter{T}" /> using the the specified configuration
@@ -155,7 +158,7 @@ namespace NCoreUtils
         /// method group.
         /// </returns>
         public static JsonConverter GetOrCreate(Type type)
-            => (JsonConverter)_gmGetOrCreateOfT0.MakeGenericMethod(type).Invoke(default, new object[0]);
+            => (JsonConverter)_gmGetOrCreateOfT0.MakeGenericMethod(type).Invoke(default, Array.Empty<object>())!;
 
         /// <summary>
         /// Either creates new instance of <see cref="ImmutableJsonConverter{T}" /> with default settings or uses
@@ -191,8 +194,9 @@ namespace NCoreUtils
         /// <paramref name="type" /> parameter or an instance configured by the previuos call to the <c>GetOrCreate</c>
         /// method group.
         /// </returns>
-        public static JsonConverter GetOrCreate(Type type, Action<ImmutableJsonCoverterOptionsBuilder> configure)
-            => (JsonConverter)_gmGetOrCreateOfT1.MakeGenericMethod(type).Invoke(default, new object[] { configure });
+        [DynamicDependency(DynamicallyAccessedMemberTypes.PublicMethods, "NCoreUtils.ImmutableJsonConverterFactory", "NCoreUtils.Extensions.Json.Immutable")]
+        public static JsonConverter GetOrCreate([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] Type type, Action<ImmutableJsonCoverterOptionsBuilder> configure)
+            => (JsonConverter)_gmGetOrCreateOfT1.MakeGenericMethod(type).Invoke(default, new object[] { configure })!;
 
         /// <summary>
         /// Either creates new instance of <see cref="ImmutableJsonConverter{T}" /> using the the specified

@@ -40,8 +40,8 @@ namespace NCoreUtils.Internal
             // Getter = eFunc.Compile();
         }
 
-        public bool Equals(LinkedProperty other)
-            => other != null
+        public bool Equals(LinkedProperty? other)
+            => other is not null
                 && ReferenceEquals(Property, other.Property)
                 && ReferenceEquals(Parameter, other.Parameter)
                 && Name.Equals(other.Name);

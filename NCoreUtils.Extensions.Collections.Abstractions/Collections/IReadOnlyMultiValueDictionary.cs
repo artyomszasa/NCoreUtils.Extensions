@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 
 namespace NCoreUtils.Collections
 {
@@ -33,7 +34,7 @@ namespace NCoreUtils.Collections
         /// Variable to store assigned values. After calling this function either references array containing the assigned
         /// values or null.
         /// </param>
-        bool TryGetValues(TKey key, out TValue[] values);
+        bool TryGetValues(TKey key, [NotNullWhen(true)] out TValue[]? values);
 
         /// <summary>
         /// Adds all values assigned to the specified key to the specified collection.
@@ -50,6 +51,6 @@ namespace NCoreUtils.Collections
         /// </summary>
         /// <param name="key">Key to search values by.</param>
         /// <param name="value">Returned value if found.</param>
-        bool TryGetValue(TKey key, out TValue value);
+        bool TryGetValue(TKey key, [MaybeNullWhen(false)] out TValue value);
     }
 }

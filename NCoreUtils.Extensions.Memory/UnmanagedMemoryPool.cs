@@ -16,8 +16,6 @@ namespace NCoreUtils
 
         public const int DefaultDefaultBufferSize = 32 * 1024;
 
-        private static int[] _pow2 = { 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024 };
-
         private static UnmanagedMemoryPool<T>? _shared;
 
         public new static UnmanagedMemoryPool<T> Shared
@@ -46,11 +44,11 @@ namespace NCoreUtils
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static void EnsureValidSize(int value, string parameterName)
         {
-            if (value % 1024 != 0)
+            if (value <= 0)
             {
-                throw new ArgumentException("Buffer size must be divisible by 1024.", parameterName);
+                throw new ArgumentException("Buffer size must be positive number.", parameterName);
             }
-            if (0 > Array.BinarySearch(_pow2, value / 1024))
+            if (0 != (value & ( value - 1)))
             {
                 throw new ArgumentException("Buffer must be 1024 * power of 2.", parameterName);
             }
@@ -58,7 +56,7 @@ namespace NCoreUtils
 
         private int _isDisposed = 0;
 
-        private (int MaxSize, ConcurrentQueue<UnmanagedMemoryManager<T>> Queue)[] _store;
+        private readonly (int MaxSize, ConcurrentQueue<UnmanagedMemoryManager<T>> Queue)[] _store;
 
         // UNIT only
         internal IReadOnlyList<(int MaxSize, ConcurrentQueue<UnmanagedMemoryManager<T>> Queue)> Store => _store;
