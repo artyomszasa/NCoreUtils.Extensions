@@ -3,10 +3,12 @@
   <ItemGroup>
     <ProjectReference Include="..\NCoreUtils.Extensions.Google.Cloud.Storage\NCoreUtils.Extensions.Google.Cloud.Storage.csproj" />
     <ProjectReference Include="..\NCoreUtils.Extensions.Globalization\NCoreUtils.Extensions.Globalization.csproj" />
+    <ProjectReference Include="..\NCoreUtils.Extensions.Expressions\NCoreUtils.Extensions.Expressions.csproj" />
     <TrimmerRootAssembly Include="NCoreUtils.Extensions.Google.Cloud.Storage" />
     <TrimmerRootAssembly Include="NCoreUtils.Extensions.Globalization" />
     <TrimmerRootAssembly Include="NCoreUtils.Extensions.Memory" />
     <TrimmerRootAssembly Include="NCoreUtils.Extensions.AsyncEnumerable" />
+    <TrimmerRootAssembly Include="NCoreUtils.Extensions.Expressions" />
   </ItemGroup>
 
   <PropertyGroup>

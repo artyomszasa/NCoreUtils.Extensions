@@ -3,7 +3,7 @@
     <TargetFrameworks>net6.0;netstandard2.1;net461</TargetFrameworks>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <RootNamespace>NCoreUtils</RootNamespace>
-    <Version>3.0.0.1</Version>
+    <Version>3.0.0.2</Version>
     <!-- NuGet -->
     <PackageId>NCoreUtils.Extensions.Memory</PackageId>
     <Title>$(PackageId)</Title>

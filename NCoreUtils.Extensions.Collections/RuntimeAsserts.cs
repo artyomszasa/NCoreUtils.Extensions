@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 
 namespace NCoreUtils
@@ -39,6 +40,9 @@ namespace NCoreUtils
         sealed class NonNullAssertions<T>
         {
             public static readonly INotNullAssertion<T> SharedAssertion;
+
+            [UnconditionalSuppressMessage("ReflectionAnalysis", "IL2026",
+                Justification = "Type is bound by caller.")]
             static NonNullAssertions()
             {
                 var assertionType = typeof(T).IsValueType ? typeof(ValueTypeNotNullAssertion<>) : typeof(ReferenceTypeNotNullAssertion<>);

@@ -183,11 +183,36 @@ namespace NCoreUtils
                 _ => throw new InvalidOperationException($"Unable to compare {obj.GetType()} to RawDateTime.")
             };
 
+        /// <summary>
+        /// Returns <see cref="DateTimeOffset" /> instance with the specified offset.
+        /// <para>
+        /// NOTE: default <see cref="DateTimeOffset" /> value is returned if the actual instance is <see cref="Zero" />.
+        /// </para>
+        /// </summary>
+        /// <param name="offset">Offset to use.</param>
         public DateTimeOffset ToDateTimeOffset(TimeSpan offset)
-            => new(Year, Month, Day, Hour, Minute, Second, Millisecond, offset);
+        {
+            if (0L == _value)
+            {
+                return default;
+            }
+            return new(Year, Month, Day, Hour, Minute, Second, Millisecond, offset);
+        }
 
+        /// <summary>
+        /// Returns <see cref="DateTimeOffset" /> instance for the specified time zone with respect to the adjustments
+        /// rules.
+        /// <para>
+        /// NOTE: default <see cref="DateTimeOffset" /> value is returned if the actual instance is <see cref="Zero" />.
+        /// </para>
+        /// </summary>
+        /// <param name="tz">Requested time zone.</param>
         public DateTimeOffset ToDateTimeOffset(TimeZoneInfo tz)
         {
+            if (0L == _value)
+            {
+                return default;
+            }
             var offset = tz.BaseUtcOffset;
             // apply rules if any
             var rules = tz.GetAdjustmentRules();
@@ -204,11 +229,30 @@ namespace NCoreUtils
             return new DateTimeOffset(dtNoTicks.Ticks + Ticks, dtNoTicks.Offset);
         }
 
+        /// <summary>
+        /// Returns <see cref="DateTime" /> instance with <see cref="DateTime.Kind" /> property set to
+        /// <see cref="DateTimeKind.Local" />.
+        /// <para>
+        /// NOTE: default <see cref="DateTime" /> value is returned if the actual instance is <see cref="Zero" />.
+        /// </para>
+        /// </summary>
         public DateTime ToLocalDateTime()
-            => new(Year, Month, Day, Hour, Minute, Second, Millisecond, DateTimeKind.Local);
+        {
+            if (0L == _value)
+            {
+                return default;
+            }
+            return new(Year, Month, Day, Hour, Minute, Second, Millisecond, DateTimeKind.Local);
+        }
 
         public string ToString(string? format, IFormatProvider? formatProvider)
-            => new DateTime(Year, Month, Day, Hour, Minute, Second, Millisecond, DateTimeKind.Unspecified).ToString(format, formatProvider);
+        {
+            if (0L == _value)
+            {
+                return string.Empty;
+            }
+            return new DateTime(Year, Month, Day, Hour, Minute, Second, Millisecond, DateTimeKind.Unspecified).ToString(format, formatProvider);
+        }
 
         public string ToString(string format)
             => ToString(format, CultureInfo.CurrentCulture);

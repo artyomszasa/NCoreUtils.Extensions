@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -81,6 +82,7 @@ namespace NCoreUtils
         private static TryExtractDelegate TryExtractInstanceDelegate { get; }
             = (Expression expression, out object? value) => expression.TryExtractInstance(out value);
 
+        [UnconditionalSuppressMessage("Trimming", "IL2072", Justification = "Constructor is supplied through expression hence is a preserved method.")]
         private static object InvokeParameterlessConstructor(NewExpression newExpression)
         {
             if (newExpression.Constructor is null)
@@ -173,7 +175,7 @@ namespace NCoreUtils
                             return field.GetValue(null).Just()!;
                         }
                         // NOTE: expression MUST be not-null for instance fields
-                        return MaybeExtractConstantImpl(memberExpression.Expression!).Map(field.GetValue);
+                        return MaybeExtractConstantImpl(memberExpression.Expression!).Map(field.GetValue)!;
                     case PropertyInfo property when property.CanRead && null != property.GetMethod:
                         if (property.GetMethod.IsStatic)
                         {
@@ -197,7 +199,7 @@ namespace NCoreUtils
         {
             if (source == null)
             {
-                throw new System.ArgumentNullException(nameof(source));
+                throw new ArgumentNullException(nameof(source));
             }
             try
             {
@@ -219,7 +221,7 @@ namespace NCoreUtils
         /// <paramref name="value" />, <c>false</c> otherwise.
         /// </returns>
         public static bool TryExtractConstant(this Expression source, out object? value)
-            => source.MaybeExtractConstant().TryGetValue(out value);
+            => source.MaybeExtractConstant()!.TryGetValue(out value);
 
         /// <summary>
         /// Extracts property info from the expression.
@@ -241,7 +243,7 @@ namespace NCoreUtils
         /// <param name="expression">Source expression.</param>
         /// <param name="propertyInfo">On success contains extracted property.</param>
         /// <returns><c>true</c> if property info could be extracted from expression, <c>false</c> otherwise.</returns>
-        public static bool TryExtractProperty(this LambdaExpression expression, out PropertyInfo propertyInfo)
+        public static bool TryExtractProperty(this LambdaExpression expression, [MaybeNullWhen(false)] out PropertyInfo propertyInfo)
             => MaybeExtractProperty(expression).TryGetValue(out propertyInfo);
 
         /// <summary>
@@ -344,7 +346,7 @@ namespace NCoreUtils
             return default;
         }
 
-        public static bool TryExtractNewInstance(this Expression source, bool allowNestedNew, out object instance)
+        public static bool TryExtractNewInstance(this Expression source, bool allowNestedNew, [MaybeNullWhen(false)] out object instance)
             => source.MaybeExtractNewInstance(allowNestedNew).TryGetValue(out instance);
 
         public static Maybe<object?> MaybeExtractInstance(this Expression source)
@@ -358,7 +360,7 @@ namespace NCoreUtils
         }
 
         public static bool TryExtractInstance(this Expression source, out object? instance)
-            => source.MaybeExtractInstance().TryGetValue(out instance);
+            => source.MaybeExtractInstance()!.TryGetValue(out instance);
 
         /// <summary>
         /// Extracts method call data as nullable tuple.
@@ -390,7 +392,7 @@ namespace NCoreUtils
             }
         }
 
-        public static bool TryExtractLambda(this Expression expression, out LambdaExpression lambdaExpression)
+        public static bool TryExtractLambda(this Expression expression, [MaybeNullWhen(false)] out LambdaExpression lambdaExpression)
             => expression.MaybeExtractLambda().TryGetValue(out lambdaExpression);
     }
 }
