@@ -1,8 +1,10 @@
+using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
 namespace NCoreUtils.Collections
 {
+    [Obsolete("Error prone and must be reevaluated")]
     public static class TinyImmutableArray
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

@@ -6,15 +6,16 @@ using System.Runtime.CompilerServices;
 
 namespace NCoreUtils.Collections
 {
+    [Obsolete("Error prone and must be reevaluated")]
     public unsafe struct TinyImmutableArray<T> : IReadOnlyList<T>
     {
         public ref struct Enumerator
         {
             int _index;
 
-            int _count;
+            readonly int _count;
 
-            void* _ptrSource;
+            readonly void* _ptrSource;
 
             ref TinyImmutableArray<T> Source => ref Unsafe.AsRef<TinyImmutableArray<T>>(_ptrSource);
 
@@ -94,7 +95,7 @@ namespace NCoreUtils.Collections
             }
 
             public TinyImmutableArray<T> Build()
-                => new TinyImmutableArray<T>(_hasFirst, _first, _hasSecond, _second, _hasThird, _third, _list is null ? null : _list.ToArray());
+                => new(_hasFirst, _first, _hasSecond, _second, _hasThird, _third, _list?.ToArray());
         }
 
         readonly bool _hasFirst;
@@ -193,6 +194,6 @@ namespace NCoreUtils.Collections
             }
         }
 
-        public Enumerator GetEnumerator() => new Enumerator(-1, Count, Unsafe.AsPointer(ref this));
+        public Enumerator GetEnumerator() => new(-1, Count, Unsafe.AsPointer(ref this));
     }
 }
