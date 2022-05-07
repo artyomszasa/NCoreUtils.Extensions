@@ -4,7 +4,7 @@ namespace NCoreUtils.Memory
 {
     public interface IEmplaceable<T>
     {
-#if NETFRAMEWORK
+#if NETFRAMEWORK || NETSTANDARD2_0
         int Emplace(Span<char> span);
 #else
         int Emplace(Span<char> span)
