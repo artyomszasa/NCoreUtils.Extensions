@@ -21,7 +21,7 @@ namespace NCoreUtils.Collections
 
         private static bool IsReferenceOrContainsReferences()
         {
-#if NETFRAMEWORK
+#if NETFRAMEWORK || NETSTANDARD2_0
             return true;
 #else
             return RuntimeHelpers.IsReferenceOrContainsReferences<T>();
