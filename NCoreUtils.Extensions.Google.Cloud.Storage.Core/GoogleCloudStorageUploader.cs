@@ -30,7 +30,7 @@ namespace NCoreUtils
             }
 
             public Memory<byte> Memory
-                => _source.Memory.Slice(0, _size);
+                => _source.Memory[.._size];
 
             public void Dispose()
                 => _source.Dispose();
@@ -130,13 +130,13 @@ namespace NCoreUtils
         {
             cancellationToken.ThrowIfCancellationRequested();
             var targetSize = Sent + size;
-            var content = new ReadOnlyMemoryContent(size == _buffer.Memory.Length ? _buffer.Memory : _buffer.Memory.Slice(0, size));
+            var content = new ReadOnlyMemoryContent(size == _buffer.Memory.Length ? _buffer.Memory : _buffer.Memory[..size]);
             var headers = content.Headers;
             headers.ContentLength = size;
             headers.ContentType = ContentType;
             headers.ContentRange = !final ? new ContentRangeHeaderValue(Sent, targetSize - 1L) : new ContentRangeHeaderValue(Sent, targetSize - 1L, targetSize);
             using var request = new HttpRequestMessage(HttpMethod.Put, EndPoint) { Content = content };
-            return await Client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead).ConfigureAwait(false);
+            return await Client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
         }
 
         async ValueTask<int> FillBuffer(Stream stream, CancellationToken cancellationToken)
@@ -145,7 +145,7 @@ namespace NCoreUtils
             int read;
             do
             {
-                read = await stream.ReadAsync(_buffer.Memory.Slice(totalRead, _buffer.Memory.Length - totalRead), cancellationToken).ConfigureAwait(false);
+                read = await stream.ReadAsync(_buffer.Memory[totalRead..], cancellationToken).ConfigureAwait(false);
                 totalRead += read;
             }
             while (read > 0 && totalRead < _buffer.Memory.Length);
