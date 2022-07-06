@@ -12,7 +12,11 @@ namespace NCoreUtils.Collections
     /// Represents a dictionary which may contain multiple values assigned to the same key.
     /// </summary>
     [Serializable]
-    public class MultiValueDictionary<TKey, TValue> : IMultiValueDictionary<TKey, TValue>, IEquatable<MultiValueDictionary<TKey, TValue>>, ISerializable, IDeserializationCallback
+    public class MultiValueDictionary<TKey, TValue>
+        : IMultiValueDictionary<TKey, TValue>
+        , IEquatable<MultiValueDictionary<TKey, TValue>>
+        , ISerializable
+        , IDeserializationCallback
         where TKey : notnull
     {
         struct Entry : IEquatable<Entry>
@@ -487,7 +491,7 @@ namespace NCoreUtils.Collections
         #if NETFRAMEWORK
         public bool TryGetValues(TKey key, out TValue[] values)
         #else
-        public bool TryGetValues(TKey key, [NotNullWhen(true)] out TValue[]? values)
+        public bool TryGetValues(TKey key, [MaybeNullWhen(false)] out TValue[] values)
         #endif
         {
             var buffer = new List<int>();

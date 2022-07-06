@@ -5,7 +5,9 @@ namespace NCoreUtils.Collections
     /// <summary>
     /// Represents a dictionary which may contain multiple values assigned to the same key.
     /// </summary>
-    public interface IMultiValueDictionary<TKey, TValue> : IReadOnlyMultiValueDictionary<TKey, TValue>, ICollection<KeyValuePair<TKey, TValue>>
+    public interface IMultiValueDictionary<TKey, TValue>
+        : IReadOnlyMultiValueDictionary<TKey, TValue>, ICollection<KeyValuePair<TKey, TValue>>
+        where TKey : notnull
     {
         /// <summary>
         /// Assignes the specified value to the specified key.

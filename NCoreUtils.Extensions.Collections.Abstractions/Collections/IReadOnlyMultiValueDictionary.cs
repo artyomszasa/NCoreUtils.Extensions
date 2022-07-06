@@ -9,6 +9,7 @@ namespace NCoreUtils.Collections
     /// </summary>
     public interface IReadOnlyMultiValueDictionary<TKey, TValue>
         : IReadOnlyCollection<KeyValuePair<TKey, TValue>>
+        where TKey : notnull
     {
         /// <summary>
         /// Gets the sequence containing all keys which are assigned at least one value.
@@ -34,7 +35,7 @@ namespace NCoreUtils.Collections
         /// Variable to store assigned values. After calling this function either references array containing the assigned
         /// values or null.
         /// </param>
-        bool TryGetValues(TKey key, [NotNullWhen(true)] out TValue[]? values);
+        bool TryGetValues(TKey key, [MaybeNullWhen(false)] out TValue[] values);
 
         /// <summary>
         /// Adds all values assigned to the specified key to the specified collection.

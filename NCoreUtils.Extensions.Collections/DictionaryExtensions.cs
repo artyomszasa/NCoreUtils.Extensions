@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 
 namespace NCoreUtils
@@ -17,10 +18,11 @@ namespace NCoreUtils
         /// <param name="defaultValue">Value returned if no value associated with the specified key.</param>
         /// <returns>Either value associated with the specified key or the default value.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static TValue GetOrDefault<TKey, TValue>(
+        [return: NotNullIfNotNull("defaultValue")]
+        public static TValue? GetOrDefault<TKey, TValue>(
             this IReadOnlyDictionary<TKey, TValue> dictionary,
             TKey key,
-            TValue defaultValue = default)
+            TValue? defaultValue = default)
         {
             if (dictionary == null)
             {

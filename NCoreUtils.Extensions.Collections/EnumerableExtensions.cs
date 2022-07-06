@@ -79,7 +79,7 @@ namespace NCoreUtils
         /// been stored in <paramref name="item" />, <c>false</c> otherwise.
         /// </returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool TryGetFirst<T>(this IEnumerable<T> source, out T item)
+        public static bool TryGetFirst<T>(this IEnumerable<T> source, [MaybeNullWhen(false)] out T item)
         {
             switch (source)
             {
@@ -89,7 +89,7 @@ namespace NCoreUtils
                     switch (list.Count)
                     {
                         case 0:
-                            item = default!;
+                            item = default;
                             return false;
                         default:
                             item = list[0];
@@ -99,7 +99,7 @@ namespace NCoreUtils
                     switch (list.Count)
                     {
                         case 0:
-                            item = default!;
+                            item = default;
                             return false;
                         default:
                             item = list[0];
@@ -113,7 +113,7 @@ namespace NCoreUtils
                         item = enumerator.Current;
                         return true;
                     }
-                    item = default!;
+                    item = default;
                     return false;
                 }
             }
@@ -135,7 +135,7 @@ namespace NCoreUtils
         /// <c>false</c> otherwise.
         /// </returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool TryGetFirst<T>(this IEnumerable<T> source, Func<T, bool> predicate, out T item)
+        public static bool TryGetFirst<T>(this IEnumerable<T> source, Func<T, bool> predicate, [MaybeNullWhen(false)] out T item)
         {
             if (predicate == null)
             {
@@ -149,7 +149,7 @@ namespace NCoreUtils
                     {
                         if (0 == list.Count)
                         {
-                            item = default!;
+                            item = default;
                             return false;
                         }
                         var found = false;
@@ -169,7 +169,7 @@ namespace NCoreUtils
                     {
                         if (0 == list.Count)
                         {
-                            item = default!;
+                            item = default;
                             return false;
                         }
                         var found = false;
