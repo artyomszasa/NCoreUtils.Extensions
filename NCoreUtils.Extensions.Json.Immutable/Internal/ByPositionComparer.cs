@@ -2,13 +2,13 @@ using System.Collections.Generic;
 
 namespace NCoreUtils.Internal
 {
-    internal sealed class ByPositionComparer : IComparer<LinkedProperty>
+    internal sealed class ByPositionComparer : IComparer<ILinkedProperty>
     {
         private static readonly Comparer<int> IntComparer = Comparer<int>.Default;
 
         public static ByPositionComparer Instance { get; } = new ByPositionComparer();
 
-        public int Compare(LinkedProperty? x, LinkedProperty? y)
+        public int Compare(ILinkedProperty? x, ILinkedProperty? y)
         {
             if (x is null)
             {

@@ -1,29 +1,50 @@
 using System;
 using System.Collections.Concurrent;
+using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using ValueBuffer = System.Collections.Generic.List<(NCoreUtils.Internal.LinkedProperty Member, object Value)>;
+using ValueBuffer = System.Collections.Generic.List<(NCoreUtils.Internal.ILinkedProperty Member, object Value)>;
 
 namespace NCoreUtils.Internal
 {
     public static class ImmutableJsonConverter
     {
-        private static readonly ConcurrentDictionary<(Type, JsonNamingPolicy?, ImmutableJsonCoverterOptions), ObjectDescription> _cache = new();
+        private struct CacheKey
+        {
+            [DynamicallyAccessedMembers(D.CtorAndProps)]
+            public Type Type { get; }
 
-        private static readonly Func<(Type, JsonNamingPolicy?, ImmutableJsonCoverterOptions), ObjectDescription> _factory =
-            args => ObjectDescription.Create(args.Item1, args.Item2, args.Item3);
+            public JsonNamingPolicy? NamingPolicy { get; }
+
+            public ImmutableJsonCoverterOptions Options { get; }
+
+            public CacheKey(
+                [DynamicallyAccessedMembers(D.CtorAndProps)] Type type,
+                JsonNamingPolicy? namingPolicy,
+                ImmutableJsonCoverterOptions options)
+            {
+                Type = type;
+                NamingPolicy = namingPolicy;
+                Options = options;
+            }
+        }
+
+        private static readonly ConcurrentDictionary<CacheKey, ObjectDescription> _cache = new();
+
+        private static readonly Func<CacheKey, ObjectDescription> _factory =
+            args => ObjectDescription.Create(args.Type, args.NamingPolicy, args.Options);
 
         public static void ClearObjectDescriptionCache()
             => _cache.Clear();
 
-        public static ObjectDescription GetObjectDescription(Type type, JsonNamingPolicy? jsonNamingPolicy, ImmutableJsonCoverterOptions options)
-            => _cache.GetOrAdd((type, jsonNamingPolicy, options), _factory);
+        public static ObjectDescription GetObjectDescription([DynamicallyAccessedMembers(D.CtorAndProps)] Type type, JsonNamingPolicy? jsonNamingPolicy, ImmutableJsonCoverterOptions options)
+            => _cache.GetOrAdd(new(type, jsonNamingPolicy, options), _factory);
 
-        public static ObjectDescription GetObjectDescription(Type type, JsonNamingPolicy? jsonNamingPolicy)
+        public static ObjectDescription GetObjectDescription([DynamicallyAccessedMembers(D.CtorAndProps)] Type type, JsonNamingPolicy? jsonNamingPolicy)
             => GetObjectDescription(type, jsonNamingPolicy, ImmutableJsonCoverterOptions.Default);
     }
 
-    public sealed class ImmutableJsonConverter<T> : JsonConverter<T>, IImmutableJsonConverter<T>
+    public sealed class ImmutableJsonConverter<[DynamicallyAccessedMembers(D.CtorAndProps)] T> : JsonConverter<T>, IImmutableJsonConverter<T>
     {
         public ImmutableJsonCoverterOptions Options { get; }
 
@@ -32,6 +53,8 @@ namespace NCoreUtils.Internal
 
         public ImmutableJsonConverter() : this(default!) { }
 
+        [RequiresUnreferencedCode("Types of the properties must be preserved")]
+        [UnconditionalSuppressMessage("Trimming", "IL2046", Justification = "RequiresUnreferencedCode is placed on factory methods.")]
         public override T Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
             if (reader.TokenType != JsonTokenType.StartObject)
@@ -47,7 +70,7 @@ namespace NCoreUtils.Internal
                 {
                     throw new InvalidOperationException($"Expected {JsonTokenType.PropertyName}, found {reader.TokenType}.");
                 }
-                LinkedProperty? prop = default;
+                ILinkedProperty? prop = default;
                 foreach (var candidate in desc.Members)
                 {
                     if (reader.ValueTextEquals(candidate.Name.EncodedUtf8Bytes))
@@ -66,7 +89,8 @@ namespace NCoreUtils.Internal
                 }
                 else
                 {
-                    buffer.Add((prop, JsonSerializer.Deserialize(ref reader, prop.Parameter.ParameterType, options)!));
+                    var value = prop.ReadPropertyValue(ref reader, options);
+                    buffer.Add((prop, value!));
                 }
                 reader.Read();
             }
@@ -92,6 +116,8 @@ namespace NCoreUtils.Internal
             return (T)desc.Ctor.Invoke(args);
         }
 
+        [RequiresUnreferencedCode("Types of the properties must be preserved")]
+        [UnconditionalSuppressMessage("Trimming", "IL2046", Justification = "RequiresUnreferencedCode is placed on factory methods.")]
         public override void Write(Utf8JsonWriter writer, T value, JsonSerializerOptions options)
         {
             var desc = ImmutableJsonConverter.GetObjectDescription(typeof(T), options.PropertyNamingPolicy, Options);

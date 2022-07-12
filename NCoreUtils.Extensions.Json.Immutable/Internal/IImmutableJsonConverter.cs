@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 
 namespace NCoreUtils.Internal
 {
@@ -9,7 +10,7 @@ namespace NCoreUtils.Internal
         ImmutableJsonCoverterOptions Options { get; }
     }
 
-    public interface IImmutableJsonConverter<T> : IImmutableJsonConverter
+    public interface IImmutableJsonConverter<[DynamicallyAccessedMembers(D.CtorAndProps)] T> : IImmutableJsonConverter
     {
 #if !NETSTANDARD2_0
         Type IImmutableJsonConverter.TargetType => typeof(T);

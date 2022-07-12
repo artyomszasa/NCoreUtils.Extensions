@@ -10,67 +10,77 @@ namespace NCoreUtils
 {
     public static class ImmutableJsonConverterFactory
     {
-        [DynamicDependency(DynamicallyAccessedMemberTypes.PublicMethods, "NCoreUtils.ImmutableJsonConverterFactory", "NCoreUtils.Extensions.Json.Immutable")]
-        [DynamicDependency(DynamicallyAccessedMemberTypes.All, "NCoreUtils.ImmutableJsonCoverterOptionsBuilder", "NCoreUtils.Extensions.Json.Immutable")]
-        private static readonly MethodInfo _gmCreateOfT1 = typeof(ImmutableJsonConverterFactory)
-            .GetMethods(BindingFlags.Public | BindingFlags.Static)
-            .First(m =>
-            {
-                if (!(m.Name == nameof(Create) && m.IsGenericMethodDefinition))
-                {
-                    return false;
-                }
-                var parameters = m.GetParameters();
-                if (parameters.Length != 1)
-                {
-                    return false;
-                }
-                var p0 = parameters[0];
-                var desiredP0Type = typeof(Action<>).MakeGenericType(
-                  typeof(ImmutableJsonCoverterOptionsBuilder<>)
-                    .MakeGenericType(m.GetGenericArguments()[0])
-                );
-                return p0.ParameterType == desiredP0Type;
-            });
+        [UnconditionalSuppressMessage("Trimming", "IL2111", Justification = "Handled via dynamic dependency")]
+        private static readonly MethodInfo _gmCreateOfT1;
 
-        private static readonly MethodInfo _gmGetOrCreateOfT0 = typeof(ImmutableJsonConverterFactory)
-            .GetMethods(BindingFlags.Public | BindingFlags.Static)
-            .First(m =>
-            {
-                if (!(m.Name == nameof(GetOrCreate) && m.IsGenericMethodDefinition))
+        [UnconditionalSuppressMessage("Trimming", "IL2111", Justification = "Handled via dynamic dependency")]
+        private static readonly MethodInfo _gmGetOrCreateOfT0;
+
+        [UnconditionalSuppressMessage("Trimming", "IL2111", Justification = "Handled via dynamic dependency")]
+        private static readonly MethodInfo _gmGetOrCreateOfT1;
+
+        private static readonly ConcurrentDictionary<Type, object> _cache = new();
+
+        [UnconditionalSuppressMessage("Trimming", "IL2111", Justification = "Handled via dynamic dependency")]
+        static ImmutableJsonConverterFactory()
+        {
+            _gmCreateOfT1 = typeof(ImmutableJsonConverterFactory)
+                .GetMethods(BindingFlags.Public | BindingFlags.Static)
+                .First(m =>
                 {
-                    return false;
-                }
-                return m.GetParameters().Length == 0;
-            });
+                    if (!(m.Name == nameof(Create) && m.IsGenericMethodDefinition))
+                    {
+                        return false;
+                    }
+                    var parameters = m.GetParameters();
+                    if (parameters.Length != 1)
+                    {
+                        return false;
+                    }
+                    var p0 = parameters[0];
+                    var desiredP0Type = typeof(Action<>).MakeGenericType(
+                    typeof(ImmutableJsonCoverterOptionsBuilder<>)
+                        .MakeGenericType(m.GetGenericArguments()[0])
+                    );
+                    return p0.ParameterType == desiredP0Type;
+                });
 
-        private static readonly MethodInfo _gmGetOrCreateOfT1 = typeof(ImmutableJsonConverterFactory)
-            .GetMethods(BindingFlags.Public | BindingFlags.Static)
-            .First(m =>
-            {
-                if (!(m.Name == nameof(GetOrCreate) && m.IsGenericMethodDefinition))
+            _gmGetOrCreateOfT0 = typeof(ImmutableJsonConverterFactory)
+                .GetMethods(BindingFlags.Public | BindingFlags.Static)
+                .First(m =>
                 {
-                    return false;
-                }
-                var parameters = m.GetParameters();
-                if (parameters.Length != 1)
+                    if (!(m.Name == nameof(GetOrCreate) && m.IsGenericMethodDefinition))
+                    {
+                        return false;
+                    }
+                    return m.GetParameters().Length == 0;
+                });
+
+            _gmGetOrCreateOfT1 = typeof(ImmutableJsonConverterFactory)
+                .GetMethods(BindingFlags.Public | BindingFlags.Static)
+                .First(m =>
                 {
-                    return false;
-                }
-                var p0 = parameters[0];
-                var desiredP0Type = typeof(Action<>).MakeGenericType(
-                  typeof(ImmutableJsonCoverterOptionsBuilder<>)
-                    .MakeGenericType(m.GetGenericArguments()[0])
-                );
-                return p0.ParameterType == desiredP0Type;
-            });
+                    if (!(m.Name == nameof(GetOrCreate) && m.IsGenericMethodDefinition))
+                    {
+                        return false;
+                    }
+                    var parameters = m.GetParameters();
+                    if (parameters.Length != 1)
+                    {
+                        return false;
+                    }
+                    var p0 = parameters[0];
+                    var desiredP0Type = typeof(Action<>).MakeGenericType(
+                    typeof(ImmutableJsonCoverterOptionsBuilder<>)
+                        .MakeGenericType(m.GetGenericArguments()[0])
+                    );
+                    return p0.ParameterType == desiredP0Type;
+                });
+        }
 
-        private static readonly ConcurrentDictionary<Type, object> _cache = new ConcurrentDictionary<Type, object>();
-
-        private static readonly Func<Type, object> _defFactory =
-            type => Activator.CreateInstance(typeof(ImmutableJsonConverter<>).MakeGenericType(type), true)!;
-
-        private static object Factory([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] Type type, ImmutableJsonCoverterOptions options)
+        [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Handled via dynamic dependency.")]
+        [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(ImmutableJsonConverter<>))]
+        private static object Factory([DynamicallyAccessedMembers(D.CtorAndProps)] Type type, ImmutableJsonCoverterOptions options)
         {
             var ctor = typeof(ImmutableJsonConverter<>)
                 .MakeGenericType(type)
@@ -88,7 +98,8 @@ namespace NCoreUtils
         /// Default json converter capable of serializing/deserializing immutable objects of type specified by
         /// <paramref name="type" /> parameter.
         /// </returns>
-        public static JsonConverter Create(Type type)
+        [RequiresUnreferencedCode("Only root type is preserved, consider preserving relevant types of the properties.")]
+        public static JsonConverter Create([DynamicallyAccessedMembers(D.CtorAndProps)] Type type)
         {
             var ctor = typeof(ImmutableJsonConverter<>)
                 .MakeGenericType(type)
@@ -106,7 +117,8 @@ namespace NCoreUtils
         /// Default json converter capable of serializing/deserializing immutable objects of type
         /// <typeparamref name="T" />.
         /// </returns>
-        public static JsonConverter Create<T>()
+        [RequiresUnreferencedCode("Only root type is preserved, consider preserving relevant types of the properties.")]
+        public static JsonConverter Create<[DynamicallyAccessedMembers(D.CtorAndProps)] T>()
             => new ImmutableJsonConverter<T>();
 
 
@@ -121,7 +133,14 @@ namespace NCoreUtils
         /// Configured json converter capable of serializing/deserializing immutable objects of type specified by
         /// <paramref name="type" /> parameter.
         /// </returns>
-        public static JsonConverter Create(Type type, Action<ImmutableJsonCoverterOptionsBuilder> configure)
+        [UnconditionalSuppressMessage("Trimming", "IL2111", Justification = "Handled via dynamic dependency.")]
+        [UnconditionalSuppressMessage("Trimming", "IL2060", Justification = "Handled via dynamic dependency.")]
+        [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Handled via dynamic dependency.")]
+        [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(ImmutableJsonConverterFactory))]
+        [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(ImmutableJsonConverter<>))]
+        [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(ImmutableJsonCoverterOptionsBuilder<>))]
+        [RequiresUnreferencedCode("Only root type is preserved, consider preserving relevant types of the properties.")]
+        public static JsonConverter Create([DynamicallyAccessedMembers(D.CtorAndProps)] Type type, Action<ImmutableJsonCoverterOptionsBuilder> configure)
             => (JsonConverter)_gmCreateOfT1.MakeGenericMethod(type).Invoke(default, new object[] { configure })!;
 
         /// <summary>
@@ -135,7 +154,8 @@ namespace NCoreUtils
         /// Configured json converter capable of serializing/deserializing immutable objects of type
         /// <typeparamref name="T" />.
         /// </returns>
-        public static ImmutableJsonConverter<T> Create<T>(Action<ImmutableJsonCoverterOptionsBuilder<T>> configure)
+        [RequiresUnreferencedCode("Only root type is preserved, consider preserving relevant types of the properties.")]
+        public static ImmutableJsonConverter<T> Create<[DynamicallyAccessedMembers(D.CtorAndProps)] T>(Action<ImmutableJsonCoverterOptionsBuilder<T>> configure)
         {
             var builder = new ImmutableJsonCoverterOptionsBuilder<T>();
             configure(builder);
@@ -157,8 +177,17 @@ namespace NCoreUtils
         /// <paramref name="type" /> parameter or an instance configured by the previuos call to the <c>GetOrCreate</c>
         /// method group.
         /// </returns>
-        public static JsonConverter GetOrCreate(Type type)
+        [UnconditionalSuppressMessage("Trimming", "IL2111", Justification = "Handled via dynamic dependency.")]
+        [UnconditionalSuppressMessage("Trimming", "IL2060", Justification = "Handled via dynamic dependency.")]
+        [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Handled via dynamic dependency.")]
+        [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(ImmutableJsonConverterFactory))]
+        [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(ImmutableJsonConverter<>))]
+        [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(ImmutableJsonCoverterOptionsBuilder<>))]
+        [RequiresUnreferencedCode("Only root type is preserved, consider preserving relevant types of the properties.")]
+        public static JsonConverter GetOrCreate([DynamicallyAccessedMembers(D.CtorAndProps)] Type type)
             => (JsonConverter)_gmGetOrCreateOfT0.MakeGenericMethod(type).Invoke(default, Array.Empty<object>())!;
+
+        private static ImmutableJsonConverter<T> DoCreateImmutableJsonConverter<[DynamicallyAccessedMembers(D.CtorAndProps)] T>(Type _) => new();
 
         /// <summary>
         /// Either creates new instance of <see cref="ImmutableJsonConverter{T}" /> with default settings or uses
@@ -175,8 +204,12 @@ namespace NCoreUtils
         /// <typeparamref name="T" /> or an instance configured by the previuos call to the <c>GetOrCreate</c>
         /// method group.
         /// </returns>
-        public static JsonConverter<T> GetOrCreate<T>()
-            => (JsonConverter<T>)_cache.GetOrAdd(typeof(T), _defFactory);
+        [RequiresUnreferencedCode("Only root type is preserved, consider preserving relevant types of the properties.")]
+        public static JsonConverter<T> GetOrCreate<[DynamicallyAccessedMembers(D.CtorAndProps)] T>()
+            => (JsonConverter<T>)_cache.GetOrAdd(
+                typeof(T),
+                DoCreateImmutableJsonConverter<T>
+            );
 
         /// <summary>
         /// Either creates new instance of <see cref="ImmutableJsonConverter{T}" /> using the the specified
@@ -194,9 +227,29 @@ namespace NCoreUtils
         /// <paramref name="type" /> parameter or an instance configured by the previuos call to the <c>GetOrCreate</c>
         /// method group.
         /// </returns>
-        [DynamicDependency(DynamicallyAccessedMemberTypes.PublicMethods, "NCoreUtils.ImmutableJsonConverterFactory", "NCoreUtils.Extensions.Json.Immutable")]
-        public static JsonConverter GetOrCreate([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] Type type, Action<ImmutableJsonCoverterOptionsBuilder> configure)
+        [UnconditionalSuppressMessage("Trimming", "IL2111", Justification = "Handled via dynamic dependency.")]
+        [UnconditionalSuppressMessage("Trimming", "IL2060", Justification = "Handled via dynamic dependency.")]
+        [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Handled via dynamic dependency.")]
+        [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(ImmutableJsonConverterFactory))]
+        [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(ImmutableJsonConverter<>))]
+        [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(ImmutableJsonCoverterOptionsBuilder<>))]
+        [RequiresUnreferencedCode("Only root type is preserved, consider preserving relevant types of the properties.")]
+        public static JsonConverter GetOrCreate([DynamicallyAccessedMembers(D.CtorAndProps)] Type type, Action<ImmutableJsonCoverterOptionsBuilder> configure)
             => (JsonConverter)_gmGetOrCreateOfT1.MakeGenericMethod(type).Invoke(default, new object[] { configure })!;
+
+        private sealed class DoCreateImmutableJsonConverterWithOptions<[DynamicallyAccessedMembers(D.CtorAndProps)] T>
+        {
+            private ImmutableJsonCoverterOptions Options { get; }
+
+            public DoCreateImmutableJsonConverterWithOptions(ImmutableJsonCoverterOptions options)
+            {
+                Options = options;
+            }
+
+            public ImmutableJsonConverter<T> Invoke(Type _)
+                => new(Options);
+        }
+
 
         /// <summary>
         /// Either creates new instance of <see cref="ImmutableJsonConverter{T}" /> using the the specified
@@ -214,7 +267,8 @@ namespace NCoreUtils
         /// <typeparamref name="T" /> or an instance configured by the previuos call to the <c>GetOrCreate</c>
         /// method group.
         /// </returns>
-        public static JsonConverter<T> GetOrCreate<T>(Action<ImmutableJsonCoverterOptionsBuilder<T>> configure)
+        [RequiresUnreferencedCode("Only root type is preserved, consider preserving relevant types of the properties.")]
+        public static JsonConverter<T> GetOrCreate<[DynamicallyAccessedMembers(D.CtorAndProps)] T>(Action<ImmutableJsonCoverterOptionsBuilder<T>> configure)
         {
             if (_cache.TryGetValue(typeof(T), out var converter))
             {
@@ -222,7 +276,10 @@ namespace NCoreUtils
             }
             var builder = new ImmutableJsonCoverterOptionsBuilder<T>();
             configure(builder);
-            return (JsonConverter<T>)_cache.GetOrAdd(typeof(T), ty => Factory(ty, builder.Build()));
+            return (JsonConverter<T>)_cache.GetOrAdd(
+                typeof(T),
+                new DoCreateImmutableJsonConverterWithOptions<T>(builder.Build()).Invoke
+            );
         }
     }
 }
