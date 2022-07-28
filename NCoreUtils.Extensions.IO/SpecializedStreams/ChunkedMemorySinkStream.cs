@@ -133,7 +133,7 @@ namespace NCoreUtils.SpecializedStreams
                 if (disposing)
                 {
                     _firstChunk.Dispose();
-                    if (!(_chunks is null))
+                    if (_chunks is not null)
                     {
                         foreach (var chunk in _chunks)
                         {
@@ -166,7 +166,7 @@ namespace NCoreUtils.SpecializedStreams
             => throw new NotSupportedException();
 
         public
-#if NETSTANDARD2_1
+#if NETSTANDARD2_1 || NET6_0_OR_GREATER
             override
 #endif
             void Write(ReadOnlySpan<byte> buffer)
@@ -176,20 +176,20 @@ namespace NCoreUtils.SpecializedStreams
             if (buffer.Length > free)
             {
                 Advance(free);
-                buffer.Slice(0, free).CopyTo(memory.Span.Slice(offset));
-                Write(buffer.Slice(free));
+                buffer[..free].CopyTo(memory.Span[offset..]);
+                Write(buffer[free..]);
             }
             else
             {
                 Advance(buffer.Length);
-                buffer.CopyTo(memory.Span.Slice(offset));
+                buffer.CopyTo(memory.Span[offset..]);
             }
         }
 
         public override void Write(byte[] buffer, int offset, int count)
             => Write(buffer.AsSpan().Slice(offset, count));
 
-#if NETSTANDARD2_1
+#if NETSTANDARD2_1 || NET6_0_OR_GREATER
         public override ValueTask WriteAsync(ReadOnlyMemory<byte> buffer, CancellationToken cancellationToken = default)
         {
             Write(buffer.Span);
@@ -222,7 +222,7 @@ namespace NCoreUtils.SpecializedStreams
         {
             if (IsSingleChunk)
             {
-                chunk = _firstChunk.Memory.Slice(0, _position);
+                chunk = _firstChunk.Memory[.._position];
                 return true;
             }
             chunk = Memory<byte>.Empty;
@@ -244,7 +244,7 @@ namespace NCoreUtils.SpecializedStreams
                 _chunks = default;
                 chunks ??= new List<IMemoryOwner<byte>>(1);
                 chunks.Insert(0, _firstChunk);
-                return new ChunkedMemoryAccessStream(_pool, chunks, _chunkSize, _position);
+                return new ChunkedMemoryAccessStream(chunks, _chunkSize, _position);
             }
             else
             {

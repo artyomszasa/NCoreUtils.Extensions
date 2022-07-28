@@ -10,8 +10,6 @@ namespace NCoreUtils.SpecializedStreams
 {
     public sealed class ChunkedMemoryAccessStream : Stream
     {
-        private readonly MemoryPool<byte> _pool;
-
         private readonly IReadOnlyList<IMemoryOwner<byte>> _chunks;
 
         private readonly int _chunkSize;
@@ -43,19 +41,17 @@ namespace NCoreUtils.SpecializedStreams
                 }
                 else
                 {
-                    throw new ArgumentOutOfRangeException();
+                    throw new ArgumentOutOfRangeException(nameof(value));
                 }
             }
         }
 
         internal ChunkedMemoryAccessStream(
-            MemoryPool<byte> pool,
             IReadOnlyList<IMemoryOwner<byte>> chunks,
             int chunkSize,
             int length)
         {
             // NOTE: no null checks as this is an internal ctor.
-            _pool = pool;
             _chunks = chunks;
             _chunkSize = chunkSize;
             _length = length;
@@ -103,7 +99,7 @@ namespace NCoreUtils.SpecializedStreams
             => throw new NotSupportedException();
 
         public
-#if NETSTANDARD2_1
+#if NETSTANDARD2_1 || NET6_0_OR_GREATER
             override
 #endif
             int Read(Span<byte> buffer)
@@ -123,7 +119,7 @@ namespace NCoreUtils.SpecializedStreams
                 var index = Math.DivRem(position, _chunkSize, out var offset);
                 var available = _chunkSize - offset;
                 var toCopy = Math.Min(available, toRead - stored);
-                _chunks[index].Memory.Span.Slice(offset, toCopy).CopyTo(buffer.Slice(stored));
+                _chunks[index].Memory.Span.Slice(offset, toCopy).CopyTo(buffer[stored..]);
                 stored += toCopy;
                 position += toCopy;
             }
@@ -133,9 +129,9 @@ namespace NCoreUtils.SpecializedStreams
         public override int Read(byte[] buffer, int offset, int count)
             => Read(buffer.AsSpan().Slice(offset, count));
 
-#if NETSTANDARD2_1
+#if NETSTANDARD2_1 || NET6_0_OR_GREATER
         public override ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken cancellationToken = default)
-            => new ValueTask<int>(Read(buffer.Span));
+            => new(Read(buffer.Span));
 #endif
 
         public override Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
@@ -175,7 +171,7 @@ namespace NCoreUtils.SpecializedStreams
             {
                 var index = position / _chunkSize;
                 var toCopy = Math.Min(_length - position, _chunkSize);
-                _chunks[index].Memory.Span.Slice(0, toCopy).CopyTo(result.AsSpan().Slice(position));
+                _chunks[index].Memory.Span[..toCopy].CopyTo(result.AsSpan(position));
                 position += toCopy;
             }
             return result;
