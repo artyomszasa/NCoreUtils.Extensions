@@ -9,7 +9,7 @@ namespace NCoreUtils.Internal
 {
     public static class ImmutableJsonConverter
     {
-        private struct CacheKey
+        private struct CacheKey : IEquatable<CacheKey>
         {
             [DynamicallyAccessedMembers(D.CtorAndProps)]
             public Type Type { get; }
@@ -27,6 +27,17 @@ namespace NCoreUtils.Internal
                 NamingPolicy = namingPolicy;
                 Options = options;
             }
+
+            public bool Equals(CacheKey other)
+                => Type.Equals(other.Type)
+                    && NamingPolicy == other.NamingPolicy
+                    && Options == other.Options;
+
+            public override bool Equals([NotNullWhen(true)] object? obj)
+                => obj is CacheKey other && Equals(other);
+
+            public override int GetHashCode()
+                => HashCode.Combine(Type, NamingPolicy, Options);
         }
 
         private static readonly ConcurrentDictionary<CacheKey, ObjectDescription> _cache = new();
