@@ -50,6 +50,7 @@
     <ProjectReference Include="..\NCoreUtils.Extensions.Collections.Optimized\NCoreUtils.Extensions.Collections.Optimized.csproj" />
     -->
     <ProjectReference Include="..\NCoreUtils.Extensions.String\NCoreUtils.Extensions.String.csproj" />
+    <ProjectReference Include="..\NCoreUtils.Extensions.Memory.Pooling\NCoreUtils.Extensions.Memory.Pooling.csproj" />
   </ItemGroup>
 
   <!-- **** -->

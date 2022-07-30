@@ -4,6 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading;
+using NCoreUtils.Memory.Pooling;
 
 namespace NCoreUtils;
 
@@ -15,60 +16,60 @@ internal struct Index : IEquatable<Index>
 
     private const uint MaskLoop = 0x40000000;
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    [MethodImpl(O.Optimize)]
     [DebuggerStepThrough]
     public static bool operator==(Index a, Index b)
         => a.Equals(b);
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    [MethodImpl(O.Optimize)]
     [DebuggerStepThrough]
     public static bool operator!=(Index a, Index b)
         => !a.Equals(b);
 
     private uint _data;
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    [MethodImpl(O.Optimize)]
     [DebuggerStepThrough]
     public Index(uint data)
         => _data = data;
 
     public uint Value
     {
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(O.Optimize)]
         [DebuggerStepThrough]
         get => _data & MaskValue;
     }
 
     public bool Loop
     {
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(O.Optimize)]
         [DebuggerStepThrough]
         get => (_data & MaskLoop) != 0;
     }
 
     public bool Locked
     {
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(O.Optimize)]
         [DebuggerStepThrough]
         get => (_data & MaskLocked) != 0;
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    [MethodImpl(O.Optimize)]
     [DebuggerStepThrough]
     public Index Inc()
         => new(_data + 1);
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    [MethodImpl(O.Optimize)]
     [DebuggerStepThrough]
     public Index ToggleLoop()
         => new((_data & (~MaskValue)) ^ MaskLoop);
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    [MethodImpl(O.Optimize)]
     [DebuggerStepThrough]
     public Index Lock()
         => new(_data | MaskLocked);
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    [MethodImpl(O.Optimize)]
     [DebuggerStepThrough]
     public Index CompareExchange(Index value, Index comparand)
 #if NET6_0_OR_GREATER
@@ -80,10 +81,27 @@ internal struct Index : IEquatable<Index>
     }
 #endif
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    [MethodImpl(O.Optimize)]
+    [DebuggerStepThrough]
+    public Index Load()
+#if NET6_0_OR_GREATER
+        => new(Interlocked.CompareExchange(ref _data, default, default));
+#else
+    {
+        var ival = Interlocked.CompareExchange(ref Unsafe.As<uint, int>(ref _data), unchecked((int)default), unchecked((int)default));
+        return new(unchecked((uint)ival));
+    }
+#endif
+
+    [MethodImpl(O.Optimize)]
     [DebuggerStepThrough]
     public bool Equals(Index other)
         => _data == other._data;
+
+    [MethodImpl(O.Optimize)]
+    [DebuggerStepThrough]
+    public bool EqLoop(Index other)
+        => (_data & (MaskLoop | MaskValue)) == (other._data & (MaskLoop | MaskValue));
 
     public override bool Equals([NotNullWhen(true)] object? obj)
         => obj is Index other && Equals(other);
@@ -91,11 +109,12 @@ internal struct Index : IEquatable<Index>
     public override int GetHashCode()
         => unchecked((int)_data);
 
+    [ExcludeFromCodeCoverage]
     public override string ToString()
         => $"{Value} [Loop = {Loop}, Locked = {Locked}]";
 }
 
-public class FixSizePool<T>
+public sealed class FixSizePool<T>
     where T : class
 {
     private static int ComputeSize(Index start, Index end, int capacity)
@@ -115,6 +134,8 @@ public class FixSizePool<T>
 
     private Index _end;
 
+    internal int ActualSize => ComputeSize(_start, _end, _items.Length);
+
     public FixSizePool(int size)
     {
         if (size < 1)
@@ -125,15 +146,49 @@ public class FixSizePool<T>
         _maxIndex = unchecked((uint)size - 1);
     }
 
-    public bool TryRent([MaybeNullWhen(false)] out T item)
+    // NOTE: UNIT TEST ONLY
+    internal void UnsafeReset()
+    {
+        for (var i = 0; i < _items.Length; ++i)
+        {
+            _items[i] = default!;
+        }
+    }
+
+    private bool TryRentShort([MaybeNullWhen(false)] out T item)
+    {
+        var actualStart = _start; // relaxed
+        var actualEnd = _end; // relaxed
+        // NOTE: both indices are monotonically increasing --> if they are not equal then start is lower than end.
+        if (!actualStart.EqLoop(actualEnd))
+        {
+            var sv = actualStart.Value;
+            var candidate = _items[sv];
+            var newStart = sv == _maxIndex
+                ? actualStart.ToggleLoop()
+                : actualStart.Inc();
+            // NOTE: synchronization happens here --> if relaxed memory acquire resulted in outdated value the operation
+            // will fail.
+            if (actualStart == _start.CompareExchange(newStart, actualStart))
+            {
+                // operation has succeeded
+                item = candidate!;
+                return true;
+            }
+        }
+        item = default;
+        return false;
+    }
+
+    private bool TryRentLong([MaybeNullWhen(false)] out T item)
     {
         while (true)
         {
-            var actualEnd = _end.CompareExchange(default, default);
+            var actualEnd = _end.Load();
             // check if pool is not locked (no operation is in progress)
             if (!actualEnd.Locked)
             {
-                var actualStart = _start.CompareExchange(default, default);
+                var actualStart = _start.Load();
                 if (actualStart == actualEnd)
                 {
                     // no items avaliable
@@ -142,9 +197,15 @@ public class FixSizePool<T>
                 }
                 // preload item --> it will be returned if the operation succeeds
                 var candidate = _items[actualStart.Value];
-                var newStart = actualStart.Value == _maxIndex
-                    ? actualStart.ToggleLoop()
-                    : actualStart.Inc();
+                Index newStart;
+                if (actualStart.Value == _maxIndex)
+                {
+                    newStart = actualStart.ToggleLoop();
+                }
+                else
+                {
+                    newStart = actualStart.Inc();
+                }
                 if (actualStart == _start.CompareExchange(newStart, actualStart))
                 {
                     // operation has succeeded
@@ -156,6 +217,10 @@ public class FixSizePool<T>
         }
     }
 
+    [MethodImpl(O.Optimize)]
+    public bool TryRent([MaybeNullWhen(false)] out T item)
+        => TryRentShort(out item) || TryRentLong(out item);
+
     public void Return(T item)
     {
         if (item is null)
@@ -165,14 +230,22 @@ public class FixSizePool<T>
         bool success;
         do
         {
-            var actualStart = _start.CompareExchange(default, default);
-            var actualEnd = _end.CompareExchange(default, default);
+            var actualStart = _start.Load();
+            var actualEnd = _end.Load();
             // check if pool is not locked (no operation is in progress)
             if (!actualEnd.Locked)
             {
                 if (_items.Length == ComputeSize(actualStart, actualEnd, _items.Length))
                 {
-                    return; // allow GC to claim an item
+                    // recheck whether start/end has changed
+                    if (actualEnd != _end.Load() || actualStart != _start.Load())
+                    {
+                        // if so --> retry
+                        success = false;
+                        continue;
+                    }
+                    // otherwise allow GC to claim an item
+                    return;
                 }
                 Index newEnd;
                 if (actualEnd.Value == _maxIndex)
