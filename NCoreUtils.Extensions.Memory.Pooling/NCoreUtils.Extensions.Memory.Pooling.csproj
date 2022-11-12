@@ -3,7 +3,7 @@
     <TargetFrameworks>net6.0;netstandard2.1;netstandard2.0;net461;net48</TargetFrameworks>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <RootNamespace>NCoreUtils</RootNamespace>
-    <Version>3.0.0.3</Version>
+    <Version>3.0.0.6</Version>
     <!-- NuGet -->
     <PackageId>NCoreUtils.Extensions.Memory.Pooling</PackageId>
     <Title>$(PackageId)</Title>

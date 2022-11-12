@@ -114,7 +114,7 @@ internal struct Index : IEquatable<Index>
         => $"{Value} [Loop = {Loop}, Locked = {Locked}]";
 }
 
-public sealed class FixSizePool<T>
+public sealed class FixSizePool<T> : IObjectPool<T>
     where T : class
 {
     private static int ComputeSize(Index start, Index end, int capacity)
@@ -134,7 +134,11 @@ public sealed class FixSizePool<T>
 
     private Index _end;
 
-    internal int ActualSize => ComputeSize(_start, _end, _items.Length);
+    public int AvailableCount => ComputeSize(
+        start: _start.Load(),
+        end: _end.Load(),
+        capacity: _items.Length
+    );
 
     public FixSizePool(int size)
     {

@@ -118,14 +118,14 @@ public class FixSizePoolTests
         using var trigger = new SemaphoreSlim(0, 16);
         RunTasks(pool, counter, trigger);
         ForceGC();
-        Assert.Equal(16, pool.ActualSize);
+        Assert.Equal(16, pool.AvailableCount);
         Assert.Equal(16, counter.Ctor);
         Assert.Equal(0, counter.Dtor);
         for (var i = 0; i < 16; ++i)
         {
             Assert.True(TryRentIgnore(pool));
         }
-        Assert.Equal(0, pool.ActualSize);
+        Assert.Equal(0, pool.AvailableCount);
         pool.UnsafeReset();
         ForceGC();
     }
