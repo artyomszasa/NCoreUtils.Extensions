@@ -5,23 +5,23 @@ using System.Threading.Tasks;
 
 namespace NCoreUtils
 {
-    sealed class DelayedAsyncEnumerator<T> : IAsyncEnumerator<T>
+    internal sealed class DelayedAsyncEnumerator<T> : IAsyncEnumerator<T>
     {
-        readonly LazyAsync<IAsyncEnumerable<T>> _lazySource;
+        private readonly DelayedAsyncEnumerable<T> _parent;
 
-        readonly CancellationToken _cancellationToken;
+        private readonly CancellationToken _cancellationToken;
 
-        IAsyncEnumerator<T>? _enumerator;
+        private IAsyncEnumerator<T>? _enumerator;
 
         public T Current => _enumerator is null ? default! : _enumerator.Current;
 
-        public DelayedAsyncEnumerator(LazyAsync<IAsyncEnumerable<T>> lazySource, CancellationToken cancellationToken)
+        public DelayedAsyncEnumerator(DelayedAsyncEnumerable<T> parent, CancellationToken cancellationToken)
         {
-            _lazySource = lazySource;
+            _parent = parent;
             _cancellationToken = cancellationToken;
         }
 
-        async Task<bool> ContinueMoveNextAsync(ValueTask<IAsyncEnumerable<T>> source)
+        private async Task<bool> ContinueMoveNextAsync(ValueTask<IAsyncEnumerable<T>> source)
         {
             _enumerator = (await source.ConfigureAwait(false)).GetAsyncEnumerator(_cancellationToken);
             return await _enumerator.MoveNextAsync();
@@ -33,8 +33,7 @@ namespace NCoreUtils
         {
             if (_enumerator is null)
             {
-                // _enumerator = (await _lazySource.GetResultAsync(_cancellationToken)).GetAsyncEnumerator(_cancellationToken);
-                var enumerable = _lazySource.GetResultAsync(_cancellationToken);
+                var enumerable = _parent.GetSourceAsync(_cancellationToken);
                 if (enumerable.IsCompletedSuccessfully)
                 {
                     _enumerator = enumerable.Result.GetAsyncEnumerator();
