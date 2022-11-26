@@ -11,7 +11,7 @@ namespace NCoreUtils
 
         internal int _length;
 
-        private Span<char> Reminder
+        internal Span<char> Reminder
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => _span[Length..];
