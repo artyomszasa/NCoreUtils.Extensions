@@ -2,7 +2,7 @@ using System;
 
 namespace NCoreUtils
 {
-    public partial struct RawDateTime
+    public partial struct RawDateTime : IConvertible
     {
         private static string FormatConvertibleException(string from, string to)
             => $"Invalid cast from '{from}' to '{to}'.";

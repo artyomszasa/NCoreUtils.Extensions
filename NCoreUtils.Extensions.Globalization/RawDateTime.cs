@@ -4,7 +4,7 @@ using System.Runtime.CompilerServices;
 
 namespace NCoreUtils
 {
-    public partial struct RawDateTime : IConvertible, IComparable, IEquatable<RawDateTime>, IComparable<RawDateTime>, IFormattable
+    public partial struct RawDateTime : IComparable, IEquatable<RawDateTime>, IComparable<RawDateTime>, IFormattable
     {
         private static readonly TimeSpan _oneDay = TimeSpan.FromDays(1);
 
@@ -111,6 +111,10 @@ namespace NCoreUtils
 
         public int Year => unchecked ((int)((_value & 0x1F_FE_00_00_00_00_00_00L) >> 49));
 
+#if NET6_0_OR_GREATER
+        public DateOnly Date => new(Year, Month, Day);
+#endif
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public RawDateTime(
             int year,
@@ -154,6 +158,27 @@ namespace NCoreUtils
         public RawDateTime(DateTime source)
             : this(source.Year, source.Month, source.Day, source.TimeOfDay)
         { }
+
+#if NET6_0_OR_GREATER
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public RawDateTime(DateOnly source)
+            : this(source.Year, source.Month, source.Day, TimeSpan.Zero)
+        { }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public RawDateTime(
+            int year,
+            int month,
+            int day,
+            TimeOnly time)
+            : this(year, month, day, time.ToTimeSpan())
+        { }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public RawDateTime(DateOnly source, TimeOnly time)
+            : this(source.Year, source.Month, source.Day, time.ToTimeSpan())
+        { }
+#endif
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public RawDateTime(DateTimeOffset source)
