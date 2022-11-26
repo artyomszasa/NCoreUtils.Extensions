@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net6</TargetFramework>
+    <TargetFramework>net7.0</TargetFramework>
     <IsPackable>false</IsPackable>
     <IsTrimmable>false</IsTrimmable>
     <LangVersion>10.0</LangVersion>
@@ -27,15 +27,12 @@
     <Compile Remove="ChunkedStreamTests.cs" />
     <Compile Remove="CompleteReadTests.cs" />
     <Compile Remove="DictionaryTests.cs" />
-    <Compile Remove="EmplacerTests.cs" />
     <Compile Remove="EnumerableTests.cs" />
     <Compile Remove="ImmutableHeadArrayTests.cs" />
     <Compile Remove="ListTests.cs" />
     <Compile Remove="MultiDictionaryTests.cs" />
     <Compile Remove="NullableTests.cs" />
     <Compile Remove="RawDateTimeTests.cs" />
-    <Compile Remove="SpanBuilderTests.cs" />
-    <Compile Remove="SpanExtensionsTests.cs" />
     <Compile Remove="TinyImmutableArrayTests.cs" />
     <Compile Remove="UnmanagedMemoryTests.cs" />
   </ItemGroup>
@@ -44,11 +41,11 @@
     <!--
     <ProjectReference Include="..\NCoreUtils.Extensions.Collections\NCoreUtils.Extensions.Collections.csproj" />
     <ProjectReference Include="..\NCoreUtils.Extensions.Nullable\NCoreUtils.Extensions.Nullable.csproj" />
-    <ProjectReference Include="..\NCoreUtils.Extensions.Memory\NCoreUtils.Extensions.Memory.csproj" />
     <ProjectReference Include="..\NCoreUtils.Extensions.Globalization\NCoreUtils.Extensions.Globalization.csproj" />
     <ProjectReference Include="..\NCoreUtils.Extensions.IO\NCoreUtils.Extensions.IO.csproj" />
     <ProjectReference Include="..\NCoreUtils.Extensions.Collections.Optimized\NCoreUtils.Extensions.Collections.Optimized.csproj" />
     -->
+    <ProjectReference Include="..\NCoreUtils.Extensions.Memory\NCoreUtils.Extensions.Memory.csproj" />
     <ProjectReference Include="..\NCoreUtils.Extensions.String\NCoreUtils.Extensions.String.csproj" />
     <ProjectReference Include="..\NCoreUtils.Extensions.Memory.Pooling\NCoreUtils.Extensions.Memory.Pooling.csproj" />
   </ItemGroup>

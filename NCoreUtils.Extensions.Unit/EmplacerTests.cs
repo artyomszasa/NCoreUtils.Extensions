@@ -26,6 +26,9 @@ namespace NCoreUtils.Extensions.Unit
 
             public override string? ToString() => Value?.ToString();
 
+            public string ToString(string? format, IFormatProvider? formatProvider)
+                => ToString() ?? string.Empty;
+
             public bool TryEmplace(Span<char> span, out int used)
             {
                 return Emplacer.GetDefault<T>().TryEmplace(Value, span, out used);

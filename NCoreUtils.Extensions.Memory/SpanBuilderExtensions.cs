@@ -9,23 +9,26 @@ namespace NCoreUtils
     public static class SpanBuilderExtensions
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Append(this in SpanBuilder builder, in Span<char> value)
+        [Obsolete("Use member method instead.")]
+        public static void Append(in SpanBuilder builder, in Span<char> value)
         {
-            value.CopyTo(builder._span.Slice(builder.Length));
+            value.CopyTo(builder._span[builder.Length..]);
             Unsafe.AsRef(builder._length) += value.Length;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Append(this in SpanBuilder builder, in ReadOnlySpan<char> value)
+        [Obsolete("Use member method instead.")]
+        public static void Append(in SpanBuilder builder, in ReadOnlySpan<char> value)
         {
-            value.CopyTo(builder._span.Slice(builder.Length));
+            value.CopyTo(builder._span[builder.Length..]);
             Unsafe.AsRef(builder._length) += value.Length;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool TryAppend(this in SpanBuilder builder, in Span<char> value)
+        [Obsolete("Use member method instead.")]
+        public static bool TryAppend(in SpanBuilder builder, in Span<char> value)
         {
-            if (value.TryCopyTo(builder._span.Slice(builder.Length)))
+            if (value.TryCopyTo(builder._span[builder.Length..]))
             {
                 Unsafe.AsRef(builder._length) += value.Length;
                 return true;
@@ -34,9 +37,10 @@ namespace NCoreUtils
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool TryAppend(this in SpanBuilder builder, in ReadOnlySpan<char> value)
+        [Obsolete("Use member method instead.")]
+        public static bool TryAppend(in SpanBuilder builder, in ReadOnlySpan<char> value)
         {
-            if (value.TryCopyTo(builder._span.Slice(builder.Length)))
+            if (value.TryCopyTo(builder._span[builder.Length..]))
             {
                 Unsafe.AsRef(builder._length) += value.Length;
                 return true;

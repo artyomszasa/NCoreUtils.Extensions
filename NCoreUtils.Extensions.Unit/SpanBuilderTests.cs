@@ -45,7 +45,7 @@ namespace NCoreUtils.Extensions.Unit
         [InlineData(10.0f, 4.0f, "G9")]
         [InlineData(10.0f, 3.0f, "G9")]
         [InlineData(100.0f, 3.0f, "G10")]
-        public void Sinfle(float a, float b, string format)
+        public void Single(float a, float b, string format)
         {
             var value = a / b;
             var expected = value.ToString(format, CultureInfo.InvariantCulture);

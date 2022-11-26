@@ -46,7 +46,7 @@ public class FixSizePoolTests
 
     [MethodImpl(MethodImplOptions.NoInlining | MethodImplOptions.NoOptimization)]
     private static bool TryRentIgnore(FixSizePool<Obj> pool)
-        => pool.TryRent(out var x);
+        => pool.TryRent(out var _);
 
     [MethodImpl(MethodImplOptions.NoInlining | MethodImplOptions.NoOptimization)]
     private static void RentAndReturn(FixSizePool<Obj> pool)

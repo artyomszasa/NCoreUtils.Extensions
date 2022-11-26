@@ -1,4 +1,5 @@
 using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
@@ -555,12 +556,41 @@ namespace NCoreUtils
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int Emplace<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] T>(T value, Span<char> span)
-            => GetDefault<T>().Emplace(value, span);
+        {
+            if (_emplacers.TryGetValue(typeof(T), out var boxed))
+            {
+                return ((IEmplacer<T>)boxed).Emplace(value, span);
+            }
+            return value switch
+            {
+                IEmplaceable<T> emplaceable => emplaceable.Emplace(span),
+#if NET6_0_OR_GREATER
+                ISpanFormattable spanFormattable => spanFormattable.TryFormat(span, out var written, default, default)
+                    ? written
+                    : throw new InsufficientBufferSizeException(span),
+#endif
+                _ => DefaultEmplacer<T>.DoEmplace(value, span)
+            };
+        }
 
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool TryEmplace<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] T>(T value, Span<char> span, out int used)
-            => GetDefault<T>().TryEmplace(value, span, out used);
+        {
+            if (_emplacers.TryGetValue(typeof(T), out var boxed))
+            {
+                return ((IEmplacer<T>)boxed).TryEmplace(value, span, out used);
+            }
+            var success = value switch
+            {
+                IEmplaceable<T> emplaceable => emplaceable.TryEmplace(span, out used),
+#if NET6_0_OR_GREATER
+                ISpanFormattable spanFormattable => spanFormattable.TryFormat(span, out used, default, default),
+#endif
+                _ => DefaultEmplacer<T>.DoTryEmplace(value, span, out used)
+            };
+            return success;
+        }
 
 
         [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(EmplaceableEmplacer<>))]
@@ -577,6 +607,42 @@ namespace NCoreUtils
                 return (IEmplacer<T>)Activator.CreateInstance(typeof(EmplaceableEmplacer<>).MakeGenericType(typeof(T)), true)!;
             }
             return new DefaultEmplacer<T>();
+        }
+
+        /// <summary>
+        /// Populates string representation of the <paramref name="value" /> using
+        /// <see cref="IEmplaceable{T}.TryGetEmplaceBufferSize(out int)" />,
+        /// <see cref="IEmplaceable{T}.Emplace(Span{char})" /> and character buffer obtained either from the array pool
+        /// specified by <paramref name="arrayPool" /> or the shared array pool.
+        /// <para>
+        /// Implementation of the <see cref="IEmplaceable{T}.TryGetEmplaceBufferSize(out int)" /> MUST always return
+        /// <c>true</c> to be used with this method.
+        /// </para>
+        /// </summary>
+        /// <param name="value">Instance to populate string representation of.</param>
+        /// <param name="arrayPool">
+        /// Array pool to obtain character buffer from. <see cref="ArrayPool{T}.Shared" /> used if no pool is supplied.
+        /// </param>
+        /// <typeparam name="T">Type of the object.</typeparam>
+        /// <returns>String representation of the object.</returns>
+        public static string ToStringUsingArrayPool<T>(this T value, ArrayPool<char>? arrayPool = default)
+            where T : notnull, IEmplaceable<T>
+        {
+            if (value.TryGetEmplaceBufferSize(out var minimumBufferSize))
+            {
+                var pool = arrayPool ?? ArrayPool<char>.Shared;
+                var buffer = pool.Rent(minimumBufferSize);
+                try
+                {
+                    var size = value.Emplace(buffer);
+                    return new string(buffer, 0, size);
+                }
+                finally
+                {
+                    pool.Return(buffer, clearArray: false);
+                }
+            }
+            throw new InvalidOperationException($"{typeof(T)}.TryGetEmplaceBufferSize(...) expected to return minimum buffer size.");
         }
     }
 }

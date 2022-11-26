@@ -8,7 +8,7 @@ namespace NCoreUtils
 {
     public static class StreamCompleteReadExtensions
     {
-#if !NETSTANDARD2_1
+#if NETFRAMEWORK || NETSTANDARD2_0
         private static async ValueTask<int> ReadAsync(
             this Stream stream,
             Memory<byte> buffer,
@@ -34,12 +34,11 @@ namespace NCoreUtils
 
         public static async ValueTask<int> ReadCompleteAsync(this Stream stream, Memory<byte> buffer, CancellationToken cancellationToken = default)
         {
-
             var read = await stream.ReadAsync(buffer, cancellationToken);
             var total = read;
             while (read != 0 && total < buffer.Length)
             {
-                read = await stream.ReadAsync(buffer.Slice(total), cancellationToken);
+                read = await stream.ReadAsync(buffer[total..], cancellationToken);
                 total += read;
             }
             return total;
