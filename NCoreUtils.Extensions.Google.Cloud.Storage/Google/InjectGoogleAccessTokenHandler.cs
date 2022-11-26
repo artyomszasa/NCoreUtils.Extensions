@@ -22,10 +22,10 @@ namespace NCoreUtils.Google
                 var scope = request.TryGetRequiredGCSScope(out var requiredScope)
                     ? requiredScope
                     : request.Method == HttpMethod.Get ? GoogleCloudStorageUtils.ReadOnlyScope : GoogleCloudStorageUtils.ReadWriteScope;
-                var accessToken = await AccessTokenProvider.GetAccessTokenAsync(scope, cancellationToken);
+                var accessToken = await AccessTokenProvider.GetAccessTokenAsync(scope, cancellationToken).ConfigureAwait(false);
                 request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
             }
-            return await base.SendAsync(request, cancellationToken);
+            return await base.SendAsync(request, cancellationToken).ConfigureAwait(false);
         }
     }
 }

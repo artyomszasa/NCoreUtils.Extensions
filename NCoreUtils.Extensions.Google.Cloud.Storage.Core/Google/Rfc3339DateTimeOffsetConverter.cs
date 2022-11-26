@@ -37,6 +37,10 @@ namespace NCoreUtils.Google
             {
                 writer.WriteStringValue(value.Value.UtcDateTime.ToString("yyyy-MM-dd'T'HH:mm:ss.fffK", CultureInfo.InvariantCulture));
             }
+            else
+            {
+                writer.WriteNullValue();
+            }
         }
     }
 }

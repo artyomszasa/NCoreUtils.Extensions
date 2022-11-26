@@ -19,12 +19,13 @@ namespace NCoreUtils.Google
         {
             if (null == _googleCredential)
             {
-                _googleCredential = await GoogleCredential.GetApplicationDefaultAsync(cancellationToken);
+                _googleCredential = await GoogleCredential.GetApplicationDefaultAsync(cancellationToken).ConfigureAwait(false);
             }
             return await _googleCredential
                 .CreateScoped(scopes)
                 .UnderlyingCredential
-                .GetAccessTokenForRequestAsync(cancellationToken: cancellationToken);
+                .GetAccessTokenForRequestAsync(cancellationToken: cancellationToken)
+                .ConfigureAwait(false);
         }
     }
 }

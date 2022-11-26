@@ -11,8 +11,5 @@ namespace NCoreUtils.Google
     [JsonSerializable(typeof(GoogleErrorResponse))]
     [JsonSerializable(typeof(GoogleErrorData))]
     [JsonSerializable(typeof(GoogleObjectPatchData))]
-    internal partial class GoogleJsonContext : JsonSerializerContext
-    {
-
-    }
+    internal partial class GoogleJsonContext : JsonSerializerContext { }
 }
