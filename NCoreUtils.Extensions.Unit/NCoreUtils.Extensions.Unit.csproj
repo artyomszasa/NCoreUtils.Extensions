@@ -22,24 +22,16 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Remove="TinyImmutableArrayTests.cs" />
-    <Compile Remove="ArrayTests.cs" />
     <Compile Remove="ChunkedStreamTests.cs" />
     <Compile Remove="CompleteReadTests.cs" />
-    <Compile Remove="DictionaryTests.cs" />
-    <Compile Remove="EnumerableTests.cs" />
     <Compile Remove="ImmutableHeadArrayTests.cs" />
-    <Compile Remove="ListTests.cs" />
-    <Compile Remove="MultiDictionaryTests.cs" />
     <Compile Remove="NullableTests.cs" />
     <Compile Remove="RawDateTimeTests.cs" />
-    <Compile Remove="TinyImmutableArrayTests.cs" />
-    <Compile Remove="UnmanagedMemoryTests.cs" />
   </ItemGroup>
 
   <ItemGroup>
-    <!--
     <ProjectReference Include="..\NCoreUtils.Extensions.Collections\NCoreUtils.Extensions.Collections.csproj" />
+    <!--
     <ProjectReference Include="..\NCoreUtils.Extensions.Nullable\NCoreUtils.Extensions.Nullable.csproj" />
     <ProjectReference Include="..\NCoreUtils.Extensions.Globalization\NCoreUtils.Extensions.Globalization.csproj" />
     <ProjectReference Include="..\NCoreUtils.Extensions.IO\NCoreUtils.Extensions.IO.csproj" />

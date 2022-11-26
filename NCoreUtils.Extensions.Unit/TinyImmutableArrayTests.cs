@@ -5,6 +5,7 @@ using Xunit;
 
 namespace NCoreUtils.Extensions.Unit
 {
+    [Obsolete("Backward compatibility only")]
     public class TinyImmutableArrayTests
     {
         [Fact]

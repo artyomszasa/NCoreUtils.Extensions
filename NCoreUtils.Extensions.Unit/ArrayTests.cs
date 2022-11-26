@@ -51,6 +51,7 @@ namespace NCoreUtils.Extensions.Unit
         }
 
         [Fact]
+        [Obsolete("Backward compatiblity only")]
         public void Slice()
         {
             Assert.Throws<ArgumentNullException>(() => ArrayExtensions.Slice<int>(null!, 0));
