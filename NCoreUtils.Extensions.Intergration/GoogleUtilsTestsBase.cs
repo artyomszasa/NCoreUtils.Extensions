@@ -14,8 +14,6 @@ namespace NCoreUtils
     {
         protected const string BucketName = "ncoreutils-integration";
 
-        protected const string ObjectName = "tmp.jpg";
-
         protected const string ObjectAltName = "tmp2.jpg";
 
         private const string ObjectContentType = "image/jpeg";
@@ -79,14 +77,14 @@ namespace NCoreUtils
             Assert.Null(obj);
         }
 
-        public virtual async Task CreateGetCopyDelete(IMemoryOwner<byte>? chunkBuffer)
+        public virtual async Task CreateGetCopyDelete(IMemoryOwner<byte>? chunkBuffer, string objectName)
         {
             var utils = _serviceProvider.GetRequiredService<GoogleCloudStorageUtils>();
             {
                 using var source = new MemoryStream(_imageData, 0, _imageData.Length, false, true);
                 var obj = await utils.UploadAsync(
                     BucketName,
-                    ObjectName,
+                    objectName,
                     source,
                     contentType: ObjectContentType,
                     cacheControl: ObjectCacheControl,
@@ -95,20 +93,20 @@ namespace NCoreUtils
                 );
                 Assert.NotNull(obj);
                 Assert.Equal(BucketName, obj.BucketName);
-                Assert.Equal(ObjectName, obj.Name);
+                Assert.Equal(objectName, obj.Name);
                 Assert.Equal(ObjectContentType, obj.ContentType);
                 Assert.Equal(ObjectCacheControl, obj.CacheControl);
                 Assert.Equal(_imageData.Length, (long)obj.Size!.Value);
             }
-            await ValidateExists(utils, ObjectName, true);
-            await utils.CopyAsync(BucketName, ObjectName, BucketName, ObjectAltName, ObjectContentType, ObjectCacheControl, true);
-            await ValidateExists(utils, ObjectName);
+            await ValidateExists(utils, objectName, true);
+            await utils.CopyAsync(BucketName, objectName, BucketName, ObjectAltName, ObjectContentType, ObjectCacheControl, true);
+            await ValidateExists(utils, objectName);
             await ValidateExists(utils, ObjectAltName);
-            await utils.DeleteAsync(BucketName, ObjectName);
-            await ValidateDoesNotExist(utils, ObjectName);
+            await utils.DeleteAsync(BucketName, objectName);
+            await ValidateDoesNotExist(utils, objectName);
             await ValidateExists(utils, ObjectAltName);
             await utils.DeleteAsync(BucketName, ObjectAltName);
-            await ValidateDoesNotExist(utils, ObjectName);
+            await ValidateDoesNotExist(utils, objectName);
             await ValidateDoesNotExist(utils, ObjectAltName);
         }
 

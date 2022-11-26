@@ -30,24 +30,30 @@ namespace NCoreUtils
             : base(default)
         { }
 
-        [Fact]
-        public Task CreateGetCopyDeleteSharedBuffer()
+        [Theory]
+        [InlineData("tmp.jpg")]
+        [InlineData("тмп.jpg")]
+        public Task CreateGetCopyDeleteSharedBuffer(string objectName)
         {
-            return base.CreateGetCopyDelete(default);
+            return base.CreateGetCopyDelete(default, objectName);
         }
 
-        [Fact]
-        public async Task CreateGetCopyDeleteUnmanagedBuffer()
+        [Theory]
+        [InlineData("tmpum.jpg")]
+        [InlineData("тмпum.jpg")]
+        public async Task CreateGetCopyDeleteUnmanagedBuffer(string objectName)
         {
             using var pool = new UnmanagedMemoryPool<byte>();
-            await base.CreateGetCopyDelete(pool.Rent(512 * 1024));
+            await base.CreateGetCopyDelete(pool.Rent(512 * 1024), objectName);
         }
 
-        [Fact]
-        public async Task CreateGetCopyDeleteUnalignedBuffer()
+        [Theory]
+        [InlineData("tmpua.jpg")]
+        [InlineData("тмпua.jpg")]
+        public async Task CreateGetCopyDeleteUnalignedBuffer(string objectName)
         {
             var buffer = new DummyMemoryOwner(512 * 1024 + 512);
-            await base.CreateGetCopyDelete(buffer);
+            await base.CreateGetCopyDelete(buffer, objectName);
             Assert.True(buffer.IsDisposed);
         }
     }
