@@ -113,10 +113,7 @@ namespace NCoreUtils.SpecializedStreams
             {
                 // lock
                 while (0 != Interlocked.CompareExchange(ref _chunkSync, 1, 0)) { }
-                if (_chunks is null)
-                {
-                    _chunks = new List<IMemoryOwner<byte>>(16);
-                }
+                _chunks ??= new List<IMemoryOwner<byte>>(16);
                 while (_chunks.Count < chunkCount)
                 {
                     _chunks.Add(_pool.Rent(_chunkSize));
