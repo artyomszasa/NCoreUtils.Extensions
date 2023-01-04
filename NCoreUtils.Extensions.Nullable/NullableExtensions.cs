@@ -21,7 +21,7 @@ namespace NCoreUtils
         /// </returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         [DebuggerStepThrough]
-        public static Nullable<TResult> Map<TSource, TResult>(this Nullable<TSource> source, Func<TSource, TResult> selector)
+        public static TResult? Map<TSource, TResult>(this TSource? source, Func<TSource, TResult> selector)
             where TSource : struct
             where TResult : struct
         {
@@ -29,11 +29,7 @@ namespace NCoreUtils
             {
                 throw new ArgumentNullException(nameof(selector));
             }
-            if (source.HasValue)
-            {
-                return new Nullable<TResult>(selector(source.Value));
-            }
-            return new Nullable<TResult>();
+            return source is TSource value ? selector(value) : default(TResult?);
         }
 
         /// <summary>
@@ -48,7 +44,7 @@ namespace NCoreUtils
         /// </returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         [DebuggerStepThrough]
-        public static Nullable<TResult> Bind<TSource, TResult>(this Nullable<TSource> source, Func<TSource, Nullable<TResult>> binder)
+        public static TResult? Bind<TSource, TResult>(this TSource? source, Func<TSource, TResult?> binder)
             where TSource : struct
             where TResult : struct
         {
@@ -56,11 +52,7 @@ namespace NCoreUtils
             {
                 throw new ArgumentNullException(nameof(binder));
             }
-            if (source.HasValue)
-            {
-                return binder(source.Value);
-            }
-            return new Nullable<TResult>();
+            return source is TSource value ? binder(value) : default;
         }
 
         /// <summary>
@@ -73,18 +65,14 @@ namespace NCoreUtils
         /// </returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         [DebuggerStepThrough]
-        public static Nullable<T> Where<T>(this Nullable<T> source, Func<T, bool> predicate)
+        public static T? Where<T>(this T? source, Func<T, bool> predicate)
             where T : struct
         {
             if (predicate == null)
             {
                 throw new ArgumentNullException(nameof(predicate));
             }
-            if (source.HasValue && predicate(source.Value))
-            {
-                return source;
-            }
-            return new Nullable<T>();
+            return source is T value && predicate(value) ? value : default(T?);
         }
 
         /// <summary>
@@ -128,7 +116,7 @@ namespace NCoreUtils
         /// </returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         [DebuggerStepThrough]
-        public static bool Any<T>(this Nullable<T> source, Func<T, bool> predicate)
+        public static bool Any<T>(this T? source, Func<T, bool> predicate)
             where T : struct
         {
             if (predicate == null)
@@ -149,14 +137,14 @@ namespace NCoreUtils
         /// </returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         [DebuggerStepThrough]
-        public static Nullable<T> Supply<T>(this Nullable<T> source, Func<T> valueFactory)
+        public static T? Supply<T>(this T? source, Func<T> valueFactory)
             where T : struct
         {
             if (valueFactory == null)
             {
                 throw new ArgumentNullException(nameof(valueFactory));
             }
-            return source.HasValue ? source : new Nullable<T>(valueFactory());
+            return source.HasValue ? source : new T?(valueFactory());
         }
 
         /// <summary>
@@ -169,9 +157,9 @@ namespace NCoreUtils
         /// </returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         [DebuggerStepThrough]
-        public static T GetOrDefault<T>(this Nullable<T> source, T defaultValue = default)
+        public static T GetOrDefault<T>(this T? source, T defaultValue = default)
             where T : struct
-            => source.HasValue ? source.Value : defaultValue;
+            => source ?? defaultValue;
 
         /// <summary>
         /// Checks whether the value is empty.
@@ -212,7 +200,7 @@ namespace NCoreUtils
         /// <returns>Enumeration that conatins single value stored by the actual instance if present.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         [DebuggerStepThrough]
-        public static IEnumerable<T> ToEnumerable<T>(this Nullable<T> source)
+        public static IEnumerable<T> ToEnumerable<T>(this T? source)
             where T : struct
             => source.ToArray();
 
@@ -223,16 +211,11 @@ namespace NCoreUtils
         /// <returns>List that conatins single value stored by the actual instance if present.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         [DebuggerStepThrough]
-        public static List<T> ToList<T>(this Nullable<T> source)
+        public static List<T> ToList<T>(this T? source)
             where T : struct
-        {
-            var result = new List<T>(1);
-            if (source.HasValue)
-            {
-                result.Add(source.Value);
-            }
-            return result;
-        }
+            => source is T value
+                ? new() { value }
+                : new();
 
         /// <summary>
         /// Creates array that conatins single value stored by the actual instance if present.
@@ -241,9 +224,15 @@ namespace NCoreUtils
         /// <returns>Array that conatins single value stored by the actual instance if present.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         [DebuggerStepThrough]
-        public static T[] ToArray<T>(this Nullable<T> source)
+        public static T[] ToArray<T>(this T? source)
             where T : struct
-            => source.HasValue ? new T[] { source.Value } : new T[0];
+            => source.HasValue
+                ? new T[] { source.Value }
+#if NET6_0_OR_GREATER
+                : Array.Empty<T>();
+#else
+                : new T[0];
+#endif
 
         /// <summary>
         /// If both value is not empty applies their stored values to <paramref name="resultSelector" />.
@@ -256,7 +245,7 @@ namespace NCoreUtils
         /// </returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         [DebuggerStepThrough]
-        public static Nullable<TResult> Zip<TFirst, TSecond, TResult>(this Nullable<TFirst> first, Nullable<TSecond> second, Func<TFirst, TSecond, TResult> resultSelector)
+        public static TResult? Zip<TFirst, TSecond, TResult>(this TFirst? first, TSecond? second, Func<TFirst, TSecond, TResult> resultSelector)
             where TFirst : struct
             where TSecond : struct
             where TResult : struct
@@ -267,9 +256,9 @@ namespace NCoreUtils
             }
             if (first.HasValue && second.HasValue)
             {
-                return new Nullable<TResult>(resultSelector(first.Value, second.Value));
+                return new TResult?(resultSelector(first.Value, second.Value));
             }
-            return new Nullable<TResult>();
+            return default;
         }
 
         /// <summary>
