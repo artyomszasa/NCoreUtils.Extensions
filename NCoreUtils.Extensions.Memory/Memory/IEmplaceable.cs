@@ -2,7 +2,8 @@ using System;
 
 namespace NCoreUtils.Memory
 {
-    public interface IEmplaceable<T> : ISpanFormattable
+    [Obsolete("Backward compatibility only, ISpanEmpaceable ot ISpanExactEmplaceable should be used insted.")]
+    public interface IEmplaceable<T>
     {
         int Emplace(Span<char> span)
         {
@@ -13,15 +14,6 @@ namespace NCoreUtils.Memory
             throw new InsufficientBufferSizeException(span);
         }
 
-        bool TryGetEmplaceBufferSize(out int minimumBufferSize)
-        {
-            minimumBufferSize = default;
-            return false;
-        }
-
         bool TryEmplace(Span<char> span, out int used);
-
-        bool ISpanFormattable.TryFormat(Span<char> destination, out int charsWritten, ReadOnlySpan<char> format, IFormatProvider? provider)
-            => TryEmplace(destination, out charsWritten);
     }
 }

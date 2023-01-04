@@ -41,9 +41,13 @@
   <ItemGroup Condition=" '$(TargetFramework)' == 'net6.0' Or '$(TargetFramework)' == 'net7.0' ">
     <Compile Remove="CodeAnalysis\**" />
     <Compile Remove="Memory\IEmplaceable.Compat.cs" />
+    <Compile Remove="Memory\ISpanEmplaceable.Compat.cs" />
+    <Compile Remove="Memory\ISpanExactEmplaceable.Compat.cs" />
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetFramework)' != 'net6.0' And '$(TargetFramework)' != 'net7.0' ">
     <Compile Remove="Memory\IEmplaceable.cs" />
+    <Compile Remove="Memory\ISpanEmplaceable.cs" />
+    <Compile Remove="Memory\ISpanExactEmplaceable.cs" />
   </ItemGroup>
   <!-- mono fix -->
   <PropertyGroup>

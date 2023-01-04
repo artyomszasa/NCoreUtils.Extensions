@@ -1,4 +1,6 @@
 using System;
+using System.Buffers;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 
 namespace NCoreUtils;
@@ -119,4 +121,29 @@ public static class UriDataEmplacer
         }
         throw new InsufficientBufferSizeException(span);
     }
+
+    [return: NotNullIfNotNull(nameof(source))]
+    public static string? ToUriEscapedString(this string? source)
+    {
+        if (source is null)
+        {
+            return default;
+        }
+        if (source.Length == 0)
+        {
+            return source;
+        }
+        var buffer = ArrayPool<char>.Shared.Rent(source.Length * 12);
+        try
+        {
+            var size = EmplaceUriEscaped(source, buffer);
+            return new string(buffer, 0, size);
+        }
+        finally
+        {
+            ArrayPool<char>.Shared.Return(buffer);
+        }
+    }
+
+
 }

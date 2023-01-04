@@ -1,5 +1,6 @@
 using System;
 using System.Buffers;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
@@ -9,7 +10,7 @@ namespace NCoreUtils
 {
     public static class Emplacer
     {
-        private static readonly Dictionary<Type, object> _emplacers = new()
+        private static readonly ConcurrentDictionary<Type, object> _emplacers = new(new Dictionary<Type, object>
         {
             { typeof(sbyte), Int8Emplacer.Instance },
             { typeof(short), Int16Emplacer.Instance },
@@ -23,7 +24,7 @@ namespace NCoreUtils
             { typeof(double), DoubleEmplacer.Default },
             { typeof(char), CharEmplacer.Instance },
             { typeof(string), StringEmplacer.Instance }
-        };
+        });
 
         private static ulong DivRem(ulong a, ulong b, out ulong reminder)
         {
@@ -563,7 +564,10 @@ namespace NCoreUtils
             }
             return value switch
             {
+                ISpanEmplaceable emplaceable => emplaceable.Emplace(span),
+#pragma warning disable CS0618
                 IEmplaceable<T> emplaceable => emplaceable.Emplace(span),
+#pragma warning restore CS0618
 #if NET6_0_OR_GREATER
                 ISpanFormattable spanFormattable => spanFormattable.TryFormat(span, out var written, default, default)
                     ? written
@@ -583,7 +587,10 @@ namespace NCoreUtils
             }
             var success = value switch
             {
+                ISpanEmplaceable emplaceable => emplaceable.TryEmplace(span, out used),
+#pragma warning disable CS0618
                 IEmplaceable<T> emplaceable => emplaceable.TryEmplace(span, out used),
+#pragma warning restore CS0618
 #if NET6_0_OR_GREATER
                 ISpanFormattable spanFormattable => spanFormattable.TryFormat(span, out used, default, default),
 #endif
@@ -592,21 +599,31 @@ namespace NCoreUtils
             return success;
         }
 
+        private static IEmplacer<T> GetDefaultInternal<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] T>()
+        {
+            if (typeof(ISpanEmplaceable).IsAssignableFrom(typeof(T)))
+            {
+                return (IEmplacer<T>)Activator.CreateInstance(typeof(SpanEmplaceableEmplacer<>).MakeGenericType(typeof(T)), true)!;
+            }
+#pragma warning disable CS0618
+            if (typeof(IEmplaceable<T>).IsAssignableFrom(typeof(T)))
+            {
+                return (IEmplacer<T>)Activator.CreateInstance(typeof(EmplaceableEmplacer<>).MakeGenericType(typeof(T)), true)!;
+            }
+#pragma warning restore CS0618
+            return new DefaultEmplacer<T>();
+        }
 
-        [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(EmplaceableEmplacer<>))]
-        [UnconditionalSuppressMessage("ReflectionAnalysis", "IL2026",
-            Justification = "Type is bound through attributes.")]
+
         public static IEmplacer<T> GetDefault<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] T>()
         {
             if (_emplacers.TryGetValue(typeof(T), out var boxed))
             {
                 return (IEmplacer<T>)boxed;
             }
-            if (typeof(IEmplaceable<T>).IsAssignableFrom(typeof(T)))
-            {
-                return (IEmplacer<T>)Activator.CreateInstance(typeof(EmplaceableEmplacer<>).MakeGenericType(typeof(T)), true)!;
-            }
-            return new DefaultEmplacer<T>();
+            var emplacer = GetDefaultInternal<T>();
+            _emplacers.TryAdd(typeof(T), emplacer);
+            return emplacer;
         }
 
         /// <summary>
@@ -614,35 +631,28 @@ namespace NCoreUtils
         /// <see cref="IEmplaceable{T}.TryGetEmplaceBufferSize(out int)" />,
         /// <see cref="IEmplaceable{T}.Emplace(Span{char})" /> and character buffer obtained either from the array pool
         /// specified by <paramref name="arrayPool" /> or the shared array pool.
-        /// <para>
-        /// Implementation of the <see cref="IEmplaceable{T}.TryGetEmplaceBufferSize(out int)" /> MUST always return
-        /// <c>true</c> to be used with this method.
-        /// </para>
         /// </summary>
         /// <param name="value">Instance to populate string representation of.</param>
         /// <param name="arrayPool">
         /// Array pool to obtain character buffer from. <see cref="ArrayPool{T}.Shared" /> used if no pool is supplied.
         /// </param>
-        /// <typeparam name="T">Type of the object.</typeparam>
+        /// <typeparam name="T">Type of the object to be stringified.</typeparam>
         /// <returns>String representation of the object.</returns>
         public static string ToStringUsingArrayPool<T>(this T value, ArrayPool<char>? arrayPool = default)
-            where T : notnull, IEmplaceable<T>
+            where T : ISpanExactEmplaceable
         {
-            if (value.TryGetEmplaceBufferSize(out var minimumBufferSize))
+            var minimumBufferSize = value.GetEmplaceBufferSize();
+            var pool = arrayPool ?? ArrayPool<char>.Shared;
+            var buffer = pool.Rent(minimumBufferSize);
+            try
             {
-                var pool = arrayPool ?? ArrayPool<char>.Shared;
-                var buffer = pool.Rent(minimumBufferSize);
-                try
-                {
-                    var size = value.Emplace(buffer);
-                    return new string(buffer, 0, size);
-                }
-                finally
-                {
-                    pool.Return(buffer, clearArray: false);
-                }
+                var size = value.Emplace(buffer);
+                return new string(buffer, 0, size);
             }
-            throw new InvalidOperationException($"{typeof(T)}.TryGetEmplaceBufferSize(...) expected to return minimum buffer size.");
+            finally
+            {
+                pool.Return(buffer, clearArray: false);
+            }
         }
     }
 }

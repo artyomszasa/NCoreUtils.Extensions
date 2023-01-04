@@ -37,14 +37,14 @@ namespace NCoreUtils
             => Append(value, Emplacer.GetDefault<T>());
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Append(Span<char> value)
+        public void Append(scoped Span<char> value)
         {
             value.CopyTo(Reminder);
             Length += value.Length;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Append(ReadOnlySpan<char> value)
+        public void Append(scoped ReadOnlySpan<char> value)
         {
             value.CopyTo(Reminder);
             Length += value.Length;
@@ -147,7 +147,7 @@ namespace NCoreUtils
             => TryAppend(value, Emplacer.GetDefault<T>());
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool TryAppend(Span<char> value)
+        public bool TryAppend(scoped Span<char> value)
         {
             if (value.TryCopyTo(Reminder))
             {
@@ -158,7 +158,7 @@ namespace NCoreUtils
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool TryAppend(ReadOnlySpan<char> value)
+        public bool TryAppend(scoped ReadOnlySpan<char> value)
         {
             if (value.TryCopyTo(Reminder))
             {
