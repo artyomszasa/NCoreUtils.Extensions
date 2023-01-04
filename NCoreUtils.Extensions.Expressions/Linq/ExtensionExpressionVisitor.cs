@@ -1,21 +1,25 @@
 using System.Linq.Expressions;
 
-namespace NCoreUtils.Linq
+namespace NCoreUtils.Linq;
+
+public abstract class ExtensionExpressionVisitor : ExpressionVisitor
 {
-    public abstract class ExtensionExpressionVisitor : ExpressionVisitor
+    protected bool KeepExtensions { get; private set; }
+
+    protected ExtensionExpressionVisitor(bool keepExtensions = false)
+        => KeepExtensions = keepExtensions;
+
+    internal void Update(bool keepExtensions)
     {
-        protected bool KeepExtensions { get; }
+        KeepExtensions = keepExtensions;
+    }
 
-        protected ExtensionExpressionVisitor(bool keepExtensions = false)
-            => KeepExtensions = keepExtensions;
-
-        protected override Expression VisitExtension(Expression node)
+    protected override Expression VisitExtension(Expression node)
+    {
+        if (KeepExtensions && node is IExtensionExpression enode)
         {
-            if (KeepExtensions && node is IExtensionExpression enode)
-            {
-                return enode.AcceptNoReduce(this);
-            }
-            return base.VisitExtension(node);
+            return enode.AcceptNoReduce(this);
         }
+        return base.VisitExtension(node);
     }
 }

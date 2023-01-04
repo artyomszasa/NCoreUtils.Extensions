@@ -5,6 +5,7 @@ namespace NCoreUtils.Linq
 {
     public static class Splice
     {
+#pragma warning disable IDE0060
         public static T Value<T>(Expression value)
             => throw new InvalidOperationException("This method not supposed to be invoked at runtime.");
 
@@ -22,5 +23,6 @@ namespace NCoreUtils.Linq
 
         public static TResult Apply<TArg1, TArg2, TArg3, TArg4, TArg5, TResult>(Expression<Func<TArg1, TArg2, TResult>> lambda, TArg1 arg1, TArg2 arg2, TArg3 arg3, TArg4 arg4, TArg5 arg5)
             => throw new InvalidOperationException("This method not supposed to be invoked at runtime.");
+#pragma warning restore IDE0060
     }
 }
