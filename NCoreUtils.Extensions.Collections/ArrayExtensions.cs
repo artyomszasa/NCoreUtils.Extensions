@@ -63,7 +63,11 @@ namespace NCoreUtils
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         [DebuggerStepThrough]
         public static void Fill<T>(this T[] array, T value = default)
+#if NET6_0_OR_GREATER
+            => Array.Fill(array, value);
+#else
         {
+
             if (array == null)
             {
                 throw new ArgumentNullException(nameof(array));
@@ -73,6 +77,7 @@ namespace NCoreUtils
                 array[i] = value;
             }
         }
+#endif
 
         /// <summary>
         /// Creates new array and copies specified slice of the array into the newly created array.
@@ -83,6 +88,7 @@ namespace NCoreUtils
         /// <returns>Newly created array.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         [DebuggerStepThrough]
+        [Obsolete("Use range operator instead")]
         public static T[] Slice<T>(this T[] array, int offset, int count = -1)
         {
             if (array == null)

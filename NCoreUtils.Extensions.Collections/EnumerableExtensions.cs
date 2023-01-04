@@ -106,16 +106,13 @@ namespace NCoreUtils
                             return true;
                     }
                 default:
-                using (var enumerator = source.GetEnumerator())
-                {
-                    if (enumerator.MoveNext())
+                    foreach (var it in source)
                     {
-                        item = enumerator.Current;
+                        item = it;
                         return true;
                     }
                     item = default;
                     return false;
-                }
             }
         }
 
@@ -186,21 +183,16 @@ namespace NCoreUtils
                         return found;
                     }
                 default:
-                    using (var enumerator = source.GetEnumerator())
+                    foreach (var it in source)
                     {
-                        var found = false;
-                        item = default!;
-                        while (!found && enumerator.MoveNext())
+                        if (predicate(it))
                         {
-                            var current = enumerator.Current;
-                            if (predicate(current))
-                            {
-                                found = true;
-                                item = current;
-                            }
+                            item = it;
+                            return true;
                         }
-                        return found;
                     }
+                    item = default;
+                    return false;
             }
         }
 

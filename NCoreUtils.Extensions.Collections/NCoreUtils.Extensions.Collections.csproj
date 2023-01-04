@@ -3,8 +3,8 @@
     <ProjectReference Include="..\NCoreUtils.Extensions.Collections.Abstractions\NCoreUtils.Extensions.Collections.Abstractions.csproj" />
   </ItemGroup>
   <PropertyGroup>
-    <TargetFrameworks>net6.0;netstandard2.1;net452;netstandard2.0</TargetFrameworks>
-    <Version>2.0.0.2</Version>
+    <TargetFrameworks>net7.0;net6.0;netstandard2.1;net452;netstandard2.0</TargetFrameworks>
+    <Version>3.0.0</Version>
     <!-- NuGet -->
     <PackageId>NCoreUtils.Extensions.Collections</PackageId>
     <Title>$(PackageId)</Title>
@@ -26,7 +26,7 @@
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <NoWarn>CS8618;CS8601;CS8625</NoWarn>
   </PropertyGroup>
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net6.0' ">
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net6.0' Or '$(TargetFramework)' == 'net7.0' ">
     <Compile Remove="CodeAnalysis\**" />
   </ItemGroup>
   <ItemGroup Condition=" $(TargetFramework.StartsWith('net4')) Or '$(TargetFramework)' == 'netstandard2.0' ">

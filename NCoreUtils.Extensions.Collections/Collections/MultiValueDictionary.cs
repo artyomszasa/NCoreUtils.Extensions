@@ -119,7 +119,10 @@ namespace NCoreUtils.Collections
         /// <param name="valueEqualityComparer">Value equality comparer.</param>
         public MultiValueDictionary(int capacity = 0, IEqualityComparer<TKey>? keyEqualityComparer = default, IEqualityComparer<TValue>? valueEqualityComparer = default)
         {
-            RuntimeAssert.ArgumentInRange(capacity, 0, int.MaxValue, nameof(capacity));
+            if (capacity < 0 || ArrayHelper.MaxArrayLength < capacity)
+            {
+                throw new ArgumentOutOfRangeException(nameof(capacity));
+            }
             if (capacity > 0)
             {
                 Initialize(capacity);
@@ -147,10 +150,10 @@ namespace NCoreUtils.Collections
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        int GetKeyHasCode(TKey key) => _keyComparer.GetHashCode(key) & 0x7FFFFFFF;
+        private int GetKeyHasCode(TKey key) => _keyComparer.GetHashCode(key) & 0x7FFFFFFF;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        void EnsureInitialized()
+        private void EnsureInitialized()
         {
             if (null == _buckets)
             {
@@ -158,9 +161,12 @@ namespace NCoreUtils.Collections
             }
         }
 
-        void Resize(int newSize, bool forceNewHashCodes)
+        private void Resize(int newSize, bool forceNewHashCodes)
         {
-            RuntimeAssert.GreaterOrEquals(newSize, _entries.Length, nameof(newSize));
+            if (!(newSize > _entries.Length))
+            {
+                throw new ArgumentException(nameof(newSize) + " must be greater than the size of the entries array.");
+            }
             int[] newBuckets = new int[newSize];
             for (int i = 0; i < newBuckets.Length; i++) newBuckets[i] = -1;
             Entry[] newEntries = new Entry[newSize];
@@ -188,11 +194,14 @@ namespace NCoreUtils.Collections
             _entries = newEntries;
         }
 
-        void Resize() => Resize(HashHelper.ExpandPrime(_count), false);
+        private void Resize() => Resize(HashHelper.ExpandPrime(_count), false);
 
         bool FindEntries(TKey key, ICollection<int> entries)
         {
-            RuntimeAssert.ArgumentNotNull(key, nameof(key));
+            if (key is null)
+            {
+                throw new ArgumentNullException(nameof(key));
+            }
             var found = false;
             if (null != _buckets)
             {
@@ -211,7 +220,10 @@ namespace NCoreUtils.Collections
 
         int FindEntry(TKey key)
         {
-            RuntimeAssert.ArgumentNotNull(key, nameof(key));
+            if (key is null)
+            {
+                throw new ArgumentNullException(nameof(key));
+            }
             if (null != _buckets)
             {
                 var hashCode = GetKeyHasCode(key);
@@ -261,7 +273,10 @@ namespace NCoreUtils.Collections
 
         int Remove(TKey key, Func<int, bool> predicate)
         {
-            RuntimeAssert.ArgumentNotNull(key, nameof(key));
+            if (key is null)
+            {
+                throw new ArgumentNullException(nameof(key));
+            }
             if (null != _buckets)
             {
                 var hashCode = GetKeyHasCode(key);
@@ -306,7 +321,10 @@ namespace NCoreUtils.Collections
 
         bool Contains(TKey key, Func<int, bool> predicate)
         {
-            RuntimeAssert.ArgumentNotNull(key, nameof(key));
+            if (key is null)
+            {
+                throw new ArgumentNullException(nameof(key));
+            }
             var found = false;
             if (null != _buckets)
             {
@@ -328,7 +346,10 @@ namespace NCoreUtils.Collections
         /// <param name="value">Value.</param>
         public void Add(TKey key, TValue value)
         {
-            RuntimeAssert.ArgumentNotNull(key, nameof(key));
+            if (key is null)
+            {
+                throw new ArgumentNullException(nameof(key));
+            }
             EnsureInitialized();
             var hashCode = GetKeyHasCode(key);
             var targetBucket = hashCode % _buckets.Length;
@@ -342,7 +363,10 @@ namespace NCoreUtils.Collections
         /// <param name="values">Values to assign.</param>
         public void Add(TKey key, IEnumerable<TValue> values)
         {
-            RuntimeAssert.ArgumentNotNull(key, nameof(key));
+            if (key is null)
+            {
+                throw new ArgumentNullException(nameof(key));
+            }
             EnsureInitialized();
             var hashCode = GetKeyHasCode(key);
             var targetBucket = hashCode % _buckets.Length;
@@ -567,9 +591,18 @@ namespace NCoreUtils.Collections
         /// <param name="arrayIndex">Array index.</param>
         public void CopyTo(KeyValuePair<TKey, TValue>[] array, int arrayIndex)
         {
-            RuntimeAssert.ArgumentNotNull(array, nameof(array));
-            RuntimeAssert.IndexInRange(arrayIndex, 0, array.Length - 1, nameof(arrayIndex));
-            RuntimeAssert.GreaterOrEquals(array.Length - arrayIndex, _count, nameof(array));
+            if (array is null)
+            {
+                throw new ArgumentNullException(nameof(array));
+            }
+            if (arrayIndex < 0 || (array.Length - 1) < arrayIndex)
+            {
+                throw new ArgumentOutOfRangeException(nameof(arrayIndex), nameof(arrayIndex) + " must be valid index of the supplied array.");
+            }
+            if (array.Length - arrayIndex < _count)
+            {
+                throw new InvalidOperationException("Supplied array with respect to the arrayIndex has not enough space to store all items.");
+            }
             if (null != _entries)
             {
                 for (var i = 0; i < _count; ++i)
@@ -786,7 +819,10 @@ namespace NCoreUtils.Collections
         [System.Security.SecurityCritical]
         public virtual void GetObjectData(SerializationInfo info, StreamingContext context)
         {
-            RuntimeAssert.ArgumentNotNull(info, nameof(info));
+            if (info is null)
+            {
+                throw new ArgumentNullException(nameof(info));
+            }
             info.AddValue(KeyVersion, _version);
             info.AddValue(KeyComparer, _keyComparer, typeof(IEqualityComparer<TKey>));
             info.AddValue(ValueComparer, _valueComparer, typeof(IEqualityComparer<TValue>));
