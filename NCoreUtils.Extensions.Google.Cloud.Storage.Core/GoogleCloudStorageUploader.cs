@@ -5,6 +5,7 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Runtime.CompilerServices;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using NCoreUtils.Google;
@@ -21,6 +22,56 @@ public sealed partial class GoogleCloudStorageUploader : IDisposable, IAsyncDisp
     public static int MinChunkSize { get; } = 256 * 1024;
 
     public static int DefaultChunkSize { get; } = 512 * 1024;
+
+    private static string FormatGoogleError(GoogleErrorResponse response)
+    {
+        if (response is null || response.Error is null)
+        {
+            return string.Empty;
+        }
+        var buffer = ArrayPool<char>.Shared.Rent(16 * 1024);
+        try
+        {
+            var builder = new SpanBuilder(buffer);
+            builder.Append(response.Error.Code);
+            builder.Append(": ");
+            builder.Append(response.Error.Message);
+            if (response.Error.Errors is { Count: >0 } errors)
+            {
+                builder.Append(" => ");
+                foreach (var error in errors)
+                {
+                    builder.Append(error, GoogleErrorDetailsEmplacer);
+                }
+            }
+            return builder.ToString();
+        }
+        finally
+        {
+            ArrayPool<char>.Shared.Return(buffer);
+        }
+    }
+
+    private static async Task<GoogleErrorResponse?> ReadErrorResponseAsync(HttpResponseMessage response, CancellationToken cancellationToken)
+    {
+        try
+        {
+            await using var stream = await response.Content
+#if NET6_0_OR_GREATER
+                .ReadAsStreamAsync(cancellationToken)
+#else
+                .ReadAsStreamAsync()
+#endif
+                .ConfigureAwait(false);
+            return await JsonSerializer.DeserializeAsync(stream, GoogleJsonContext.Default.GoogleErrorResponse, cancellationToken)
+                .ConfigureAwait(false);
+        }
+        catch (Exception exn)
+        {
+            Console.WriteLine(exn); // FIXME: use logging
+            return default;
+        }
+    }
 
     private readonly IMemoryOwner<byte> _buffer;
 
@@ -135,6 +186,8 @@ public sealed partial class GoogleCloudStorageUploader : IDisposable, IAsyncDisp
         return totalRead;
     }
 
+    private static Memory.SpanEmplaceableEmplacer<GoogleErrorDetails> GoogleErrorDetailsEmplacer { get; } = new();
+
     public async Task UploadAsync(Stream stream, bool leaveOpen, CancellationToken cancellationToken)
     {
         await using var chunker = CreateChunkSource(stream, leaveOpen);
@@ -150,15 +203,25 @@ public sealed partial class GoogleCloudStorageUploader : IDisposable, IAsyncDisp
             {
                 if (response.StatusCode != HttpStatusCode.OK && response.StatusCode != HttpStatusCode.Created)
                 {
-                    throw new GoogleCloudStorageUploadException($"Upload final chunk failed with status code {response.StatusCode}.");
+                    var error = await ReadErrorResponseAsync(response, CancellationToken.None).ConfigureAwait(false);
+                    if (error is null)
+                    {
+                        throw new GoogleCloudStorageUploadException($"Upload final chunk failed with status code {response.StatusCode} [no error description].");
+                    }
+                    throw new GoogleCloudStorageUploadException($"Upload final chunk failed with status code {response.StatusCode} [{FormatGoogleError(error)}].");
                 }
                 // final chunk upload successfull
                 Sent += size;
                 return;
             }
-            if (response.StatusCode != /* 308 */ HttpStatusCode.PermanentRedirect)
+            if (response.StatusCode != HttpStatusCode.PermanentRedirect)
             {
-                throw new GoogleCloudStorageUploadException($"Upload chunk failed with status code {response.StatusCode}.");
+                var error = await ReadErrorResponseAsync(response, CancellationToken.None).ConfigureAwait(false);
+                if (error is null)
+                {
+                    throw new GoogleCloudStorageUploadException($"Upload chunk failed with status code {response.StatusCode} [no error description].");
+                }
+                throw new GoogleCloudStorageUploadException($"Upload chunk failed with status code {response.StatusCode} [{FormatGoogleError(error)}].");
             }
             // chunk upload successfull (TODO: check if response range is set properly)
             Sent += size;
