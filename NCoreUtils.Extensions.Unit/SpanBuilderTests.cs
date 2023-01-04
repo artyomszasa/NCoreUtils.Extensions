@@ -103,6 +103,20 @@ namespace NCoreUtils.Extensions.Unit
             }
         }
 
+        private static bool TryAppendSpanCopy(ref SpanBuilder builder, ReadOnlySpan<char> span)
+        {
+            Span<char> copy = stackalloc char[span.Length];
+            span.CopyTo(copy);
+            return builder.TryAppend(copy);
+        }
+
+        private static bool TryAppendReadOnlySpanCopy(ref SpanBuilder builder, ReadOnlySpan<char> span)
+        {
+            Span<char> copy = stackalloc char[span.Length];
+            span.CopyTo(copy);
+            return builder.TryAppend((ReadOnlySpan<char>)copy);
+        }
+
         [Fact]
         public void Span()
         {
@@ -111,6 +125,15 @@ namespace NCoreUtils.Extensions.Unit
                 var builder = new SpanBuilder(span);
                 builder.Append("01234");
                 builder.Append(span[..builder.Length]);
+                Assert.Equal("0123401234", builder.ToString());
+            }
+            {
+                Span<char> span = stackalloc char[500];
+                var builder = new SpanBuilder(span);
+                {
+                    builder.Append("01234");
+                    Assert.True(builder.TryAppend(span[..builder.Length]));
+                }
                 Assert.Equal("0123401234", builder.ToString());
             }
             {

@@ -5,10 +5,8 @@
     <ProjectReference Include="..\NCoreUtils.Extensions.Globalization\NCoreUtils.Extensions.Globalization.csproj" />
     <ProjectReference Include="..\NCoreUtils.Extensions.Expressions\NCoreUtils.Extensions.Expressions.csproj" />
     <ProjectReference Include="..\NCoreUtils.Extensions.Collections\NCoreUtils.Extensions.Collections.csproj" />
+    <ProjectReference Include="..\NCoreUtils.Extensions.Memory\NCoreUtils.Extensions.Memory.csproj" />
     <ProjectReference Include="..\NCoreUtils.Extensions.Memory.Pooling\NCoreUtils.Extensions.Memory.Pooling.csproj" />
-    <!--
-    <ProjectReference Include="..\NCoreUtils.Extensions.Json.Immutable\NCoreUtils.Extensions.Json.Immutable.csproj" />
-    -->
     <TrimmerRootAssembly Include="NCoreUtils.Extensions.Google.Cloud.Storage" />
     <TrimmerRootAssembly Include="NCoreUtils.Extensions.Google.Cloud.Storage.Core" />
     <TrimmerRootAssembly Include="NCoreUtils.Extensions.Globalization" />
@@ -19,15 +17,11 @@
     <TrimmerRootAssembly Include="NCoreUtils.Extensions.Expressions" />
     <TrimmerRootAssembly Include="NCoreUtils.Extensions.Collections" />
     <TrimmerRootAssembly Include="NCoreUtils.Extensions.Collections.Abstractions" />
-    <!--
-    <TrimmerRootAssembly Include="NCoreUtils.Extensions.Json" />
-    <TrimmerRootAssembly Include="NCoreUtils.Extensions.Json.Immutable" />
-    -->
   </ItemGroup>
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net7.0</TargetFramework>
+    <TargetFrameworks>net7.0;net6.0;</TargetFrameworks>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <!-- Use a RID of your choice. -->

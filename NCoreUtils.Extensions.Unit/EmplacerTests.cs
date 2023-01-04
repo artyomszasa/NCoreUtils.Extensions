@@ -18,7 +18,7 @@ namespace NCoreUtils.Extensions.Unit
             public override string? ToString() => Value?.ToString();
         }
 
-        sealed class EmplaceableBox<T> : IEmplaceable<EmplaceableBox<T>>
+        sealed class EmplaceableBox<T> : ISpanEmplaceable
         {
             public T Value { get; }
 
