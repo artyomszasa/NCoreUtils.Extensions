@@ -2,7 +2,6 @@ using System;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using System.Threading;
 using NCoreUtils.Memory.Pooling;
 
@@ -16,60 +15,60 @@ internal struct Index : IEquatable<Index>
 
     private const uint MaskLoop = 0x40000000;
 
-    [MethodImpl(O.Optimize)]
+    [MethodImpl(O.Inline)]
     [DebuggerStepThrough]
     public static bool operator==(Index a, Index b)
         => a.Equals(b);
 
-    [MethodImpl(O.Optimize)]
+    [MethodImpl(O.Inline)]
     [DebuggerStepThrough]
     public static bool operator!=(Index a, Index b)
         => !a.Equals(b);
 
     private uint _data;
 
-    [MethodImpl(O.Optimize)]
+    [MethodImpl(O.Inline)]
     [DebuggerStepThrough]
     public Index(uint data)
         => _data = data;
 
     public uint Value
     {
-        [MethodImpl(O.Optimize)]
+        [MethodImpl(O.Inline)]
         [DebuggerStepThrough]
         get => _data & MaskValue;
     }
 
     public bool Loop
     {
-        [MethodImpl(O.Optimize)]
+        [MethodImpl(O.Inline)]
         [DebuggerStepThrough]
         get => (_data & MaskLoop) != 0;
     }
 
     public bool Locked
     {
-        [MethodImpl(O.Optimize)]
+        [MethodImpl(O.Inline)]
         [DebuggerStepThrough]
         get => (_data & MaskLocked) != 0;
     }
 
-    [MethodImpl(O.Optimize)]
+    [MethodImpl(O.Inline)]
     [DebuggerStepThrough]
     public Index Inc()
         => new(_data + 1);
 
-    [MethodImpl(O.Optimize)]
+    [MethodImpl(O.Inline)]
     [DebuggerStepThrough]
     public Index ToggleLoop()
         => new((_data & (~MaskValue)) ^ MaskLoop);
 
-    [MethodImpl(O.Optimize)]
+    [MethodImpl(O.Inline)]
     [DebuggerStepThrough]
     public Index Lock()
         => new(_data | MaskLocked);
 
-    [MethodImpl(O.Optimize)]
+    [MethodImpl(O.Inline)]
     [DebuggerStepThrough]
     public Index CompareExchange(Index value, Index comparand)
 #if NET6_0_OR_GREATER
@@ -81,7 +80,7 @@ internal struct Index : IEquatable<Index>
     }
 #endif
 
-    [MethodImpl(O.Optimize)]
+    [MethodImpl(O.Inline)]
     [DebuggerStepThrough]
     public Index Load()
 #if NET6_0_OR_GREATER
@@ -93,12 +92,12 @@ internal struct Index : IEquatable<Index>
     }
 #endif
 
-    [MethodImpl(O.Optimize)]
+    [MethodImpl(O.Inline)]
     [DebuggerStepThrough]
     public bool Equals(Index other)
         => _data == other._data;
 
-    [MethodImpl(O.Optimize)]
+    [MethodImpl(O.Inline)]
     [DebuggerStepThrough]
     public bool EqLoop(Index other)
         => (_data & (MaskLoop | MaskValue)) == (other._data & (MaskLoop | MaskValue));
@@ -114,10 +113,10 @@ internal struct Index : IEquatable<Index>
         => $"{Value} [Loop = {Loop}, Locked = {Locked}]";
 }
 
-public sealed class FixSizePool<T> : IObjectPool<T>
-    where T : class
+internal static class FixSizePoolHelpers
 {
-    private static int ComputeSize(Index start, Index end, int capacity)
+    [MethodImpl(O.Optimize)]
+    internal static int ComputeSize(Index start, Index end, int capacity)
     {
         if (start.Loop == end.Loop)
         {
@@ -125,6 +124,11 @@ public sealed class FixSizePool<T> : IObjectPool<T>
         }
         return unchecked((int)end.Value) + capacity - unchecked((int)start.Value);
     }
+}
+
+public class FixSizePool<T> : IObjectPool<T>
+    where T : class
+{
 
     private readonly T?[] _items;
 
@@ -134,11 +138,15 @@ public sealed class FixSizePool<T> : IObjectPool<T>
 
     private Index _end;
 
-    public int AvailableCount => ComputeSize(
-        start: _start.Load(),
-        end: _end.Load(),
-        capacity: _items.Length
-    );
+    public int AvailableCount
+    {
+        [MethodImpl(O.Inline)]
+        get => FixSizePoolHelpers.ComputeSize(
+            start: _start.Load(),
+            end: _end.Load(),
+            capacity: _items.Length
+        );
+    }
 
     public FixSizePool(int size)
     {
@@ -159,6 +167,7 @@ public sealed class FixSizePool<T> : IObjectPool<T>
         }
     }
 
+    [MethodImpl(O.Optimize)]
     private bool TryRentShort([MaybeNullWhen(false)] out T item)
     {
         var actualStart = _start; // relaxed
@@ -221,10 +230,13 @@ public sealed class FixSizePool<T> : IObjectPool<T>
         }
     }
 
-    [MethodImpl(O.Optimize)]
+    protected virtual void Cleanup(T item) { /* noop */ }
+
+    [MethodImpl(O.Inline)]
     public bool TryRent([MaybeNullWhen(false)] out T item)
         => TryRentShort(out item) || TryRentLong(out item);
 
+    [MethodImpl(O.Optimize)]
     public void Return(T item)
     {
         if (item is null)
@@ -239,7 +251,7 @@ public sealed class FixSizePool<T> : IObjectPool<T>
             // check if pool is not locked (no operation is in progress)
             if (!actualEnd.Locked)
             {
-                if (_items.Length == ComputeSize(actualStart, actualEnd, _items.Length))
+                if (_items.Length == FixSizePoolHelpers.ComputeSize(actualStart, actualEnd, _items.Length))
                 {
                     // recheck whether start/end has changed
                     if (actualEnd != _end.Load() || actualStart != _start.Load())
@@ -248,7 +260,8 @@ public sealed class FixSizePool<T> : IObjectPool<T>
                         success = false;
                         continue;
                     }
-                    // otherwise allow GC to claim an item
+                    // otherwise allow GC to claim an item (default impl) or perform overridden cleanup
+                    Cleanup(item);
                     return;
                 }
                 Index newEnd;
