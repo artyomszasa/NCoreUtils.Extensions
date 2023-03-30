@@ -1,6 +1,10 @@
-using System;
 using System.Buffers;
 using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
+
+#if !NET6_0_OR_GREATER
+using System;
+#endif
 
 namespace NCoreUtils;
 
@@ -8,68 +12,83 @@ public partial class GoogleCloudStorageUtils
 {
     public sealed class GoogleCloudStorageEndpointFactory
     {
+        private readonly ref struct CharArrayBuffer
+        {
+            public char[] Array { get; }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public CharArrayBuffer()
+                => Array = ArrayPool<char>.Shared.Rent(UriMaxSize);
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public void Dispose()
+                => ArrayPool<char>.Shared.Return(Array);
+        }
+
+        private const int UriMaxSize = 8 * 1024;
+
         [SuppressMessage("Performance", "CA1822")]
         public string ResumableUpload(string bucket)
-            => $"https://www.googleapis.com/upload/storage/v1/b/{bucket}/o?uploadType=resumable";
+        {
+            using var buffer = new CharArrayBuffer();
+            var builder = new SpanBuilder(buffer.Array);
+            builder.Append("https://www.googleapis.com/upload/storage/v1/b/");
+            builder.Append(bucket);
+            builder.Append("/o?uploadType=resumable");
+            return builder.GetString();
+        }
 
         [SuppressMessage("Performance", "CA1822")]
         public string List(string bucket, string? prefix, bool? includeAcl, string? pageToken)
         {
-            var buffer = ArrayPool<char>.Shared.Rent(8192);
-            try
+            using var buffer = new CharArrayBuffer();
+            var builder = new SpanBuilder(buffer.Array);
+            builder.Append("https://storage.googleapis.com/storage/v1/b/");
+            builder.Append(bucket);
+            builder.Append("/o");
+            bool first = true;
+            if (!string.IsNullOrEmpty(prefix))
             {
-                var builder = new SpanBuilder(buffer);
-                builder.Append("https://storage.googleapis.com/storage/v1/b/");
-                builder.Append(bucket);
-                builder.Append("/o");
-                bool first = true;
-                if (!string.IsNullOrEmpty(prefix))
-                {
-                    builder.Append("?prefix=");
+                builder.Append("?prefix=");
 #if NET6_0_OR_GREATER
-                    builder.AppendUriEscaped(prefix);
+                builder.AppendUriEscaped(prefix);
 #else
-                    builder.Append(Uri.EscapeDataString(prefix));
+                builder.Append(Uri.EscapeDataString(prefix));
 #endif
+                first = false;
+            }
+            if (includeAcl.HasValue)
+            {
+                if (first)
+                {
+                    builder.Append('?');
                     first = false;
                 }
-                if (includeAcl.HasValue)
+                else
                 {
-                    if (first)
-                    {
-                        builder.Append('?');
-                        first = false;
-                    }
-                    else
-                    {
-                        builder.Append('&');
-                    }
-                    builder.Append("projection=");
-                    builder.Append(includeAcl.Value ? "full" : "noAcl");
+                    builder.Append('&');
                 }
-                if (!string.IsNullOrEmpty(pageToken))
-                {
-                    if (first)
-                    {
-                        builder.Append('?');
-                    }
-                    else
-                    {
-                        builder.Append('&');
-                    }
-                    builder.Append("pageToken=");
-#if NET6_0_OR_GREATER
-                    builder.AppendUriEscaped(pageToken);
-#else
-                    builder.Append(Uri.EscapeDataString(pageToken));
-#endif
-                }
-                return builder.ToString();
+                builder.Append("projection=");
+                builder.Append(includeAcl.Value ? "full" : "noAcl");
             }
-            finally
+            if (!string.IsNullOrEmpty(pageToken))
             {
-                ArrayPool<char>.Shared.Return(buffer);
+                if (first)
+                {
+                    builder.Append('?');
+                }
+                else
+                {
+                    builder.Append('&');
+                }
+                builder.Append("pageToken=");
+#if NET6_0_OR_GREATER
+                builder.AppendUriEscaped(pageToken);
+#else
+                builder.Append(Uri.EscapeDataString(pageToken));
+#endif
             }
+            return builder.GetString();
         }
 
         [SuppressMessage("Performance", "CA1822")]
@@ -80,24 +99,17 @@ public partial class GoogleCloudStorageUtils
             string destinationName)
 #if NET6_0_OR_GREATER
         {
-            var buffer = ArrayPool<char>.Shared.Rent(8 * 1024);
-            try
-            {
-                var builder = new SpanBuilder(buffer);
-                builder.Append("https://www.googleapis.com/storage/v1/b/");
-                builder.AppendUriEscaped(sourceBucket);
-                builder.Append("/o/");
-                builder.AppendUriEscaped(sourceName);
-                builder.Append("/copyTo/b/");
-                builder.AppendUriEscaped(destinationBucket);
-                builder.Append("/o/");
-                builder.AppendUriEscaped(destinationName);
-                return builder.ToString();
-            }
-            finally
-            {
-                ArrayPool<char>.Shared.Return(buffer, clearArray: false);
-            }
+            using var buffer = new CharArrayBuffer();
+            var builder = new SpanBuilder(buffer.Array);
+            builder.Append("https://www.googleapis.com/storage/v1/b/");
+            builder.AppendUriEscaped(sourceBucket);
+            builder.Append("/o/");
+            builder.AppendUriEscaped(sourceName);
+            builder.Append("/copyTo/b/");
+            builder.AppendUriEscaped(destinationBucket);
+            builder.Append("/o/");
+            builder.AppendUriEscaped(destinationName);
+            return builder.GetString();
         }
 #else
             => $"https://www.googleapis.com/storage/v1/b/{sourceBucket}/o/{Uri.EscapeDataString(sourceName)}/copyTo/b/{destinationBucket}/o/{Uri.EscapeDataString(destinationName)}";
@@ -109,20 +121,13 @@ public partial class GoogleCloudStorageUtils
             string name)
 #if NET6_0_OR_GREATER
         {
-            var buffer = ArrayPool<char>.Shared.Rent(8 * 1024);
-            try
-            {
-                var builder = new SpanBuilder(buffer);
-                builder.Append("https://www.googleapis.com/storage/v1/b/");
-                builder.AppendUriEscaped(bucket);
-                builder.Append("/o/");
-                builder.AppendUriEscaped(name);
-                return builder.ToString();
-            }
-            finally
-            {
-                ArrayPool<char>.Shared.Return(buffer, clearArray: false);
-            }
+            using var buffer = new CharArrayBuffer();
+            var builder = new SpanBuilder(buffer.Array);
+            builder.Append("https://www.googleapis.com/storage/v1/b/");
+            builder.AppendUriEscaped(bucket);
+            builder.Append("/o/");
+            builder.AppendUriEscaped(name);
+            return builder.GetString();
         }
 #else
             => $"https://www.googleapis.com/storage/v1/b/{bucket}/o/{Uri.EscapeDataString(name)}";
@@ -134,21 +139,14 @@ public partial class GoogleCloudStorageUtils
             string name)
 #if NET6_0_OR_GREATER
         {
-            var buffer = ArrayPool<char>.Shared.Rent(8 * 1024);
-            try
-            {
-                var builder = new SpanBuilder(buffer);
-                builder.Append("https://www.googleapis.com/storage/v1/b/");
-                builder.AppendUriEscaped(bucket);
-                builder.Append("/o/");
-                builder.AppendUriEscaped(name);
-                builder.Append("?alt=media");
-                return builder.ToString();
-            }
-            finally
-            {
-                ArrayPool<char>.Shared.Return(buffer, clearArray: false);
-            }
+            using var buffer = new CharArrayBuffer();
+            var builder = new SpanBuilder(buffer.Array);
+            builder.Append("https://www.googleapis.com/storage/v1/b/");
+            builder.AppendUriEscaped(bucket);
+            builder.Append("/o/");
+            builder.AppendUriEscaped(name);
+            builder.Append("?alt=media");
+            return builder.GetString();
         }
 #else
             => $"https://www.googleapis.com/storage/v1/b/{bucket}/o/{Uri.EscapeDataString(name)}?alt=media";
@@ -160,20 +158,13 @@ public partial class GoogleCloudStorageUtils
             string name)
 #if NET6_0_OR_GREATER
         {
-            var buffer = ArrayPool<char>.Shared.Rent(8 * 1024);
-            try
-            {
-                var builder = new SpanBuilder(buffer);
-                builder.Append("https://www.googleapis.com/storage/v1/b/");
-                builder.AppendUriEscaped(bucket);
-                builder.Append("/o/");
-                builder.AppendUriEscaped(name);
-                return builder.ToString();
-            }
-            finally
-            {
-                ArrayPool<char>.Shared.Return(buffer, clearArray: false);
-            }
+            using var buffer = new CharArrayBuffer();
+            var builder = new SpanBuilder(buffer.Array);
+            builder.Append("https://www.googleapis.com/storage/v1/b/");
+            builder.AppendUriEscaped(bucket);
+            builder.Append("/o/");
+            builder.AppendUriEscaped(name);
+            return builder.GetString();
         }
 #else
             => $"https://www.googleapis.com/storage/v1/b/{bucket}/o/{Uri.EscapeDataString(name)}";
@@ -186,32 +177,24 @@ public partial class GoogleCloudStorageUtils
             bool? includeAcl)
 #if NET6_0_OR_GREATER
         {
-            var buffer = ArrayPool<char>.Shared.Rent(8 * 1024);
-            try
+            using var buffer = new CharArrayBuffer();
+            var builder = new SpanBuilder(buffer.Array);
+            builder.Append("https://www.googleapis.com/storage/v1/b/");
+            builder.AppendUriEscaped(bucket);
+            builder.Append("/o/");
+            builder.AppendUriEscaped(name);
+            if (includeAcl is bool acl)
             {
-                var builder = new SpanBuilder(buffer);
-                builder.Append("https://www.googleapis.com/storage/v1/b/");
-                builder.AppendUriEscaped(bucket);
-                builder.Append("/o/");
-                builder.AppendUriEscaped(name);
-                if (includeAcl is bool acl)
-                {
-                    builder.Append("?projection=");
-                    builder.Append(includeAcl.Value ? "full" : "noAcl");
-                }
-                return builder.ToString();
+                builder.Append("?projection=");
+                builder.Append(includeAcl.Value ? "full" : "noAcl");
             }
-            finally
-            {
-                ArrayPool<char>.Shared.Return(buffer, clearArray: false);
-            }
+            return builder.GetString();
         }
 #else
         {
-            // FIXME: optimize
             var projection = includeAcl.HasValue
-            ? $"?projection={(includeAcl.Value ? "full" : "noAcl")}"
-            : string.Empty;
+                ? $"?projection={(includeAcl.Value ? "full" : "noAcl")}"
+                : string.Empty;
             return $"https://storage.googleapis.com/storage/v1/b/{bucket}/o/{Uri.EscapeDataString(name)}{projection}";
         }
 #endif

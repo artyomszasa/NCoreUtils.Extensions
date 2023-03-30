@@ -112,7 +112,7 @@ public partial class GoogleCloudStorageUploader
             // there may be more data, that must be prefetched to check whether the chunk is final
             PrefetchBuffer ??= ArrayPool<byte>.Shared.Rent(PrefetchBufferSize);
             Prefetched = await Source.ReadAsync(PrefetchBuffer.AsMemory(), cancellationToken).ConfigureAwait(false);
-            return (totalRead, Prefetched > 0);
+            return (totalRead, Prefetched == 0);
         }
 
         public void Dispose()

@@ -57,11 +57,7 @@ public sealed partial class GoogleCloudStorageUploader : IDisposable, IAsyncDisp
         try
         {
             await using var stream = await response.Content
-#if NET6_0_OR_GREATER
                 .ReadAsStreamAsync(cancellationToken)
-#else
-                .ReadAsStreamAsync()
-#endif
                 .ConfigureAwait(false);
             return await JsonSerializer.DeserializeAsync(stream, GoogleJsonContext.Default.GoogleErrorResponse, cancellationToken)
                 .ConfigureAwait(false);
@@ -130,13 +126,14 @@ public sealed partial class GoogleCloudStorageUploader : IDisposable, IAsyncDisp
             {
                 throw new InvalidOperationException($"Supplied memory is smaller than the minimum chunk size ({MinChunkSize}).");
             }
-            var usableSize = memoryLength / MinChunkSize * MinChunkSize; // Floor to chunk size
-            if (memoryLength == usableSize)
+            var unalignedSize = memoryLength % MinChunkSize;
+            if (unalignedSize == 0)
             {
                 _buffer = buffer;
             }
             else
             {
+                var usableSize = memoryLength - unalignedSize;
                 _buffer = new SliceMemoryOwner(buffer, usableSize);
             }
         }

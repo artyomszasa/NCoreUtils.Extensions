@@ -2,10 +2,10 @@
   <PropertyGroup>
     <TargetFrameworks>net7.0;net6.0;netstandard2.1</TargetFrameworks>
     <RootNamespace>NCoreUtils</RootNamespace>
-    <Version>7.0.0.1</Version>
+    <Version>7.0.0.2</Version>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Google.Apis.Auth" Version="1.57.0" />
+    <PackageReference Include="Google.Apis.Auth" Version="1.59.0" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\NCoreUtils.Extensions.Google.Cloud.Storage.Core\NCoreUtils.Extensions.Google.Cloud.Storage.Core.csproj" />
