@@ -33,6 +33,10 @@ namespace NCoreUtils
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [RequiresUnreferencedCode(W.DynamicallyCreatedEmplacer)]
+#if NET7_0_OR_GREATER
+        [RequiresDynamicCode(W.DynamicallyCreatedEmplacer)]
+#endif
         public void Append<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] T>(T value)
             => Append(value, Emplacer.GetDefault<T>());
 
@@ -143,6 +147,10 @@ namespace NCoreUtils
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [RequiresUnreferencedCode(W.DynamicallyCreatedEmplacer)]
+#if NET7_0_OR_GREATER
+        [RequiresDynamicCode(W.DynamicallyCreatedEmplacer)]
+#endif
         public bool TryAppend<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] T>(T value)
             => TryAppend(value, Emplacer.GetDefault<T>());
 
@@ -308,6 +316,15 @@ namespace NCoreUtils
             return false;
         }
 
-        public override string ToString() => _span[..Length].ToString();
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public string GetString()
+#if NET6_0_OR_GREATER
+            => new(_span[..Length]);
+#else
+            => _span[..Length].ToString();
+#endif
+
+        public override string ToString()
+            => GetString();
     }
 }

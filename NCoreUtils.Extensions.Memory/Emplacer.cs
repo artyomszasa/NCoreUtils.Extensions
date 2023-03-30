@@ -599,6 +599,10 @@ namespace NCoreUtils
             return success;
         }
 
+        [RequiresUnreferencedCode(W.DynamicallyCreatedEmplacer)]
+#if NET7_0_OR_GREATER
+        [RequiresDynamicCode(W.DynamicallyCreatedEmplacer)]
+#endif
         private static IEmplacer<T> GetDefaultInternal<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] T>()
         {
             if (typeof(ISpanEmplaceable).IsAssignableFrom(typeof(T)))
@@ -614,7 +618,10 @@ namespace NCoreUtils
             return new DefaultEmplacer<T>();
         }
 
-
+        [RequiresUnreferencedCode(W.DynamicallyCreatedEmplacer)]
+#if NET7_0_OR_GREATER
+        [RequiresDynamicCode(W.DynamicallyCreatedEmplacer)]
+#endif
         public static IEmplacer<T> GetDefault<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] T>()
         {
             if (_emplacers.TryGetValue(typeof(T), out var boxed))
