@@ -5,7 +5,9 @@ using System.Runtime.Serialization;
 
 namespace NCoreUtils
 {
+#if !NET8_0_OR_GREATER
     [Serializable]
+#endif
     public class InsufficientBufferSizeException : InvalidOperationException
     {
         private const string KeyHasSizeAvailable = "Has" + nameof(SizeAvailable);
@@ -22,6 +24,7 @@ namespace NCoreUtils
 
         public int? SizeRequired { get; }
 
+#if !NET8_0_OR_GREATER
         protected InsufficientBufferSizeException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
@@ -32,6 +35,7 @@ namespace NCoreUtils
                 ? (int?)info.GetInt32(nameof(SizeRequired))
                 : (int?)default;
         }
+#endif
 
         [ExcludeFromCodeCoverage]
         [Obsolete("Consider specifying custom message or at least available buffer size.")]
@@ -62,6 +66,7 @@ namespace NCoreUtils
             : this(span.Length, sizeRequired)
         { }
 
+#if !NET8_0_OR_GREATER
         public override void GetObjectData(SerializationInfo info, StreamingContext context)
         {
             base.GetObjectData(info, context);
@@ -76,5 +81,6 @@ namespace NCoreUtils
                 info.AddValue(nameof(SizeRequired), SizeRequired.Value);
             }
         }
+#endif
     }
 }

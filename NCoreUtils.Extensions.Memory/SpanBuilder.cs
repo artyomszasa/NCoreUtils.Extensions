@@ -11,13 +11,13 @@ namespace NCoreUtils
 
         internal int _length;
 
-        internal Span<char> Reminder
+        internal readonly Span<char> Reminder
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => _span[Length..];
         }
 
-        public int Length { get => _length; internal set => _length = value; }
+        public int Length { readonly get => _length; internal set => _length = value; }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public SpanBuilder(Span<char> span)
@@ -317,14 +317,14 @@ namespace NCoreUtils
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public string GetString()
+        public readonly string GetString()
 #if NET6_0_OR_GREATER
             => new(_span[..Length]);
 #else
             => _span[..Length].ToString();
 #endif
 
-        public override string ToString()
+        public readonly override string ToString()
             => GetString();
     }
 }

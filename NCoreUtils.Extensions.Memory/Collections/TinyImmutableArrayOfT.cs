@@ -94,7 +94,7 @@ namespace NCoreUtils.Collections
                 }
             }
 
-            public TinyImmutableArray<T> Build()
+            public readonly TinyImmutableArray<T> Build()
                 => new(_hasFirst, _first, _hasSecond, _second, _hasThird, _third, _list?.ToArray());
         }
 
@@ -112,7 +112,7 @@ namespace NCoreUtils.Collections
 
         readonly T[]? _array;
 
-        public int Count
+        public readonly int Count
         {
             get
             {
@@ -163,11 +163,11 @@ namespace NCoreUtils.Collections
         }
 
         [ExcludeFromCodeCoverage]
-        IEnumerator IEnumerable.GetEnumerator() => Enumerate();
+        readonly IEnumerator IEnumerable.GetEnumerator() => Enumerate();
 
-        IEnumerator<T> IEnumerable<T>.GetEnumerator() => Enumerate();
+        readonly IEnumerator<T> IEnumerable<T>.GetEnumerator() => Enumerate();
 
-        private IEnumerator<T> Enumerate()
+        private readonly IEnumerator<T> Enumerate()
         {
             if (!_hasFirst)
             {

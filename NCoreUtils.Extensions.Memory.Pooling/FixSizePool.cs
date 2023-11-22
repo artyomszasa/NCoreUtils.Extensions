@@ -32,21 +32,21 @@ internal struct Index : IEquatable<Index>
     public Index(uint data)
         => _data = data;
 
-    public uint Value
+    public readonly uint Value
     {
         [MethodImpl(O.Inline)]
         [DebuggerStepThrough]
         get => _data & MaskValue;
     }
 
-    public bool Loop
+    public readonly bool Loop
     {
         [MethodImpl(O.Inline)]
         [DebuggerStepThrough]
         get => (_data & MaskLoop) != 0;
     }
 
-    public bool Locked
+    public readonly bool Locked
     {
         [MethodImpl(O.Inline)]
         [DebuggerStepThrough]
@@ -55,17 +55,17 @@ internal struct Index : IEquatable<Index>
 
     [MethodImpl(O.Inline)]
     [DebuggerStepThrough]
-    public Index Inc()
+    public readonly Index Inc()
         => new(_data + 1);
 
     [MethodImpl(O.Inline)]
     [DebuggerStepThrough]
-    public Index ToggleLoop()
+    public readonly Index ToggleLoop()
         => new((_data & (~MaskValue)) ^ MaskLoop);
 
     [MethodImpl(O.Inline)]
     [DebuggerStepThrough]
-    public Index Lock()
+    public readonly Index Lock()
         => new(_data | MaskLocked);
 
     [MethodImpl(O.Inline)]
@@ -94,22 +94,22 @@ internal struct Index : IEquatable<Index>
 
     [MethodImpl(O.Inline)]
     [DebuggerStepThrough]
-    public bool Equals(Index other)
+    public readonly bool Equals(Index other)
         => _data == other._data;
 
     [MethodImpl(O.Inline)]
     [DebuggerStepThrough]
-    public bool EqLoop(Index other)
+    public readonly bool EqLoop(Index other)
         => (_data & (MaskLoop | MaskValue)) == (other._data & (MaskLoop | MaskValue));
 
-    public override bool Equals([NotNullWhen(true)] object? obj)
+    public readonly override bool Equals([NotNullWhen(true)] object? obj)
         => obj is Index other && Equals(other);
 
-    public override int GetHashCode()
+    public readonly override int GetHashCode()
         => unchecked((int)_data);
 
     [ExcludeFromCodeCoverage]
-    public override string ToString()
+    public readonly override string ToString()
         => $"{Value} [Loop = {Loop}, Locked = {Locked}]";
 }
 
