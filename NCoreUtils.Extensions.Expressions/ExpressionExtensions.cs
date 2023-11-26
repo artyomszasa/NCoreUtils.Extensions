@@ -33,7 +33,7 @@ public static class ExpressionExtensions
 #if NETFRAMEWORK
             new object[0]
 #else
-            Array.Empty<object>()
+            []
 #endif
         );
     }
