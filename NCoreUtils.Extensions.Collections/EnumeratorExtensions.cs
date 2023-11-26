@@ -3,325 +3,302 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 
-namespace NCoreUtils
+namespace NCoreUtils;
+
+/// <summary>
+/// Contains enumerator extensions.
+/// </summary>
+public static class EnumeratorExtensions
 {
-    /// <summary>
-    /// Contains enumerator extensions.
-    /// </summary>
-    public static class EnumeratorExtensions
+
+    private sealed class SelectEnumerator<TSource, TTarget>(IEnumerator<TSource> source, Func<TSource, TTarget> selector)
+        : IEnumerator<TTarget>
     {
+        private readonly IEnumerator<TSource> _source = source;
 
-        sealed class SelectEnumerator<TSource, TTarget> : IEnumerator<TTarget>
+        private readonly Func<TSource, TTarget> _selector = selector;
+
+        public TTarget Current { get; private set; } = default!;
+
+        object IEnumerator.Current
         {
-            readonly IEnumerator<TSource> _source;
-
-            readonly Func<TSource, TTarget> _selector;
-
-            public TTarget Current { get; private set; } = default!;
-
-            object IEnumerator.Current
-            {
-                [ExcludeFromCodeCoverage]
-                get => Current!;
-            }
-
-            public SelectEnumerator(IEnumerator<TSource> source, Func<TSource, TTarget> selector)
-            {
-                _source = source;
-                _selector = selector;
-            }
-
-            public void Dispose() => _source.Dispose();
-
-            public bool MoveNext()
-            {
-                if (_source.MoveNext())
-                {
-                    Current = _selector(_source.Current);
-                    return true;
-                }
-                Current = default!;
-                return false;
-            }
-
             [ExcludeFromCodeCoverage]
-            public void Reset()
-            {
-                _source.Reset();
-                Current = default!;
-            }
+            get => Current!;
         }
 
-        sealed class IndexedSelectEnumerator<TSource, TTarget> : IEnumerator<TTarget>
+        public void Dispose() => _source.Dispose();
+
+        public bool MoveNext()
         {
-            readonly IEnumerator<TSource> _source;
-
-            readonly Func<TSource, int, TTarget> _selector;
-
-            int _index = -1;
-
-            public TTarget Current { get; private set; } = default!;
-
-            object IEnumerator.Current
+            if (_source.MoveNext())
             {
-                [ExcludeFromCodeCoverage]
-                get => Current!;
+                Current = _selector(_source.Current);
+                return true;
             }
-
-            public IndexedSelectEnumerator(IEnumerator<TSource> source, Func<TSource, int, TTarget> selector)
-            {
-                _source = source;
-                _selector = selector;
-            }
-
-            public void Dispose() => _source.Dispose();
-
-            public bool MoveNext()
-            {
-                if (_source.MoveNext())
-                {
-                    Current = _selector(_source.Current, ++_index);
-                    return true;
-                }
-                Current = default!;
-                return false;
-            }
-
-            [ExcludeFromCodeCoverage]
-            public void Reset()
-            {
-                _source.Reset();
-                _index = -1;
-                Current = default!;
-            }
+            Current = default!;
+            return false;
         }
 
-        sealed class WhereEnumerator<T> : IEnumerator<T>
+        [ExcludeFromCodeCoverage]
+        public void Reset()
         {
-            readonly IEnumerator<T> _source;
+            _source.Reset();
+            Current = default!;
+        }
+    }
 
-            readonly Func<T, bool> _predicate;
+    private sealed class IndexedSelectEnumerator<TSource, TTarget>(IEnumerator<TSource> source, Func<TSource, int, TTarget> selector)
+        : IEnumerator<TTarget>
+    {
+        private readonly IEnumerator<TSource> _source = source;
 
-            public T Current { get; private set; } = default!;
+        private readonly Func<TSource, int, TTarget> _selector = selector;
 
-            object IEnumerator.Current
+        private int _index = -1;
+
+        public TTarget Current { get; private set; } = default!;
+
+        object IEnumerator.Current
+        {
+            [ExcludeFromCodeCoverage]
+            get => Current!;
+        }
+
+        public void Dispose() => _source.Dispose();
+
+        public bool MoveNext()
+        {
+            if (_source.MoveNext())
             {
-                [ExcludeFromCodeCoverage]
-                get => Current!;
+                Current = _selector(_source.Current, ++_index);
+                return true;
             }
+            Current = default!;
+            return false;
+        }
 
-            public WhereEnumerator(IEnumerator<T> source, Func<T, bool> predicate)
+        [ExcludeFromCodeCoverage]
+        public void Reset()
+        {
+            _source.Reset();
+            _index = -1;
+            Current = default!;
+        }
+    }
+
+    private sealed class WhereEnumerator<T>(IEnumerator<T> source, Func<T, bool> predicate) : IEnumerator<T>
+    {
+        private readonly IEnumerator<T> _source = source;
+
+        private readonly Func<T, bool> _predicate = predicate;
+
+        public T Current { get; private set; } = default!;
+
+        object IEnumerator.Current
+        {
+            [ExcludeFromCodeCoverage]
+            get => Current!;
+        }
+
+        public void Dispose() => _source.Dispose();
+
+        public bool MoveNext()
+        {
+            var found = false;
+            var done = false;
+            do
             {
-                _source = source;
-                _predicate = predicate;
-            }
-
-            public void Dispose() => _source.Dispose();
-
-            public bool MoveNext()
-            {
-                var found = false;
-                var done = false;
-                do
+                if (!_source.MoveNext())
                 {
-                    if (!_source.MoveNext())
+                    done = true;
+                    Current = default!;
+                }
+                else
+                {
+                    var current = _source.Current;
+                    if (_predicate(current))
                     {
+                        found = true;
                         done = true;
-                        Current = default!;
-                    }
-                    else
-                    {
-                        var current = _source.Current;
-                        if (_predicate(current))
-                        {
-                            found = true;
-                            done = true;
-                            Current = current;
-                        }
+                        Current = current;
                     }
                 }
-                while (!done);
-                return found;
             }
-
-            [ExcludeFromCodeCoverage]
-            public void Reset()
-            {
-                _source.Reset();
-                Current = default!;
-            }
+            while (!done);
+            return found;
         }
 
-        sealed class IndexedWhereEnumerator<T> : IEnumerator<T>
+        [ExcludeFromCodeCoverage]
+        public void Reset()
         {
-            readonly IEnumerator<T> _source;
+            _source.Reset();
+            Current = default!;
+        }
+    }
 
-            readonly Func<T, int, bool> _predicate;
+    private sealed class IndexedWhereEnumerator<T>(IEnumerator<T> source, Func<T, int, bool> predicate) : IEnumerator<T>
+    {
+        private readonly IEnumerator<T> _source = source;
 
-            int _index = -1;
+        private readonly Func<T, int, bool> _predicate = predicate;
 
-            public T Current { get; private set; } = default!;
+        private int _index = -1;
 
-            object IEnumerator.Current
+        public T Current { get; private set; } = default!;
+
+        object IEnumerator.Current
+        {
+            [ExcludeFromCodeCoverage]
+            get => Current!;
+        }
+
+        public void Dispose() => _source.Dispose();
+
+        public bool MoveNext()
+        {
+            var found = false;
+            var done = false;
+            do
             {
-                [ExcludeFromCodeCoverage]
-                get => Current!;
-            }
-
-            public IndexedWhereEnumerator(IEnumerator<T> source, Func<T, int, bool> predicate)
-            {
-                _source = source;
-                _predicate = predicate;
-            }
-
-            public void Dispose() => _source.Dispose();
-
-            public bool MoveNext()
-            {
-                var found = false;
-                var done = false;
-                do
+                if (!_source.MoveNext())
                 {
-                    if (!_source.MoveNext())
+                    done = true;
+                    Current = default!;
+                }
+                else
+                {
+                    var current = _source.Current;
+                    if (_predicate(current, ++_index))
                     {
+                        found = true;
                         done = true;
-                        Current = default!;
-                    }
-                    else
-                    {
-                        var current = _source.Current;
-                        if (_predicate(current, ++_index))
-                        {
-                            found = true;
-                            done = true;
-                            Current = current;
-                        }
+                        Current = current;
                     }
                 }
-                while (!done);
-                return found;
             }
-
-            [ExcludeFromCodeCoverage]
-            public void Reset()
-            {
-                _source.Reset();
-                _index = -1;
-                Current = default!;
-            }
+            while (!done);
+            return found;
         }
 
-        /// <summary>
-        /// Projects each element of a sequence into a new form.
-        /// </summary>
-        /// <param name="source">Source sequence enumerator.</param>
-        /// <param name="selector">A transform function to apply to each element.</param>
-        /// <typeparam name="TSource">The type of the elements of <paramref name="source" /></typeparam>
-        /// <typeparam name="TTarget">The type of the value returned by <paramref name="selector" />.</typeparam>
-        /// <returns>
-        /// Enumerator whose elements are the result of invoking the transform function on each element of
-        /// <paramref name="source" />.
-        /// </returns>
-        public static IEnumerator<TTarget> Select<TSource, TTarget>(this IEnumerator<TSource> source, Func<TSource, TTarget> selector)
+        [ExcludeFromCodeCoverage]
+        public void Reset()
         {
-            if (source == null)
-            {
-                throw new ArgumentNullException(nameof(source));
-            }
-            if (selector == null)
-            {
-                throw new ArgumentNullException(nameof(selector));
-            }
-            return new SelectEnumerator<TSource, TTarget>(source, selector);
+            _source.Reset();
+            _index = -1;
+            Current = default!;
         }
+    }
 
-        /// <summary>
-        /// Projects each element of a sequence into a new form by incorporating the element's index.
-        /// </summary>
-        /// <param name="source">Source sequence enumerator.</param>
-        /// <param name="selector">A transform function to apply to each element.</param>
-        /// <typeparam name="TSource">The type of the elements of <paramref name="source" /></typeparam>
-        /// <typeparam name="TTarget">The type of the value returned by <paramref name="selector" />.</typeparam>
-        /// <returns>
-        /// Enumerator whose elements are the result of invoking the transform function on each element of
-        /// <paramref name="source" />.
-        /// </returns>
-        public static IEnumerator<TTarget> Select<TSource, TTarget>(this IEnumerator<TSource> source, Func<TSource, int, TTarget> selector)
+    /// <summary>
+    /// Projects each element of a sequence into a new form.
+    /// </summary>
+    /// <param name="source">Source sequence enumerator.</param>
+    /// <param name="selector">A transform function to apply to each element.</param>
+    /// <typeparam name="TSource">The type of the elements of <paramref name="source" /></typeparam>
+    /// <typeparam name="TTarget">The type of the value returned by <paramref name="selector" />.</typeparam>
+    /// <returns>
+    /// Enumerator whose elements are the result of invoking the transform function on each element of
+    /// <paramref name="source" />.
+    /// </returns>
+    public static IEnumerator<TTarget> Select<TSource, TTarget>(this IEnumerator<TSource> source, Func<TSource, TTarget> selector)
+    {
+        if (source == null)
         {
-            if (source == null)
-            {
-                throw new ArgumentNullException(nameof(source));
-            }
-            if (selector == null)
-            {
-                throw new ArgumentNullException(nameof(selector));
-            }
-            return new IndexedSelectEnumerator<TSource, TTarget>(source, selector);
+            throw new ArgumentNullException(nameof(source));
         }
+        if (selector == null)
+        {
+            throw new ArgumentNullException(nameof(selector));
+        }
+        return new SelectEnumerator<TSource, TTarget>(source, selector);
+    }
 
-        /// <summary>
-        /// Filters a sequence of values based on a predicate.
-        /// </summary>
-        /// <param name="source">Source sequence enumerator.</param>
-        /// <param name="predicate">A function to test each element for a condition.</param>
-        /// <typeparam name="T">The type of the elements of <paramref name="source" /></typeparam>
-        /// <returns>
-        /// Enumerator that contains elements from the input sequence enumerator that satisfy the condition.
-        /// </returns>
-        public static IEnumerator<T> Where<T>(this IEnumerator<T> source, Func<T, bool> predicate)
+    /// <summary>
+    /// Projects each element of a sequence into a new form by incorporating the element's index.
+    /// </summary>
+    /// <param name="source">Source sequence enumerator.</param>
+    /// <param name="selector">A transform function to apply to each element.</param>
+    /// <typeparam name="TSource">The type of the elements of <paramref name="source" /></typeparam>
+    /// <typeparam name="TTarget">The type of the value returned by <paramref name="selector" />.</typeparam>
+    /// <returns>
+    /// Enumerator whose elements are the result of invoking the transform function on each element of
+    /// <paramref name="source" />.
+    /// </returns>
+    public static IEnumerator<TTarget> Select<TSource, TTarget>(this IEnumerator<TSource> source, Func<TSource, int, TTarget> selector)
+    {
+        if (source == null)
         {
-            if (source == null)
-            {
-                throw new ArgumentNullException(nameof(source));
-            }
-            if (predicate == null)
-            {
-                throw new ArgumentNullException(nameof(predicate));
-            }
-            return new WhereEnumerator<T>(source, predicate);
+            throw new ArgumentNullException(nameof(source));
         }
+        if (selector == null)
+        {
+            throw new ArgumentNullException(nameof(selector));
+        }
+        return new IndexedSelectEnumerator<TSource, TTarget>(source, selector);
+    }
 
-        /// <summary>
-        /// Filters a sequence of values based on a predicate. Each element's index is used in the logic of the
-        /// predicate function.
-        /// </summary>
-        /// <param name="source">Source sequence enumerator.</param>
-        /// <param name="predicate">A function to test each element for a condition.</param>
-        /// <typeparam name="T">The type of the elements of <paramref name="source" /></typeparam>
-        /// <returns>
-        /// Enumerator that contains elements from the input sequence enumerator that satisfy the condition.
-        /// </returns>
-        public static IEnumerator<T> Where<T>(this IEnumerator<T> source, Func<T, int, bool> predicate)
+    /// <summary>
+    /// Filters a sequence of values based on a predicate.
+    /// </summary>
+    /// <param name="source">Source sequence enumerator.</param>
+    /// <param name="predicate">A function to test each element for a condition.</param>
+    /// <typeparam name="T">The type of the elements of <paramref name="source" /></typeparam>
+    /// <returns>
+    /// Enumerator that contains elements from the input sequence enumerator that satisfy the condition.
+    /// </returns>
+    public static IEnumerator<T> Where<T>(this IEnumerator<T> source, Func<T, bool> predicate)
+    {
+        if (source == null)
         {
-            if (source == null)
-            {
-                throw new ArgumentNullException(nameof(source));
-            }
-            if (predicate == null)
-            {
-                throw new ArgumentNullException(nameof(predicate));
-            }
-            return new IndexedWhereEnumerator<T>(source, predicate);
+            throw new ArgumentNullException(nameof(source));
         }
+        if (predicate == null)
+        {
+            throw new ArgumentNullException(nameof(predicate));
+        }
+        return new WhereEnumerator<T>(source, predicate);
+    }
 
-        /// <summary>
-        /// Creates a list from the enumerator.
-        /// </summary>
-        /// <param name="source">Sequence enumerator.</param>
-        /// <typeparam name="T">The type of the elements of <paramref name="source" /></typeparam>
-        /// <returns>A list that contains elements from the input sequence enumerator.</returns>
-        public static List<T> ToList<T>(this IEnumerator<T> source)
+    /// <summary>
+    /// Filters a sequence of values based on a predicate. Each element's index is used in the logic of the
+    /// predicate function.
+    /// </summary>
+    /// <param name="source">Source sequence enumerator.</param>
+    /// <param name="predicate">A function to test each element for a condition.</param>
+    /// <typeparam name="T">The type of the elements of <paramref name="source" /></typeparam>
+    /// <returns>
+    /// Enumerator that contains elements from the input sequence enumerator that satisfy the condition.
+    /// </returns>
+    public static IEnumerator<T> Where<T>(this IEnumerator<T> source, Func<T, int, bool> predicate)
+    {
+        if (source == null)
         {
-            if (source == null)
-            {
-                throw new ArgumentNullException(nameof(source));
-            }
-            var result = new List<T>();
-            while (source.MoveNext())
-            {
-                result.Add(source.Current);
-            }
-            return result;
+            throw new ArgumentNullException(nameof(source));
         }
+        if (predicate == null)
+        {
+            throw new ArgumentNullException(nameof(predicate));
+        }
+        return new IndexedWhereEnumerator<T>(source, predicate);
+    }
+
+    /// <summary>
+    /// Creates a list from the enumerator.
+    /// </summary>
+    /// <param name="source">Sequence enumerator.</param>
+    /// <typeparam name="T">The type of the elements of <paramref name="source" /></typeparam>
+    /// <returns>A list that contains elements from the input sequence enumerator.</returns>
+    public static List<T> ToList<T>(this IEnumerator<T> source)
+    {
+        if (source == null)
+        {
+            throw new ArgumentNullException(nameof(source));
+        }
+        var result = new List<T>();
+        while (source.MoveNext())
+        {
+            result.Add(source.Current);
+        }
+        return result;
     }
 }
