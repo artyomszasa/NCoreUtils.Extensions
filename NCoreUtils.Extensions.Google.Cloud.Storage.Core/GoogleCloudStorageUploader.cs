@@ -200,11 +200,8 @@ public sealed partial class GoogleCloudStorageUploader : IDisposable, IAsyncDisp
             {
                 if (response.StatusCode != HttpStatusCode.OK && response.StatusCode != HttpStatusCode.Created)
                 {
-                    var error = await ReadErrorResponseAsync(response, CancellationToken.None).ConfigureAwait(false);
-                    if (error is null)
-                    {
-                        throw new GoogleCloudStorageUploadException($"Upload final chunk failed with status code {response.StatusCode} [no error description].");
-                    }
+                    var error = await ReadErrorResponseAsync(response, CancellationToken.None).ConfigureAwait(false)
+                        ?? throw new GoogleCloudStorageUploadException($"Upload final chunk failed with status code {response.StatusCode} [no error description].");
                     throw new GoogleCloudStorageUploadException($"Upload final chunk failed with status code {response.StatusCode} [{FormatGoogleError(error)}].");
                 }
                 // final chunk upload successfull
@@ -213,11 +210,8 @@ public sealed partial class GoogleCloudStorageUploader : IDisposable, IAsyncDisp
             }
             if (response.StatusCode != HttpStatusCode.PermanentRedirect)
             {
-                var error = await ReadErrorResponseAsync(response, CancellationToken.None).ConfigureAwait(false);
-                if (error is null)
-                {
-                    throw new GoogleCloudStorageUploadException($"Upload chunk failed with status code {response.StatusCode} [no error description].");
-                }
+                var error = await ReadErrorResponseAsync(response, CancellationToken.None).ConfigureAwait(false)
+                    ?? throw new GoogleCloudStorageUploadException($"Upload chunk failed with status code {response.StatusCode} [no error description].");
                 throw new GoogleCloudStorageUploadException($"Upload chunk failed with status code {response.StatusCode} [{FormatGoogleError(error)}].");
             }
             // chunk upload successfull (TODO: check if response range is set properly)

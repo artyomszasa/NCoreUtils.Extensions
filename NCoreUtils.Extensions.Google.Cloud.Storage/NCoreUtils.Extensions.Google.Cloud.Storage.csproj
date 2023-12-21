@@ -1,11 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>net7.0;net6.0;netstandard2.1</TargetFrameworks>
+    <TargetFrameworks>net8.0;net7.0;net6.0;netstandard2.1</TargetFrameworks>
     <RootNamespace>NCoreUtils</RootNamespace>
-    <Version>7.0.0.2</Version>
+    <Version>8.0.0</Version>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Google.Apis.Auth" Version="1.59.0" />
+    <PackageReference Include="Google.Apis.Auth" Version="1.64.0" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\NCoreUtils.Extensions.Google.Cloud.Storage.Core\NCoreUtils.Extensions.Google.Cloud.Storage.Core.csproj" />
