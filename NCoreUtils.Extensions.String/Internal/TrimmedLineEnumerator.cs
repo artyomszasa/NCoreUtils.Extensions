@@ -2,16 +2,18 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 
 namespace NCoreUtils.Internal;
 
-public sealed class TrimmedLineEnumerator : IEnumerator<string>
+[method: MethodImpl(MethodImplOptions.AggressiveInlining)]
+public sealed class TrimmedLineEnumerator(string source) : IEnumerator<string>
 {
-    private string Source { get; }
+    private string Source { get; } = source ?? throw new ArgumentNullException(nameof(source));
 
     private int Offset { get; set; }
 
-    private bool TrailingEmptyLine { get; set; }
+    private bool TrailingEmptyLine { get; set; } = source.Length == 0 || source[^1] == '\n';
 
     object IEnumerator.Current
     {
@@ -20,12 +22,6 @@ public sealed class TrimmedLineEnumerator : IEnumerator<string>
     }
 
     public string Current { get; private set; } = string.Empty;
-
-    public TrimmedLineEnumerator(string source)
-    {
-        Source = source ?? throw new ArgumentNullException(nameof(source));
-        TrailingEmptyLine = source.Length == 0 || source[^1] == '\n';
-    }
 
     [ExcludeFromCodeCoverage]
     void IEnumerator.Reset()

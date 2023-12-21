@@ -2,16 +2,20 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 
 namespace NCoreUtils.Internal;
 
-public sealed class LineEnumerator : IEnumerator<string>
+[method: MethodImpl(MethodImplOptions.AggressiveInlining)]
+public sealed class LineEnumerator(string source) : IEnumerator<string>
 {
-    private string Source { get; }
+    private readonly string _source = source ?? throw new ArgumentNullException(nameof(source));
 
-    private int Offset { get; set; }
+    private int _offset;
 
-    private bool TrailingEmptyLine { get; set; }
+    private bool _trailingEmptyLine = source.Length == 0 || source[^1] == '\n';
+
+    private string _current = string.Empty;
 
     object IEnumerator.Current
     {
@@ -19,33 +23,32 @@ public sealed class LineEnumerator : IEnumerator<string>
         get => Current;
     }
 
-    public string Current { get; private set; } = string.Empty;
-
-    public LineEnumerator(string source)
+    public string Current
     {
-        Source = source ?? throw new ArgumentNullException(nameof(source));
-        TrailingEmptyLine = source.Length == 0 || source[^1] == '\n';
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        get => _current;
     }
 
     [ExcludeFromCodeCoverage]
     void IEnumerator.Reset()
-        => Offset = 0;
+        => _offset = 0;
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool MoveNext()
     {
-        if (Offset == Source.Length)
+        if (_offset == _source.Length)
         {
-            Current = string.Empty;
-            if (TrailingEmptyLine)
+            _current = string.Empty;
+            if (_trailingEmptyLine)
             {
-                TrailingEmptyLine = false;
+                _trailingEmptyLine = false;
                 return true;
             }
             return false;
         }
-        LineRange.GetLineRange(Source.AsSpan()[Offset..], out var range, out var used);
-        Current = Source[(Offset + range.Start)..(Offset + range.End)];
-        Offset += used;
+        LineRange.GetLineRange(_source.AsSpan()[_offset..], out var range, out var used);
+        _current = _source[(_offset + range.Start)..(_offset + range.End)];
+        _offset += used;
         return true;
     }
 

@@ -10,7 +10,7 @@ namespace NCoreUtils;
 public static class StringExtensions
 {
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    [return: NotNullIfNotNull("placeholder")]
+    [return: NotNullIfNotNull(nameof(placeholder))]
     public static string? Supply(this string? source, string? placeholder)
         => string.IsNullOrEmpty(source) ? placeholder : source;
 
@@ -32,6 +32,18 @@ public static class StringExtensions
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool IsNotEmpty([NotNullWhen(true)] this string? value)
         => !value.IsNullOrEmpty();
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static bool IsNotEmpty([NotNullWhen(true)] this string? value, [MaybeNullWhen(false)] out string nonEmptyValue)
+    {
+        if (string.IsNullOrEmpty(value))
+        {
+            nonEmptyValue = default;
+            return false;
+        }
+        nonEmptyValue = value;
+        return true;
+    }
 
     public static IEnumerable<string> SplitIntoLines(this string? source, StringSplitOptions options)
     {

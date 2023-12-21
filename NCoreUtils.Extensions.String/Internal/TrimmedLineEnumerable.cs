@@ -2,15 +2,14 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 
 namespace NCoreUtils.Internal;
 
-public class TrimmedLineEnumerable : IEnumerable<string>
+[method: MethodImpl(MethodImplOptions.AggressiveInlining)]
+public sealed class TrimmedLineEnumerable(string source) : IEnumerable<string>
 {
-    public string Source { get; }
-
-    public TrimmedLineEnumerable(string source)
-        => Source = source ?? throw new ArgumentNullException(nameof(source));
+    public string Source { get; } = source ?? throw new ArgumentNullException(nameof(source));
 
     [ExcludeFromCodeCoverage]
     IEnumerator IEnumerable.GetEnumerator()
