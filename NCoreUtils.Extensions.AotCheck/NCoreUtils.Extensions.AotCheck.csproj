@@ -2,15 +2,21 @@
 
   <ItemGroup>
     <ProjectReference Include="..\NCoreUtils.Extensions.Memory\NCoreUtils.Extensions.Memory.csproj" />
+    <ProjectReference Include="..\NCoreUtils.Extensions.Google.Cloud.Storage.ServiceAccount\NCoreUtils.Extensions.Google.Cloud.Storage.ServiceAccount.csproj" />
+    <ProjectReference Include="..\NCoreUtils.Extensions.Globalization\NCoreUtils.Extensions.Globalization.csproj" />
   </ItemGroup>
 
   <ItemGroup>
+    <TrimmerRootAssembly Include="NCoreUtils.Extensions.Globalization" />
     <TrimmerRootAssembly Include="NCoreUtils.Extensions.Memory" />
+    <TrimmerRootAssembly Include="NCoreUtils.Extensions.Memory.Pooling" />
+    <TrimmerRootAssembly Include="NCoreUtils.Extensions.Primitives" />
+    <TrimmerRootAssembly Include="NCoreUtils.Extensions.Google.Cloud.Storage.ServiceAccount" />
   </ItemGroup>
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net7.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <!-- Use a RID of your choice. -->
