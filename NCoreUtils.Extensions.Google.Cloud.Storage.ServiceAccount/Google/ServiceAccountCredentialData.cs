@@ -45,7 +45,6 @@ public record ServiceAccountCredentialData(
         try
         {
             using var rsa = RSA.Create();
-            File.WriteAllBytes("/tmp/key.pem", Encoding.ASCII.GetBytes(raw.PrivateKey));
             rsa.ImportFromPem(raw.PrivateKey);
             privateKeyParameters = rsa.ExportParameters(includePrivateParameters: true);
         }

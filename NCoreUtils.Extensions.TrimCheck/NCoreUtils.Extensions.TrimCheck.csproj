@@ -30,5 +30,6 @@
     <!-- Prevent warnings from unused code in dependencies -->
     <TrimMode>full</TrimMode>
     <IsPackable>false</IsPackable>
+    <SelfContained>true</SelfContained>
   </PropertyGroup>
 </Project>

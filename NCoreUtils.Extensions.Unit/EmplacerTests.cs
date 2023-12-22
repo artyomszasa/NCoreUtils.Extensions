@@ -35,9 +35,10 @@ namespace NCoreUtils.Extensions.Unit
             }
         }
 
+#if !NET8_0_OR_GREATER
         private static readonly BinaryFormatter _formatter = new();
 
-#pragma warning disable SYSLIB0011
+
         private static T Reserialize<T>(T value)
         {
             using var buffer = new MemoryStream();
@@ -45,7 +46,7 @@ namespace NCoreUtils.Extensions.Unit
             buffer.Seek(0L, SeekOrigin.Begin);
             return (T)_formatter.Deserialize(buffer);
         }
-#pragma warning restore SYSLIB0011
+#endif
 
         [Theory]
         [InlineData((byte)0)]
@@ -582,6 +583,7 @@ namespace NCoreUtils.Extensions.Unit
             Assert.Equal(0, length);
         }
 
+#if !NET8_0_OR_GREATER
         [Fact]
         public void ReserializeException()
         {
@@ -604,5 +606,6 @@ namespace NCoreUtils.Extensions.Unit
             Assert.Equal(exn2.SizeAvailable, e2.SizeAvailable);
             Assert.Equal(exn2.SizeRequired, e2.SizeRequired);
         }
+#endif
     }
 }

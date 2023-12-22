@@ -247,6 +247,7 @@ namespace NCoreUtils.Extensions.Unit
             }
         }
 
+#if !NET8_0_OR_GREATER
         public virtual void Serialization()
         {
             var items = Enumerable.Range(0, 100).Select(_ =>
@@ -262,7 +263,6 @@ namespace NCoreUtils.Extensions.Unit
             }
             var binaryFormatter = new BinaryFormatter();
             byte[] bin;
-#pragma warning disable SYSLIB0011
             using (var buffer = new MemoryStream())
             {
                 binaryFormatter.Serialize(buffer, data0);
@@ -273,7 +273,6 @@ namespace NCoreUtils.Extensions.Unit
             {
                 data1 = (MultiValueDictionary<TKey, TValue>)binaryFormatter.Deserialize(buffer);
             }
-#pragma warning restore SYSLIB0011
             Assert.Equal(data0, data1);
             Assert.Equal(data0.GetHashCode(), data1.GetHashCode());
             var data2 = data0.Clone();
@@ -281,10 +280,11 @@ namespace NCoreUtils.Extensions.Unit
             Assert.False(((object)data0).Equals(null));
             Assert.False(((object)data0!).Equals(2));
         }
+#endif
     }
 
     [Serializable]
-    public struct MyInt : IEquatable<MyInt>
+    public readonly struct MyInt : IEquatable<MyInt>
     {
         readonly int _i;
         public MyInt(int i) => _i = i;
@@ -326,8 +326,10 @@ namespace NCoreUtils.Extensions.Unit
         [Fact]
         public override void ManyItems() => base.ManyItems();
 
+#if !NET8_0_OR_GREATER
         [Fact]
         public override void Serialization() => base.Serialization();
+#endif
     }
 
     public class MyIntIntMultiDictionaryTests : MultiDictionaryTests<MyInt, int>
@@ -350,8 +352,10 @@ namespace NCoreUtils.Extensions.Unit
         [Fact]
         public override void ManyItems() => base.ManyItems();
 
+#if !NET8_0_OR_GREATER
         [Fact]
         public override void Serialization() => base.Serialization();
+#endif
     }
 
     public class StringStringMultiDictionaryTests : MultiDictionaryTests<string, string>
@@ -373,7 +377,9 @@ namespace NCoreUtils.Extensions.Unit
         [Fact]
         public override void ManyItems() => base.ManyItems();
 
+#if !NET8_0_OR_GREATER
         [Fact]
         public override void Serialization() => base.Serialization();
+#endif
     }
 }

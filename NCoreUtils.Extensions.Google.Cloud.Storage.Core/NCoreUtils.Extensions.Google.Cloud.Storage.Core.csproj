@@ -6,10 +6,10 @@
     <IsAotCompatible>true</IsAotCompatible>
     <IsTrimmable>true</IsTrimmable>
   </PropertyGroup>
-  <ItemGroup Condition="!$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net6.0'))">
+  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.1' ">
     <Compile Remove="Google\HttpRequestMessageExtensions.Net6.cs" />
   </ItemGroup>
-  <ItemGroup Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net6.0'))">
+  <ItemGroup Condition=" '$(TargetFramework)' != 'netstandard2.1' ">
     <Compile Remove="Google\HttpRequestMessageExtensions.Legacy.cs" />
     <Compile Remove="Compat\**" />
   </ItemGroup>
