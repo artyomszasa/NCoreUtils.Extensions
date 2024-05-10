@@ -195,27 +195,44 @@ public sealed partial class GoogleCloudStorageUploader : IDisposable, IAsyncDisp
             {
                 throw new InvalidOperationException("Should never happen: stream is empty?");
             }
-            using var response = await SendChunkAsync(size, final, cancellationToken).ConfigureAwait(false);
-            if (final)
+            try
             {
-                if (response.StatusCode != HttpStatusCode.OK && response.StatusCode != HttpStatusCode.Created)
+                using var response = await SendChunkAsync(size, final, cancellationToken).ConfigureAwait(false);
+                if (final)
+                {
+                    if (response.StatusCode != HttpStatusCode.OK && response.StatusCode != HttpStatusCode.Created)
+                    {
+                        var error = await ReadErrorResponseAsync(response, CancellationToken.None).ConfigureAwait(false)
+                            ?? throw new GoogleCloudStorageUploadException($"Upload final chunk failed with status code {response.StatusCode} [no error description].");
+                        throw new GoogleCloudStorageUploadException($"Upload final chunk failed with status code {response.StatusCode} [{FormatGoogleError(error)}].");
+                    }
+                    // final chunk upload successfull
+                    Sent += size;
+                    return;
+                }
+                if (response.StatusCode != HttpStatusCode.PermanentRedirect)
                 {
                     var error = await ReadErrorResponseAsync(response, CancellationToken.None).ConfigureAwait(false)
-                        ?? throw new GoogleCloudStorageUploadException($"Upload final chunk failed with status code {response.StatusCode} [no error description].");
-                    throw new GoogleCloudStorageUploadException($"Upload final chunk failed with status code {response.StatusCode} [{FormatGoogleError(error)}].");
+                        ?? throw new GoogleCloudStorageUploadException($"Upload chunk failed with status code {response.StatusCode} [no error description].");
+                    throw new GoogleCloudStorageUploadException($"Upload chunk failed with status code {response.StatusCode} [{FormatGoogleError(error)}].");
                 }
-                // final chunk upload successfull
+                // chunk upload successfull (TODO: check if response range is set properly)
                 Sent += size;
-                return;
             }
-            if (response.StatusCode != HttpStatusCode.PermanentRedirect)
+            catch (Exception exn)
             {
-                var error = await ReadErrorResponseAsync(response, CancellationToken.None).ConfigureAwait(false)
-                    ?? throw new GoogleCloudStorageUploadException($"Upload chunk failed with status code {response.StatusCode} [no error description].");
-                throw new GoogleCloudStorageUploadException($"Upload chunk failed with status code {response.StatusCode} [{FormatGoogleError(error)}].");
+                // NOTE: Xamarin AndroidMessageHandler throws exception on 308 response
+                // see: https://github.com/xamarin/xamarin-android/issues/4477
+                if (!final && exn.Message.Contains("not supported") && exn.Message.Contains("308"))
+                {
+                    // chunk upload successfull
+                    Sent += size;
+                }
+                else
+                {
+                    throw;
+                }
             }
-            // chunk upload successfull (TODO: check if response range is set properly)
-            Sent += size;
         }
     }
 
