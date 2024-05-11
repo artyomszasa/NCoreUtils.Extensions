@@ -12,17 +12,14 @@ namespace NCoreUtils.Google
         public GoogleAccessTokenProvider(GoogleCredential? googleCredential = default)
             => _googleCredential = googleCredential;
 
-        public ValueTask<string> GetAccessTokenAsync(string[] scopes, CancellationToken cancellationToken)
-            => GetAccessTokenAsync(new HashSet<string>(scopes), cancellationToken);
-
-        public async ValueTask<string> GetAccessTokenAsync(HashSet<string> scopes, CancellationToken cancellationToken)
+        public async ValueTask<string> GetAccessTokenAsync(ScopeCollection scopes, CancellationToken cancellationToken)
         {
             if (null == _googleCredential)
             {
                 _googleCredential = await GoogleCredential.GetApplicationDefaultAsync(cancellationToken).ConfigureAwait(false);
             }
             return await _googleCredential
-                .CreateScoped(scopes)
+                .CreateScoped(scopes.ToArray())
                 .UnderlyingCredential
                 .GetAccessTokenForRequestAsync(cancellationToken: cancellationToken)
                 .ConfigureAwait(false);

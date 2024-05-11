@@ -12,85 +12,18 @@ internal partial class TokenResponseSerializerContext : JsonSerializerContext { 
 public class ServiceAccountAccessTokenManager(ServiceAccountCredentialData credential, IHttpClientFactory? httpClientFactory = default)
     : IGoogleAccessTokenProvider
 {
-    private sealed class ScopeArrayComparer : IEqualityComparer<string[]>
-    {
-        private static IEqualityComparer<HashSet<string>> SetComparer { get; } = HashSet<string>.CreateSetComparer();
-
-        private static FixSizePool<HashSet<string>> HashSetPool { get; } = new(16);
-
-        public static ScopeArrayComparer Singleton { get; } = new();
-
-        private ScopeArrayComparer() { }
-
-        public bool Equals(string[]? x, string[]? y)
-        {
-            if (x is null)
-            {
-                return y is null;
-            }
-            if (y is null || x.Length != y.Length)
-            {
-                return false;
-            }
-            if (x.Length == 1 && y.Length == 1)
-            {
-                return x[0] == y[0];
-            }
-            var set = HashSetPool.TryRent(out var instance) ? instance : new(StringComparer.InvariantCulture);
-            try
-            {
-                foreach (var item in x)
-                {
-                    set.Add(item);
-                }
-                return set.SetEquals(y);
-            }
-            finally
-            {
-                set.Clear();
-                HashSetPool.Return(set);
-            }
-        }
-
-        public int GetHashCode([DisallowNull] string[] obj)
-        {
-            if (obj is null || obj.Length == 0)
-            {
-                return default;
-            }
-            if (obj.Length == 1)
-            {
-                return HashCode.Combine(0, obj[0]);
-            }
-            var set = HashSetPool.TryRent(out var instance) ? instance : new(StringComparer.InvariantCulture);
-            try
-            {
-                foreach (var item in obj)
-                {
-                    set.Add(item);
-                }
-                return HashCode.Combine(1, SetComparer.GetHashCode(set));
-            }
-            finally
-            {
-                set.Clear();
-                HashSetPool.Return(set);
-            }
-        }
-    }
-
     private sealed record AccessTokenValue(string AccessToken, DateTimeOffset Expiry);
 
     private InterlockedBoolean Sync;
 
-    private Dictionary<string[], AccessTokenValue> AccessTokens { get; } = new(ScopeArrayComparer.Singleton);
+    private Dictionary<ScopeCollection, AccessTokenValue> AccessTokens { get; } = [];
 
     private ServiceAccountCredentialData Credential { get; } = credential ?? throw new ArgumentNullException(nameof(credential));
 
     private IHttpClientFactory? HttpClientFactory { get; } = httpClientFactory;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private void SetAccessToken(string[] scope, string accessToken, DateTimeOffset expiry)
+    private void SetAccessToken(ScopeCollection scope, string accessToken, DateTimeOffset expiry)
     {
         while (!Sync.TrySet()) { /* noop */ }
         try
@@ -104,12 +37,12 @@ public class ServiceAccountAccessTokenManager(ServiceAccountCredentialData crede
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private void SetAccessToken(string[] scope, string accessToken, TimeSpan expiresIn)
+    private void SetAccessToken(ScopeCollection scope, string accessToken, TimeSpan expiresIn)
         // NOTE: -2 seconds to be sure
         => SetAccessToken(scope, accessToken, DateTimeOffset.Now.Add(expiresIn).Add(TimeSpan.FromSeconds(-2)));
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private bool TryGetAccessToken(string[] scope, [MaybeNullWhen(false)] out string accessToken)
+    private bool TryGetAccessToken(ScopeCollection scope, [MaybeNullWhen(false)] out string accessToken)
     {
         while (!Sync.TrySet()) { /* noop */ }
         try
@@ -131,7 +64,7 @@ public class ServiceAccountAccessTokenManager(ServiceAccountCredentialData crede
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private bool TryResetAccessToken(string[] scope, string? accessToken)
+    private bool TryResetAccessToken(ScopeCollection scope, string? accessToken)
     {
         while (!Sync.TrySet()) { /* noop */ }
         try
@@ -158,7 +91,7 @@ public class ServiceAccountAccessTokenManager(ServiceAccountCredentialData crede
             var factory => factory.CreateClient(nameof(ServiceAccountAccessTokenManager))
         };
 
-    protected async Task<string> DoGetAccessTokenAsync(string[] scope, CancellationToken cancellationToken = default)
+    protected async Task<string> DoGetAccessTokenAsync(ScopeCollection scope, CancellationToken cancellationToken = default)
     {
         var jwtToken = JwtHelper.CreateJwtToken(Credential, scope);
         using var request = new HttpRequestMessage(HttpMethod.Post, Credential.TokenUri)
@@ -185,7 +118,7 @@ public class ServiceAccountAccessTokenManager(ServiceAccountCredentialData crede
         return resp.AccessToken;
     }
 
-    public ValueTask<string> GetAccessTokenAsync(string[] scope, CancellationToken cancellationToken = default)
+    public ValueTask<string> GetAccessTokenAsync(ScopeCollection scope, CancellationToken cancellationToken = default)
     {
         if (TryGetAccessToken(scope, out var accessToken))
         {
@@ -195,6 +128,6 @@ public class ServiceAccountAccessTokenManager(ServiceAccountCredentialData crede
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public bool Invalidate(string[] scope, string? accessToken)
+    public bool Invalidate(ScopeCollection scope, string? accessToken)
         => TryResetAccessToken(scope, accessToken);
 }

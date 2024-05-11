@@ -1,5 +1,4 @@
 using System.Security.Cryptography;
-using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -19,6 +18,41 @@ public record ServiceAccountCredentialData(
     string? AuthProviderX509CertUrl,
     string? ClientX509CertUrl)
 {
+#if NET6_0_OR_GREATER
+
+    private static RSA ReadPrivateKey(string raw)
+    {
+        var rsa = RSA.Create();
+        rsa.ImportFromPem(raw);
+        return rsa;
+    }
+
+#else
+    private static readonly System.Text.RegularExpressions.Regex _eolRegex = new("\r*\n\r*", System.Text.RegularExpressions.RegexOptions.Compiled | System.Text.RegularExpressions.RegexOptions.CultureInvariant);
+
+    private static RSA ReadPrivateKey(string raw)
+    {
+        var key = _eolRegex.Split(raw).Where(s => !string.IsNullOrEmpty(s)).ToArray();
+        if (key.Length < 3)
+        {
+            throw new InvalidOperationException("Invalid private key.");
+        }
+        if (key[0] != "-----BEGIN PRIVATE KEY-----")
+        {
+            throw new InvalidOperationException("Invalid private key.");
+        }
+        if (key[key.Length - 1] != "-----END PRIVATE KEY-----")
+        {
+            throw new InvalidOperationException("Invalid private key.");
+        }
+        var base64 = string.Join(string.Empty, key[1..^1]);
+        var rsaKey = RSA.Create();
+        rsaKey.ImportPkcs8PrivateKey(Convert.FromBase64String(base64), out _);
+        return rsaKey;
+    }
+
+#endif
+
     public static ServiceAccountCredentialData ValidateAndCreate(RawServiceAccountCredentialData raw)
     {
         if (string.IsNullOrEmpty(raw.Type))
@@ -44,8 +78,7 @@ public record ServiceAccountCredentialData(
         RSAParameters privateKeyParameters;
         try
         {
-            using var rsa = RSA.Create();
-            rsa.ImportFromPem(raw.PrivateKey);
+            using var rsa = ReadPrivateKey(raw.PrivateKey);
             privateKeyParameters = rsa.ExportParameters(includePrivateParameters: true);
         }
         catch (Exception exn)

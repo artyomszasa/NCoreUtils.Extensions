@@ -1,8 +1,4 @@
-using System;
 using System.Buffers;
-using System.IO;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace NCoreUtils;
 
@@ -13,19 +9,13 @@ public partial class GoogleCloudStorageUploader
         ValueTask<(int Read, bool Final)> FetchChunkAsync(Memory<byte> buffer, CancellationToken cancellationToken);
     }
 
-    private sealed class DefaultChunkSource : IDataChunkSource
+    private sealed class DefaultChunkSource(Stream source, bool leaveOpen) : IDataChunkSource
     {
-        private Stream Source { get; }
+        private Stream Source { get; } = source ?? throw new ArgumentNullException(nameof(source));
 
-        private bool LeaveOpen { get; }
+        private bool LeaveOpen { get; } = leaveOpen;
 
         private long TotalFetched { get; set; }
-
-        public DefaultChunkSource(Stream source, bool leaveOpen)
-        {
-            Source = source ?? throw new ArgumentNullException(nameof(source));
-            LeaveOpen = leaveOpen;
-        }
 
         public async ValueTask<(int Read, bool Final)> FetchChunkAsync(Memory<byte> buffer, CancellationToken cancellationToken)
         {
@@ -58,23 +48,17 @@ public partial class GoogleCloudStorageUploader
             => LeaveOpen ? default : Source.DisposeAsync();
     }
 
-    private sealed class PrefetchChunkSource : IDataChunkSource
+    private sealed class PrefetchChunkSource(Stream source, bool leaveOpen) : IDataChunkSource
     {
         private const int PrefetchBufferSize = 16 * 1024;
 
         private byte[]? PrefetchBuffer { get; set; }
 
-        private Stream Source { get; }
+        private Stream Source { get; } = source ?? throw new ArgumentNullException(nameof(source));
 
-        private bool LeaveOpen { get; }
+        private bool LeaveOpen { get; } = leaveOpen;
 
         private int Prefetched { get; set; }
-
-        public PrefetchChunkSource(Stream source, bool leaveOpen)
-        {
-            Source = source ?? throw new ArgumentNullException(nameof(source));
-            LeaveOpen = leaveOpen;
-        }
 
         public async ValueTask<(int Read, bool Final)> FetchChunkAsync(
             Memory<byte> buffer,

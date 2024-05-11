@@ -49,7 +49,7 @@ public partial class GoogleCloudStorageUtils
         {
             request.Headers.Add("X-Upload-Content-Type", contentType);
         }
-        request.SetRequiredGSCScope(obj.Acl.Count > 0 ? FullControlScope : ReadWriteScope);
+        request.SetRequiredGcpScope(obj.Acl.Count > 0 ? FullControlScope : ReadWriteScope);
         using var client = CreateHttpClient();
         using var response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken)
             .ConfigureAwait(false);

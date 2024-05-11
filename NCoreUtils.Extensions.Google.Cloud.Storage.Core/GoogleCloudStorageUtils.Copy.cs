@@ -1,8 +1,5 @@
-using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
-using System.Threading;
-using System.Threading.Tasks;
 using NCoreUtils.Google;
 
 namespace NCoreUtils;
@@ -43,7 +40,7 @@ public partial class GoogleCloudStorageUtils
         {
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
         }
-        request.SetRequiredGSCScope(obj.Acl.Count > 0 ? FullControlScope : ReadWriteScope);
+        request.SetRequiredGcpScope(obj.Acl.Count > 0 ? FullControlScope : ReadWriteScope);
         // perform request
         using var client = CreateHttpClient();
         using var response = await client.SendAsync(request, HttpCompletionOption.ResponseContentRead, cancellationToken)

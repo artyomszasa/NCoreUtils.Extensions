@@ -6,13 +6,10 @@
 #if !NETCOREAPP
 using System.Diagnostics;
 #endif
-using System.IO;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization.Metadata;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace System.Net.Http.Json
 {

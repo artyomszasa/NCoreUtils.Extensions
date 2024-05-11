@@ -17,12 +17,13 @@ namespace NCoreUtils.Google
 
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
+            if (!request.TryGetRequiredGcpScope(out var scopes))
+            {
+                return await base.SendAsync(request, cancellationToken).ConfigureAwait(false);
+            }
             if (request.Headers.Authorization is null || string.IsNullOrEmpty(request.Headers.Authorization.Parameter))
             {
-                var scope = request.TryGetRequiredGCSScope(out var requiredScope)
-                    ? requiredScope
-                    : request.Method == HttpMethod.Get ? GoogleCloudStorageUtils.ReadOnlyScope : GoogleCloudStorageUtils.ReadWriteScope;
-                var accessToken = await AccessTokenProvider.GetAccessTokenAsync(scope, cancellationToken).ConfigureAwait(false);
+                var accessToken = await AccessTokenProvider.GetAccessTokenAsync(scopes, cancellationToken).ConfigureAwait(false);
                 request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
             }
             return await base.SendAsync(request, cancellationToken).ConfigureAwait(false);

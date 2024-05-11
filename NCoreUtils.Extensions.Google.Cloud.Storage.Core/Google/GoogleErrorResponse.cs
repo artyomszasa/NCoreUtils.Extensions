@@ -1,10 +1,9 @@
 using System.Text.Json.Serialization;
 
-namespace NCoreUtils.Google
+namespace NCoreUtils.Google;
+
+public class GoogleErrorResponse
 {
-    public class GoogleErrorResponse
-    {
-        [JsonPropertyName("error")]
-        public GoogleErrorData Error { get; set; } = default!;
-    }
+    [JsonPropertyName("error")]
+    public GoogleErrorData Error { get; set; } = default!;
 }

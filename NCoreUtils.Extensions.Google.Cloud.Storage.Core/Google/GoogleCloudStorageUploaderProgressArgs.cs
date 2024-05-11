@@ -1,12 +1,6 @@
-using System;
+namespace NCoreUtils.Google;
 
-namespace NCoreUtils.Google
+public class GoogleCloudStorageUploaderProgressArgs(long sent) : EventArgs
 {
-    public class GoogleCloudStorageUploaderProgressArgs : EventArgs
-    {
-        public long Sent { get; }
-
-        public GoogleCloudStorageUploaderProgressArgs(long sent)
-            => Sent = sent;
-    }
+    public long Sent { get; } = sent;
 }

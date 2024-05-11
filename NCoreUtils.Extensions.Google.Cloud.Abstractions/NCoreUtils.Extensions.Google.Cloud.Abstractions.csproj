@@ -1,0 +1,28 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>net8.0;net7.0;net6.0;netstandard2.1;net48</TargetFrameworks>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>NCoreUtils.Google</RootNamespace>
+    <Version>8.1.0</Version>
+    <IsAotCompatible>true</IsAotCompatible>
+    <IsTrimmable>true</IsTrimmable>
+  </PropertyGroup>
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net48' ">
+    <PackageReference Include="System.Net.Http" Version="4.3.4" />
+    <PackageReference Include="Microsoft.Bcl.HashCode" Version="1.1.1" />
+    <Using Include="System.Net.Http" />
+    <Compile Include="..\Compat\Nullable\NotNullAttribute.cs" />
+    <Compile Include="..\Compat\Nullable\NotNullWhenAttribute.cs" />
+    <Compile Include="..\Compat\Range\*" />
+  </ItemGroup>
+  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.1' Or '$(TargetFramework)' == 'net48' ">
+    <Compile Remove="HttpRequestMessageExtensions.Net6.cs" />
+    <Compile Include="..\Compat\Nullable\MemberNotNullWhenAttribute.cs" />
+  </ItemGroup>
+  <ItemGroup Condition=" '$(TargetFramework)' != 'netstandard2.1' And '$(TargetFramework)' != 'net48' ">
+    <Compile Remove="HttpRequestMessageExtensions.Legacy.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\NCoreUtils.Extensions.Memory\NCoreUtils.Extensions.Memory.csproj" />
+  </ItemGroup>
+</Project>

@@ -6,17 +6,16 @@ namespace NCoreUtils.Google;
 
 public static class JwtHelper
 {
-    public static string CreateJwtToken(ServiceAccountCredentialData cred, IReadOnlyList<string> scope)
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0300:Simplify collection initialization", Justification = "Ambiguous..")]
+    public static string CreateJwtToken(ServiceAccountCredentialData cred, ScopeCollection scope)
     {
-        // using var rsa = RSA.Create();
-        // rsa.ImportParameters(cred.PrivateKeyParameters);
         var now = DateTime.Now;
         var descriptor = new SecurityTokenDescriptor()
         {
             Audience = "https://oauth2.googleapis.com/token",
             Subject = new ClaimsIdentity(new Claim[]
             {
-                new("scope", string.Join(' ', scope))
+                new("scope", scope.Join(" "))
             }),
             Issuer = cred.ClientEmail,
             IssuedAt = now,

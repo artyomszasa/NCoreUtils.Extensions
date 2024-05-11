@@ -16,7 +16,7 @@ public static class ServiceCollectionGoogleCloudStorageExtensions
         if (configureHttpClient)
         {
             services.TryAddSingleton<IGoogleAccessTokenProvider, GoogleAccessTokenProvider>();
-            services.AddTransient<InjectGoogleAccessTokenHandler>();
+            services.TryAddTransient<InjectGoogleAccessTokenHandler>();
             services.AddHttpClient(GoogleCloudStorageUtils.HttpClientConfigurationName)
                 .AddHttpMessageHandler<InjectGoogleAccessTokenHandler>();
         }
