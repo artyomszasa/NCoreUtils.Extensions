@@ -1,10 +1,13 @@
 using System.Buffers;
 using System.Text.Json.Serialization;
+using NCoreUtils.Memory;
 
 namespace NCoreUtils.Google;
 
 public class GoogleErrorDetails : ISpanEmplaceable
 {
+    public static SpanEmplaceableEmplacer<GoogleErrorDetails> Emplacer { get; } = new();
+
     private static bool TryAppendProp(ref SpanBuilder builder, scoped ref bool fst, string name, string? value)
     {
         if (!string.IsNullOrEmpty(value))
@@ -19,7 +22,7 @@ public class GoogleErrorDetails : ISpanEmplaceable
             }
             return builder.TryAppend(name)
                 && builder.TryAppend('=')
-                && builder.TryAppend(value);
+                && builder.TryAppend(value ?? string.Empty);
         }
         return true;
     }

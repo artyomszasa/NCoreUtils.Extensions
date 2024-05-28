@@ -1,23 +1,13 @@
-using System.Runtime.Serialization;
-
 namespace NCoreUtils.Google;
 
-#if !NET8_0_OR_GREATER
-[Serializable]
-#endif
-public class GoogleCloudStorageUploadException : Exception
+public class GoogleCloudStorageUploadException(string? message, GoogleErrorData? errorData = default, Exception? innerException = default)
+    : GoogleCloudException(message, errorData, innerException)
 {
-#if !NET8_0_OR_GREATER
-    protected GoogleCloudStorageUploadException(SerializationInfo info, StreamingContext context)
-        : base(info, context)
-    { }
-#endif
-
-    public GoogleCloudStorageUploadException(string message, Exception innerException)
-        : base(message, innerException)
+    public GoogleCloudStorageUploadException(GoogleErrorData errorData, Exception? innerException = default)
+        : this(default, errorData, innerException)
     { }
 
-    public GoogleCloudStorageUploadException(string message)
-        : base(message)
+    public GoogleCloudStorageUploadException(string? message, Exception? innerException)
+        : this(message, default, innerException)
     { }
 }

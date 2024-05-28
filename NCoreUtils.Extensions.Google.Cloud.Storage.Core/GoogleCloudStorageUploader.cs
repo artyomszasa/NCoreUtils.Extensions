@@ -18,35 +18,6 @@ public sealed partial class GoogleCloudStorageUploader : IDisposable, IAsyncDisp
 
     public static int DefaultChunkSize { get; } = 512 * 1024;
 
-    private static string FormatGoogleError(GoogleErrorResponse response)
-    {
-        if (response is null || response.Error is null)
-        {
-            return string.Empty;
-        }
-        var buffer = ArrayPool<char>.Shared.Rent(16 * 1024);
-        try
-        {
-            var builder = new SpanBuilder(buffer);
-            builder.Append(response.Error.Code);
-            builder.Append(": ");
-            builder.Append(response.Error.Message);
-            if (response.Error.Errors is { Count: >0 } errors)
-            {
-                builder.Append(" => ");
-                foreach (var error in errors)
-                {
-                    builder.Append(error, GoogleErrorDetailsEmplacer);
-                }
-            }
-            return builder.ToString();
-        }
-        finally
-        {
-            ArrayPool<char>.Shared.Return(buffer);
-        }
-    }
-
     private static async Task<GoogleErrorResponse?> ReadErrorResponseAsync(HttpResponseMessage response, CancellationToken cancellationToken)
     {
         try
@@ -199,7 +170,7 @@ public sealed partial class GoogleCloudStorageUploader : IDisposable, IAsyncDisp
                     {
                         var error = await ReadErrorResponseAsync(response, CancellationToken.None).ConfigureAwait(false)
                             ?? throw new GoogleCloudStorageUploadException($"Upload final chunk failed with status code {response.StatusCode} [no error description].");
-                        throw new GoogleCloudStorageUploadException($"Upload final chunk failed with status code {response.StatusCode} [{FormatGoogleError(error)}].");
+                        throw new GoogleCloudStorageUploadException($"Upload final chunk failed with status code {response.StatusCode}.", error?.Error);
                     }
                     // final chunk upload successfull
                     Sent += size;
@@ -209,7 +180,7 @@ public sealed partial class GoogleCloudStorageUploader : IDisposable, IAsyncDisp
                 {
                     var error = await ReadErrorResponseAsync(response, CancellationToken.None).ConfigureAwait(false)
                         ?? throw new GoogleCloudStorageUploadException($"Upload chunk failed with status code {response.StatusCode} [no error description].");
-                    throw new GoogleCloudStorageUploadException($"Upload chunk failed with status code {response.StatusCode} [{FormatGoogleError(error)}].");
+                    throw new GoogleCloudStorageUploadException($"Upload chunk failed with status code {response.StatusCode}.", error?.Error);
                 }
                 // chunk upload successfull (TODO: check if response range is set properly)
                 Sent += size;

@@ -7,12 +7,12 @@ namespace NCoreUtils;
 
 public static class ServiceCollectionGoogleCloudPubSubServiceAccountExtensions
 {
-    private const string DefaultGoogleCountPubSubServiceEndpoint = "https://pubsub.googleapis.com";
+    public const string DefaultGoogleCountPubSubServiceEndpoint = "https://pubsub.googleapis.com";
 
     public static IServiceCollection AddGoogleCloudPubSubClient(
         this IServiceCollection services,
         ServiceAccountCredentialData credentials,
-        string endpoint = DefaultGoogleCountPubSubServiceEndpoint,
+        string? endpoint = default,
         bool configureHttpClient = true)
     {
         if (configureHttpClient)
@@ -23,12 +23,12 @@ public static class ServiceCollectionGoogleCloudPubSubServiceAccountExtensions
         }
         return services
             .AddGoogleCloudServiceAccount(credentials)
-            .AddPubSubV1ApiClient(endpoint, PubSubV1ApiClient.HttpClientConfigurationName);
+            .AddPubSubV1ApiClient(endpoint ?? DefaultGoogleCountPubSubServiceEndpoint, PubSubV1ApiClient.HttpClientConfigurationName);
     }
 
     public static IServiceCollection AddGoogleCloudPubSubClient(
         this IServiceCollection services,
-        string endpoint = DefaultGoogleCountPubSubServiceEndpoint,
+        string? endpoint,
         bool configureHttpClient = true)
         => services.AddGoogleCloudPubSubClient(
             credentials: ServiceAccountCredentialData.ReadDefaultAsync(CancellationToken.None).GetAwaiter().GetResult(),
