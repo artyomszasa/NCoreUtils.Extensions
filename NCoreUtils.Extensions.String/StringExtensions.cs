@@ -41,7 +41,11 @@ public static class StringExtensions
             nonEmptyValue = default;
             return false;
         }
+#if NETFRAMEWORK || NETSTANDARD2_0
+        nonEmptyValue = value!;
+#else
         nonEmptyValue = value;
+#endif
         return true;
     }
 

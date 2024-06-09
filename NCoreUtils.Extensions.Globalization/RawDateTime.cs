@@ -141,15 +141,15 @@ public partial struct RawDateTime
     {
         if (year < 0 || year > 4095)
         {
-            throw new ArgumentOutOfRangeException(nameof(year));
+            throw new ArgumentOutOfRangeException(nameof(year), "Year mut be between 0 and 4095.");
         }
         if (month <= 0 || month > 12)
         {
-            throw new ArgumentOutOfRangeException(nameof(month));
+            throw new ArgumentOutOfRangeException(nameof(month), "Month must be between 1 and 12.");
         }
-        if (day < 0 || day > 4095)
+        if (day <= 0 || day > 31)
         {
-            throw new ArgumentOutOfRangeException(nameof(year));
+            throw new ArgumentOutOfRangeException(nameof(day), "Day must be between 1 and 31.");
         }
         if (time >= _oneDay || time.Ticks < 0L)
         {

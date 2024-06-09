@@ -4,6 +4,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using NCoreUtils.Memory;
 
 namespace NCoreUtils
@@ -26,13 +27,7 @@ namespace NCoreUtils
             { typeof(string), StringEmplacer.Instance }
         });
 
-        private static ulong DivRem(ulong a, ulong b, out ulong reminder)
-        {
-            reminder = a % b;
-            return a / b;
-        }
-
-        private static char I(int value) => (char)('0' + value);
+        private static char I(int value) => unchecked((char)('0' + value));
 
         #region char
 
@@ -98,51 +93,9 @@ namespace NCoreUtils
 
         #region int
 
-        [MethodImpl(MethodImplOptions.NoInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static bool TryEmplaceInternal(int value, Span<char> span, out int total)
-        {
-            if (value == int.MinValue)
-            {
-                return TryEmplaceInternal("-2147483648", span, out total);
-            }
-            if (0 == value)
-            {
-                return TryEmplaceInternal('0', span, out total);
-            }
-            var isSigned = value < 0 ? 1 : 0;
-            value = Math.Abs(value);
-            total = (int)Math.Floor(Math.Log10(value)) + 1 + isSigned;
-            if (span.Length < total)
-            {
-                return false;
-            }
-            if (0 != isSigned)
-            {
-                span[0] = '-';
-            }
-            for (var offset = isSigned; value > 0; ++offset)
-            {
-                value = Math.DivRem(value, 10, out var part);
-                span[offset] = I(part);
-            }
-            if (0 != isSigned)
-            {
-#if NETFRAMEWORK
-                span.Slice(1, total - 1).Reverse();
-#else
-                span[1..total].Reverse();
-#endif
-            }
-            else
-            {
-#if NETFRAMEWORK
-                span.Slice(0, total).Reverse();
-#else
-                span[..total].Reverse();
-#endif
-            }
-            return true;
-        }
+            => StringUtils.TryFormatInt32(value, span, out total);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int Emplace(int value, Span<char> span)
@@ -170,53 +123,9 @@ namespace NCoreUtils
 
         #region long
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static bool TryEmplaceInternal(long value, Span<char> span, out int total)
-        {
-            if (value == long.MinValue)
-            {
-                return TryEmplaceInternal("-9223372036854775808", span, out total);
-            }
-            if (0L == value)
-            {
-                return TryEmplaceInternal('0', span, out total);
-            }
-            var isSigned = value < 0L ? 1 : 0;
-            value = Math.Abs(value);
-            total = (int)Math.Floor(Math.Log10(value)) + 1 + isSigned;
-            if (span.Length < total)
-            {
-                return false;
-            }
-            if (0 != isSigned)
-            {
-                span[0] = '-';
-            }
-            for (var offset = isSigned; value > 0L; ++offset)
-            {
-                value = Math.DivRem(value, 10, out var part);
-                unchecked
-                {
-                    span[offset] = I((int)part);
-                }
-            }
-            if (0 != isSigned)
-            {
-#if NETFRAMEWORK
-                span.Slice(1, total - 1).Reverse();
-#else
-                span[1..total].Reverse();
-#endif
-            }
-            else
-            {
-#if NETFRAMEWORK
-                span.Slice(0, total).Reverse();
-#else
-                span[..total].Reverse();
-#endif
-            }
-            return true;
-        }
+            => StringUtils.TryFormatInt64(value, span, out total);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int Emplace(long value, Span<char> span)
@@ -260,7 +169,7 @@ namespace NCoreUtils
             // floating part
             var fvalue = uvalue - uivalue;
             // intgeral part length...
-            var ilength = (int)Math.Floor(Math.Log10(uivalue)) + 1 + isNegative;
+            var ilength = StringUtils.GetDigitCount(unchecked((ulong)uivalue)) + isNegative;
             // stringify floating part locally to get value...
             var flength = 0;
             var flast = maxPrecision - 1;
@@ -503,33 +412,9 @@ namespace NCoreUtils
 
         #region ulong
 
-        [MethodImpl(MethodImplOptions.NoInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static bool TryEmplaceInternal(ulong value, Span<char> span, out int total)
-        {
-            if (0L == value)
-            {
-                return TryEmplaceInternal('0', span, out total);
-            }
-            total = (int)Math.Floor(Math.Log10(value)) + 1;
-            if (span.Length < total)
-            {
-                return false;
-            }
-            for (var offset = 0; value != 0; ++offset)
-            {
-                value = DivRem(value, 10L, out var part);
-                unchecked
-                {
-                    span[offset] = I((int)part);
-                }
-            }
-#if NETFRAMEWORK
-            span.Slice(0, total).Reverse();
-#else
-            span[..total].Reverse();
-#endif
-            return true;
-        }
+            => StringUtils.TryFormatUInt64(value, span, out total);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int Emplace(ulong value, Span<char> span)

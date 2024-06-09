@@ -19,6 +19,8 @@ public partial struct RawDateTime
         throw new FormatException("Specified value is not a valid date/time.");
     }
 
+#if NET6_0_OR_GREATER
+
     public static RawDateTime Parse(ReadOnlySpan<char> input, IFormatProvider? provider)
     {
         if (TryParse(input, provider, out var result))
@@ -42,9 +44,25 @@ public partial struct RawDateTime
     public static bool TryParse(string? input, IFormatProvider? provider, DateTimeStyles styles, out RawDateTime result)
         => TryParse(input.AsSpan(), provider, styles, out result);
 
-    public static bool TryParse([NotNullWhen(true)] string? input, IFormatProvider? provider, out RawDateTime result)
+    public static bool TryParse(ReadOnlySpan<char> input, IFormatProvider? provider, out RawDateTime result)
         => TryParse(input, provider, DateTimeStyles.AllowWhiteSpaces, out result);
 
-    public static bool TryParse(ReadOnlySpan<char> input, IFormatProvider? provider, out RawDateTime result)
+#else
+
+    public static bool TryParse(string? input, IFormatProvider? provider, DateTimeStyles styles, out RawDateTime result)
+    {
+        if (DateTime.TryParse(input ?? string.Empty, provider, styles, out var dt))
+        {
+            result = new(dt);
+            return true;
+        }
+        result = default;
+        return false;
+    }
+
+#endif
+
+
+    public static bool TryParse([NotNullWhen(true)] string? input, IFormatProvider? provider, out RawDateTime result)
         => TryParse(input, provider, DateTimeStyles.AllowWhiteSpaces, out result);
 }

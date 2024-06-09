@@ -12,11 +12,11 @@
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.0.1" />
     <PackageReference Include="xunit" Version="2.4.1" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.4.1" />
-    <PackageReference Include="ReportGenerator" Version="4.5.3">
+    <PackageReference Include="ReportGenerator" Version="5.3.6">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="coverlet.msbuild" Version="2.9.0">
+    <PackageReference Include="coverlet.msbuild" Version="6.0.2">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
@@ -26,14 +26,14 @@
     <Compile Remove="CompleteReadTests.cs" />
     <Compile Remove="ImmutableHeadArrayTests.cs" />
     <Compile Remove="NullableTests.cs" />
-    <Compile Remove="RawDateTimeTests.cs" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\NCoreUtils.Extensions.Collections\NCoreUtils.Extensions.Collections.csproj" />
+    <ProjectReference Include="..\NCoreUtils.Extensions.Globalization\NCoreUtils.Extensions.Globalization.csproj" />
     <!--
     <ProjectReference Include="..\NCoreUtils.Extensions.Nullable\NCoreUtils.Extensions.Nullable.csproj" />
-    <ProjectReference Include="..\NCoreUtils.Extensions.Globalization\NCoreUtils.Extensions.Globalization.csproj" />
+
     <ProjectReference Include="..\NCoreUtils.Extensions.IO\NCoreUtils.Extensions.IO.csproj" />
     <ProjectReference Include="..\NCoreUtils.Extensions.Collections.Optimized\NCoreUtils.Extensions.Collections.Optimized.csproj" />
     -->

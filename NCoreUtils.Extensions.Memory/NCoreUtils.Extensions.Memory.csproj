@@ -3,7 +3,7 @@
     <TargetFrameworks>net8.0;net7.0;net6.0;netstandard2.1;netstandard2.0;net461;net48</TargetFrameworks>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <RootNamespace>NCoreUtils</RootNamespace>
-    <Version>8.0.1</Version>
+    <Version>8.0.2</Version>
     <IsAotCompatible>true</IsAotCompatible>
     <!-- NuGet -->
     <PackageId>NCoreUtils.Extensions.Memory</PackageId>
@@ -27,7 +27,7 @@
   <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' OR '$(TargetFramework)' == 'net461' OR '$(TargetFramework)' == 'net48' ">
     <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="4.7.1" />
     <PackageReference Include="System.ValueTuple" Version="4.5.0" />
-    <PackageReference Include="System.Memory" Version="4.5.4" />
+    <PackageReference Include="System.Memory" Version="4.5.5" />
     <PackageReference Include="System.Threading.Tasks.Extensions" Version="4.5.4" />
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.1' ">
@@ -46,5 +46,8 @@
     <Compile Remove="Memory\IEmplaceable.cs" />
     <Compile Remove="Memory\ISpanEmplaceable.cs" />
     <Compile Remove="Memory\ISpanExactEmplaceable.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\NCoreUtils.Extensions.String\NCoreUtils.Extensions.String.csproj" />
   </ItemGroup>
 </Project>
