@@ -3,7 +3,7 @@
     <TargetFrameworks>net8.0;net7.0;net6.0;netstandard2.1;net48</TargetFrameworks>
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>NCoreUtils.Google</RootNamespace>
-    <Version>8.1.1</Version>
+    <Version>8.1.2</Version>
     <IsAotCompatible>true</IsAotCompatible>
     <IsTrimmable>true</IsTrimmable>
   </PropertyGroup>

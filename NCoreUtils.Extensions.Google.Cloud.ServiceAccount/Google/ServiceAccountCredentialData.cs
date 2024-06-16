@@ -26,6 +26,17 @@ public record ServiceAccountCredentialData(
         rsa.ImportFromPem(raw);
         return rsa;
     }
+#elif NETFRAMEWORK
+
+    private static RSA ReadPrivateKey(string raw)
+    {
+        using var pr = new Org.BouncyCastle.OpenSsl.PemReader(new StringReader(raw));
+        var keyPair = (Org.BouncyCastle.Crypto.AsymmetricCipherKeyPair)pr.ReadObject();
+        RSAParameters rsaParams = Org.BouncyCastle.Security.DotNetUtilities.ToRSAParameters((Org.BouncyCastle.Crypto.Parameters.RsaPrivateCrtKeyParameters)keyPair.Private);
+        var rsa = RSA.Create();
+        rsa.ImportParameters(rsaParams);
+        return rsa;
+    }
 
 #else
     private static readonly System.Text.RegularExpressions.Regex _eolRegex = new("\r*\n\r*", System.Text.RegularExpressions.RegexOptions.Compiled | System.Text.RegularExpressions.RegexOptions.CultureInvariant);
@@ -41,11 +52,13 @@ public record ServiceAccountCredentialData(
         {
             throw new InvalidOperationException("Invalid private key.");
         }
-        if (key[key.Length - 1] != "-----END PRIVATE KEY-----")
+        if (key[^1] != "-----END PRIVATE KEY-----")
         {
             throw new InvalidOperationException("Invalid private key.");
         }
-        var base64 = string.Join(string.Empty, key[1..^1]);
+
+        var keyBody = key[1..^1];
+        var base64 = string.Join(string.Empty, keyBody);
         var rsaKey = RSA.Create();
         rsaKey.ImportPkcs8PrivateKey(Convert.FromBase64String(base64), out _);
         return rsaKey;
@@ -127,7 +140,10 @@ public record ServiceAccountCredentialData(
     {
         try
         {
-            await using var source = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read, 0, FileOptions.SequentialScan | FileOptions.Asynchronous);
+#if !NETFRAMEWORK
+            await
+#endif
+            using var source = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read, 0, FileOptions.SequentialScan | FileOptions.Asynchronous);
             return await ReadFromStreamAsync(source, cancellationToken).ConfigureAwait(false);
         }
         catch (Exception exn)

@@ -19,7 +19,6 @@ internal static class HttpCompatExtensions
 [JsonSourceGenerationOptions(PropertyNamingPolicy = JsonKnownNamingPolicy.CamelCase)]
 [JsonSerializable(typeof(JsonRootPubSubV1ApiInfo))]
 [JsonSerializable(typeof(PubSubPublishRequest))]
-[JsonSerializable(typeof(GoogleErrorResponse))]
 internal partial class PubSubV1ApiSerializerContext : JsonSerializerContext { }
 
 [ProtoClient(typeof(PubSubV1ApiInfo), typeof(PubSubV1ApiSerializerContext))]
@@ -39,28 +38,6 @@ public partial class PubSubV1ApiClient
         return request;
     }
 
-    protected override async ValueTask HandleErrors(HttpResponseMessage response, CancellationToken cancellationToken)
-    {
-        if (!response.IsSuccessStatusCode)
-        {
-            var responseContent = response.Content is null
-                ? null
-                : await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
-
-            if (string.IsNullOrEmpty(responseContent))
-            {
-                throw new GoogleCloudException($"Server responded with status code {response.StatusCode} (no body).");
-            }
-            GoogleErrorResponse? gresponse;
-            try
-            {
-                gresponse = JsonSerializer.Deserialize(responseContent, PubSubV1ApiSerializerContext.Default.GoogleErrorResponse);
-            }
-            catch
-            {
-                throw new GoogleCloudException($"Server responded with status code {response.StatusCode} and unrecognized body: {responseContent}.");
-            }
-            throw new GoogleCloudException(gresponse?.Error);
-        }
-    }
+    protected override ValueTask HandleErrors(HttpResponseMessage response, CancellationToken cancellationToken)
+        => response.HandleGoogleCloudErrorResponseAsync(cancellationToken);
 }

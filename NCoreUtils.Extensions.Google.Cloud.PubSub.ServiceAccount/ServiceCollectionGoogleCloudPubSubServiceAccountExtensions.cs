@@ -7,7 +7,7 @@ namespace NCoreUtils;
 
 public static class ServiceCollectionGoogleCloudPubSubServiceAccountExtensions
 {
-    public const string DefaultGoogleCountPubSubServiceEndpoint = "https://pubsub.googleapis.com";
+    public const string DefaultGoogleCloudPubSubServiceEndpoint = "https://pubsub.googleapis.com";
 
     public static IServiceCollection AddGoogleCloudPubSubClient(
         this IServiceCollection services,
@@ -23,7 +23,7 @@ public static class ServiceCollectionGoogleCloudPubSubServiceAccountExtensions
         }
         return services
             .AddGoogleCloudServiceAccount(credentials)
-            .AddPubSubV1ApiClient(endpoint ?? DefaultGoogleCountPubSubServiceEndpoint, PubSubV1ApiClient.HttpClientConfigurationName);
+            .AddPubSubV1ApiClient(endpoint ?? DefaultGoogleCloudPubSubServiceEndpoint, PubSubV1ApiClient.HttpClientConfigurationName);
     }
 
     public static IServiceCollection AddGoogleCloudPubSubClient(

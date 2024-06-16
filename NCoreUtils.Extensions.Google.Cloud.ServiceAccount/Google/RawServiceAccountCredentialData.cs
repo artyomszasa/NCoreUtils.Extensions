@@ -2,34 +2,45 @@ using System.Text.Json.Serialization;
 
 namespace NCoreUtils.Google;
 
-public record RawServiceAccountCredentialData(
+public class RawServiceAccountCredentialData(
+    string? type,
+    string? projectId,
+    string? privateKeyId,
+    string? privateKey,
+    string? clientEmail,
+    string? clientId,
+    string? authUri,
+    string? tokenUri,
+    string? authProviderX509CertUrl,
+    string? clientX509CertUrl)
+{
     [property: JsonPropertyName("type")]
-    string? Type,
+    public string? Type { get; } = type;
 
     [property: JsonPropertyName("project_id")]
-    string? ProjectId,
+    public string? ProjectId { get; } = projectId;
 
     [property: JsonPropertyName("private_key_id")]
-    string? PrivateKeyId,
+    public string? PrivateKeyId { get; } = privateKeyId;
 
     [property: JsonPropertyName("private_key")]
-    string? PrivateKey,
+    public string? PrivateKey { get; } = privateKey;
 
     [property: JsonPropertyName("client_email")]
-    string? ClientEmail,
+    public string? ClientEmail { get; } = clientEmail;
 
     [property: JsonPropertyName("client_id")]
-    string? ClientId,
+    public string? ClientId { get; } = clientId;
 
     [property: JsonPropertyName("auth_uri")]
-    string? AuthUri,
+    public string? AuthUri { get; } = authUri;
 
     [property: JsonPropertyName("token_uri")]
-    string? TokenUri,
+    public string? TokenUri { get; } = tokenUri;
 
     [property: JsonPropertyName("auth_provider_x509_cert_url")]
-    string? AuthProviderX509CertUrl,
+    public string? AuthProviderX509CertUrl { get; } = authProviderX509CertUrl;
 
     [property: JsonPropertyName("client_x509_cert_url")]
-    string? ClientX509CertUrl
-);
+    public string? ClientX509CertUrl { get; } = clientX509CertUrl;
+}
