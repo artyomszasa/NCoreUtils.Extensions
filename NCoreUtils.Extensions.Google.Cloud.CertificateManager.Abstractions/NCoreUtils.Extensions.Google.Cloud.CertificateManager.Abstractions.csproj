@@ -7,6 +7,10 @@
     <IsAotCompatible>true</IsAotCompatible>
     <IsTrimmable>true</IsTrimmable>
   </PropertyGroup>
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net48' ">
+    <Compile Include="..\Compat\Nullable\**" />
+    <Compile Include="..\Compat\Range\*" />
+  </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\NCoreUtils.Extensions.Google.Cloud.Abstractions\NCoreUtils.Extensions.Google.Cloud.Abstractions.csproj" />
   </ItemGroup>

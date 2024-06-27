@@ -2,7 +2,7 @@
   <PropertyGroup>
     <TargetFrameworks>net8.0;net7.0;net6.0;netstandard2.1</TargetFrameworks>
     <RootNamespace>NCoreUtils</RootNamespace>
-    <Version>8.1.2</Version>
+    <Version>8.1.4</Version>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Google.Apis.Auth" Version="1.64.0" />
