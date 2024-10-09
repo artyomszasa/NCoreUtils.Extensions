@@ -7,7 +7,7 @@ namespace NCoreUtils;
 public static class ClaimsPrincipalExtensions
 {
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool TryGetName(this ClaimsPrincipal? user, [MaybeNullWhen(false)] out string name)
+    public static bool TryGetName([NotNullWhen(true)] this ClaimsPrincipal? user, [MaybeNullWhen(false)] out string name)
     {
         if (user is not null)
         {
@@ -27,7 +27,7 @@ public static class ClaimsPrincipalExtensions
         => user.GetNameOrDefault() ?? throw new ClaimNotFoundException(ClaimTypes.Name);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool TryGetEmail(this ClaimsPrincipal? user, [MaybeNullWhen(false)] out string email)
+    public static bool TryGetEmail([NotNullWhen(true)] this ClaimsPrincipal? user, [MaybeNullWhen(false)] out string email)
     {
         if (user is not null)
         {
@@ -47,7 +47,7 @@ public static class ClaimsPrincipalExtensions
         => user.GetEmailOrDefault() ?? throw new ClaimNotFoundException(ClaimTypes.Email);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool TryGetSid(this ClaimsPrincipal? user, [MaybeNullWhen(false)] out string sid)
+    public static bool TryGetSid([NotNullWhen(true)] this ClaimsPrincipal? user, [MaybeNullWhen(false)] out string sid)
     {
         if (user is not null)
         {
