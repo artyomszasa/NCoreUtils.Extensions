@@ -1,5 +1,6 @@
-using System.Collections.Generic;
+using System;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -23,7 +24,9 @@ namespace NCoreUtils
 
     internal sealed class HasObservablePropertyAttribute : System.Attribute
     {
-        private System.Type? EqualityComparer { get; set; }
+        public System.Type? EqualityComparer { get; set; }
+
+        public NCoreUtils.ChangeTriggerStrategy Strategy { get; set; }
 
         public HasObservablePropertyAttribute() { /* noop */ }
     }
@@ -52,7 +55,19 @@ namespace NCoreUtils
                 IFieldSymbol fieldSymbol = (IFieldSymbol)ctx.TargetSymbol;
                 if (fieldSymbol.ContainingSymbol is INamedTypeSymbol host)
                 {
-                    return new ObservableFieldTarget(ctx.SemanticModel, host, fieldSymbol);
+                    var attr = ctx.Attributes.FirstOrDefault(a => a.AttributeClass?.Name == "HasObservablePropertyAttribute");
+                    INamedTypeSymbol? equalityComparer = null;
+                    FieldChangeTriggerStrategy strategy = FieldChangeTriggerStrategy.Default;
+                    if (attr is not null)
+                    {
+                        equalityComparer = attr.NamedArguments.TryGetFirst("EqualityComparer", out var eq)
+                            ? eq.Value as INamedTypeSymbol
+                            : default;
+                        strategy = attr.NamedArguments.TryGetFirst("Strategy", out var strat) && strat.Value is int istrat
+                            ? (FieldChangeTriggerStrategy)istrat
+                            : FieldChangeTriggerStrategy.Default;
+                    }
+                    return new ObservableFieldTarget(ctx.SemanticModel, host, fieldSymbol, equalityComparer, strategy);
                 }
                 return default;
             }
@@ -63,7 +78,7 @@ namespace NCoreUtils
         {
             return targets
                 .GroupBy(static t => t.Host, SymbolEqualityComparer.Default)
-                .Select(static g => new ObservableClassTarget((INamedTypeSymbol)g.Key!, g.Select(static e => e.Field).ToList()));
+                .Select(static g => new ObservableClassTarget((INamedTypeSymbol)g.Key!, g.Select(static e => new ObservableFieldSettings(e.Field, e.EqualityComparer, e.Strategy)).ToList()));
         });
 
         context.RegisterSourceOutput(classes, (ctx, target) =>
@@ -77,7 +92,7 @@ namespace NCoreUtils
 
             var typeDeclarationSyntax = ClassDeclaration(target.Host.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat))
                 .AddModifiers(Token(TriviaList(Comment("/// <inheritdoc/>")), SyntaxKind.PartialKeyword, TriviaList()))
-                .AddMembers(target.Fields.Select<IFieldSymbol, MemberDeclarationSyntax>(field =>
+                .AddMembers(target.Fields.Select<ObservableFieldSettings, MemberDeclarationSyntax>(field =>
                 {
                     ExpressionSyntax fieldExpression = field.Name switch
                     {
@@ -87,12 +102,66 @@ namespace NCoreUtils
                     var propertyName = field.Name.Capitalize();
                     TypeSyntax propertyType = IdentifierName(field.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat.AddMiscellaneousOptions(SymbolDisplayMiscellaneousOptions.IncludeNullableReferenceTypeModifier)));
 
-                    var setterBody = IfStatement(
-                        BinaryExpression(
+                    ExpressionSyntax neq = field.EqualityComparer switch
+                    {
+                        null => BinaryExpression(
                             SyntaxKind.NotEqualsExpression,
                             fieldExpression,
                             IdentifierName("value")
                         ),
+                        var equalityComparer => PrefixUnaryExpression(
+                            kind: SyntaxKind.LogicalNotExpression,
+                            operatorToken: Token(SyntaxKind.ExclamationToken),
+                            operand: InvocationExpression(
+                                expression: MemberAccessExpression(SyntaxKind.SimpleMemberAccessExpression, field.EqualityComparerInstanceSyntax, IdentifierName("Equals")),
+                                argumentList: ArgumentList(SeparatedList(new ArgumentSyntax[]
+                                {
+                                    Argument(fieldExpression),
+                                    Argument(IdentifierName("value"))
+                                }))
+                            )
+                        )
+                    };
+
+                    ExpressionSyntax condition = field.Strategy switch
+                    {
+                        FieldChangeTriggerStrategy.Default => neq,
+                        FieldChangeTriggerStrategy.Always => LiteralExpression(SyntaxKind.TrueLiteralExpression),
+                        // if ((0 == _isSet && 0 == Interlocked.CompareExchange(ref _isSet, 1, 0)) || neq([oldvalue], value))
+                        FieldChangeTriggerStrategy.InitialSet => BinaryExpression(
+                            kind: SyntaxKind.LogicalOrExpression,
+                            left: ParenthesizedExpression(BinaryExpression(
+                                kind: SyntaxKind.LogicalAndExpression,
+                                left: BinaryExpression(
+                                    kind: SyntaxKind.EqualsExpression,
+                                    left: LiteralExpression(SyntaxKind.NumericLiteralExpression, Literal(0)),
+                                    right: IdentifierName($"_{field.Name}IsSet")
+                                ),
+                                right: BinaryExpression(
+                                    kind: SyntaxKind.EqualsExpression,
+                                    left: LiteralExpression(SyntaxKind.NumericLiteralExpression, Literal(0)),
+                                    right: InvocationExpression(
+                                        expression: MemberAccessExpression(
+                                            kind: SyntaxKind.SimpleMemberAccessExpression,
+                                            expression: ParseTypeName("System.Threading.Interlocked"),
+                                            name: IdentifierName("CompareExchange")
+                                        ),
+                                        argumentList: ArgumentList(SeparatedList(new ArgumentSyntax[]
+                                        {
+                                            Argument(nameColon: default, refKindKeyword: Token(SyntaxKind.RefKeyword), expression: IdentifierName($"_{field.Name}IsSet")),
+                                            Argument(LiteralExpression(SyntaxKind.NumericLiteralExpression, Literal(1))),
+                                            Argument(LiteralExpression(SyntaxKind.NumericLiteralExpression, Literal(0)))
+                                        }))
+                                    )
+                                )
+                            )),
+                            right: neq
+                        ),
+                        _ => throw new InvalidOperationException("Invalid field change trigger strategy.")
+                    };
+
+                    var setterBody = IfStatement(
+                        condition,
                         Block(new StatementSyntax[]
                         {
                             ExpressionStatement(
@@ -134,7 +203,25 @@ namespace NCoreUtils
                             AccessorDeclaration(SyntaxKind.SetAccessorDeclaration)
                                 .WithBody(Block(setterBody))
                         );
-                }).ToArray());
+                })
+                .Concat(target.Fields
+                    .Where(field => field.Strategy == FieldChangeTriggerStrategy.InitialSet)
+                    .Select<ObservableFieldSettings, MemberDeclarationSyntax>(field =>
+                    {
+                        return FieldDeclaration(
+                            attributeLists: default,
+                            modifiers: TokenList(Token(SyntaxKind.PrivateKeyword)),
+                            declaration: VariableDeclaration(
+                                type: ParseTypeName("int"),
+                                variables: SeparatedList(new VariableDeclaratorSyntax[]
+                                {
+                                    VariableDeclarator($"_{field.Name}IsSet")
+                                })
+                            )
+                        );
+                    })
+                )
+                .ToArray());
 
             CompilationUnitSyntax unitSyntax = CompilationUnit()
                 .AddMembers(
