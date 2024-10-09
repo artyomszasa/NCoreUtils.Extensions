@@ -24,7 +24,7 @@ public class GoogleRpcPreconditionViolation
 public class GoogleRpcPreconditionFailure : GoogleRpcErrorDetails
 {
     [JsonPropertyName("violations")]
-    public IReadOnlyList<GoogleRpcPreconditionViolation> Violations { get; set; }
+    public IReadOnlyList<GoogleRpcPreconditionViolation>? Violations { get; set; }
 }
 
 public class GoogleRpcBadRequestFieldViolation
