@@ -2,9 +2,10 @@
 
   <ItemGroup>
     <!--
-    <ProjectReference Include="..\NCoreUtils.Extensions.Memory\NCoreUtils.Extensions.Memory.csproj" />
+
     <ProjectReference Include="..\NCoreUtils.Extensions.Google.Cloud.Storage.ServiceAccount\NCoreUtils.Extensions.Google.Cloud.Storage.ServiceAccount.csproj" />
     -->
+    <ProjectReference Include="..\NCoreUtils.Extensions.Memory.Pooling\NCoreUtils.Extensions.Memory.Pooling.csproj" />
     <ProjectReference Include="..\NCoreUtils.Extensions.Globalization\NCoreUtils.Extensions.Globalization.csproj" />
   </ItemGroup>
 
