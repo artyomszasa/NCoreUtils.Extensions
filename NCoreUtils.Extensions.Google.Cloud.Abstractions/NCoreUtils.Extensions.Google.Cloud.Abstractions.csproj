@@ -3,10 +3,13 @@
     <TargetFrameworks>net8.0;net7.0;net6.0;netstandard2.1;net48</TargetFrameworks>
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>NCoreUtils.Google</RootNamespace>
-    <Version>8.1.4</Version>
+    <Version>8.1.6</Version>
     <IsAotCompatible>true</IsAotCompatible>
     <IsTrimmable>true</IsTrimmable>
   </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="System.Text.Json" Version="8.0.5" />
+  </ItemGroup>
   <ItemGroup Condition=" '$(TargetFramework)' == 'net48' ">
     <PackageReference Include="System.Net.Http" Version="4.3.4" />
     <PackageReference Include="Microsoft.Bcl.HashCode" Version="1.1.1" />
@@ -16,7 +19,6 @@
     <Compile Include="..\Compat\Range\*" />
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.1' Or '$(TargetFramework)' == 'net48' ">
-    <PackageReference Include="System.Text.Json" Version="6.0.9" />
     <Compile Remove="HttpRequestMessageExtensions.Net6.cs" />
     <Compile Include="..\Compat\Nullable\MemberNotNullWhenAttribute.cs" />
   </ItemGroup>

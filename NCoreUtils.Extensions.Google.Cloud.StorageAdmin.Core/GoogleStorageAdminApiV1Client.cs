@@ -9,6 +9,7 @@ namespace NCoreUtils;
 
 [JsonSerializable(typeof(JsonRootGoogleStorageAdminApiV1Info))]
 [JsonSerializable(typeof(CreateBucketRequest))]
+[JsonSerializable(typeof(GoogleBucketPatch))]
 internal partial class GoogleStorageAdminApiV1SerializerContext : JsonSerializerContext { }
 
 [ProtoClient(typeof(GoogleStorageAdminApiV1Info), typeof(GoogleStorageAdminApiV1SerializerContext))]
@@ -30,6 +31,25 @@ public partial class GoogleStorageAdminApiV1Client
         var req = new HttpRequestMessage(HttpMethod.Post, requestUri)
         {
             Content = ProtoJsonContent.Create(request, GoogleStorageAdminApiV1SerializerContext.Default.CreateBucketRequest, null)
+        };
+        req.SetRequiredGcpScope("https://www.googleapis.com/auth/cloud-platform");
+        return req;
+    }
+
+    private HttpRequestMessage CreatePatchBucketRequest(string bucket, GoogleBucketPatch patch, string projection)
+    {
+#if NET8_0_OR_GREATER
+        ArgumentException.ThrowIfNullOrEmpty(bucket);
+#else
+        if (string.IsNullOrEmpty(bucket))
+        {
+            throw new ArgumentException("Bucket name must be specified.", nameof(bucket));
+        }
+#endif
+        var requestUri = $"{GetCachedMethodPath(Methods.PatchBucket)}/{Uri.EscapeDataString(bucket)}?projection={Uri.EscapeDataString(projection)}";
+        var req = new HttpRequestMessage(HttpMethod.Post, requestUri)
+        {
+            Content = ProtoJsonContent.Create(patch, GoogleStorageAdminApiV1SerializerContext.Default.GoogleBucketPatch, null)
         };
         req.SetRequiredGcpScope("https://www.googleapis.com/auth/cloud-platform");
         return req;

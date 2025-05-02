@@ -33,6 +33,21 @@ public interface IGoogleStorageAdminClient
     );
 
     /// <summary>
+    /// Patches the specified bucket.
+    /// </summary>
+    /// <param name="bucket">Bucket name to patch.</param>
+    /// <param name="patch">Data to apply.</param>
+    /// <param name="projection">Projection to return.</param>
+    /// <param name="cancellationToken">Canellation token.</param>
+    /// <returns>Patched bucket data.</returns>
+    Task<GoogleBucket> PatchBucketAsync(
+        string bucket,
+        GoogleBucketPatch patch,
+        string projection = "noAcl",
+        CancellationToken cancellationToken = default
+    );
+
+    /// <summary>
     /// Permanently deletes an empty bucket. The request fails if there are any live or noncurrent objects in the
     /// bucket, but the request succeeds if the bucket only contains soft-deleted objects or incomplete uploads,
     /// such as ongoing XML API multipart uploads. Does not delete soft-deleted objects.

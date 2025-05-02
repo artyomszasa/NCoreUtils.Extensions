@@ -3,7 +3,7 @@
     <TargetFrameworks>net8.0;net7.0;net6.0;netstandard2.1;net48</TargetFrameworks>
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>NCoreUtils.Google</RootNamespace>
-    <Version>8.1.4</Version>
+    <Version>8.1.6</Version>
     <IsAotCompatible>true</IsAotCompatible>
     <IsTrimmable>true</IsTrimmable>
   </PropertyGroup>
@@ -11,6 +11,7 @@
     <ProjectReference Include="..\NCoreUtils.Extensions.Google.Cloud.Abstractions\NCoreUtils.Extensions.Google.Cloud.Abstractions.csproj" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="NCoreUtils.Maybe" Version="2.0.2" />
     <PackageReference Include="NCoreUtils.Proto.Abstractions" Version="$(ProtoVersion)" />
     <PackageReference Include="NCoreUtils.Proto.Generator" Version="$(ProtoVersion)" PrivateAssets="All" />
   </ItemGroup>

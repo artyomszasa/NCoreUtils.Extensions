@@ -3,7 +3,7 @@ namespace NCoreUtils.Google;
 public interface IGoogleStorageAdminApiV1
 {
     /// <summary>
-    /// eturns metadata for the specified bucket.
+    /// Returns metadata for the specified bucket.
     /// </summary>
     /// <param name="bucket"></param>
     /// <param name="projection"></param>
@@ -29,6 +29,21 @@ public interface IGoogleStorageAdminApiV1
     Task<GoogleBucket> InsertBucketAsync(
         string projectId,
         CreateBucketRequest request,
+        CancellationToken cancellationToken = default
+    );
+
+    /// <summary>
+    /// Patches the specified bucket.
+    /// </summary>
+    /// <param name="bucket">Bucket name to patch.</param>
+    /// <param name="patch">Data to apply.</param>
+    /// <param name="projection">Projection to return.</param>
+    /// <param name="cancellationToken">Canellation token.</param>
+    /// <returns>Patched bucket data.</returns>
+    Task<GoogleBucket> PatchBucketAsync(
+        string bucket,
+        GoogleBucketPatch patch,
+        string projection = "noAcl",
         CancellationToken cancellationToken = default
     );
 

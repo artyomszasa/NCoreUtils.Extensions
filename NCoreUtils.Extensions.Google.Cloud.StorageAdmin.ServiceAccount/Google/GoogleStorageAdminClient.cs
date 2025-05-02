@@ -15,4 +15,7 @@ public class GoogleStorageAdminClient(IGoogleStorageAdminApiV1 api, string proje
 
     public Task<GoogleBucket> InsertBucketAsync(CreateBucketRequest request, CancellationToken cancellationToken = default)
         => Api.InsertBucketAsync(ProjectId, request, cancellationToken);
+
+    public Task<GoogleBucket> PatchBucketAsync(string bucket, GoogleBucketPatch patch, string projection = "noAcl", CancellationToken cancellationToken = default)
+        => Api.PatchBucketAsync(bucket, patch, projection, cancellationToken);
 }
