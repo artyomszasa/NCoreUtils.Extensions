@@ -45,11 +45,11 @@ public class FixSizePoolTests
     }
 
     [MethodImpl(MethodImplOptions.NoInlining | MethodImplOptions.NoOptimization)]
-    private static bool TryRentIgnore(FixSizePool<Obj> pool)
+    private static bool TryRentIgnore(FixSizePool2<Obj> pool)
         => pool.TryRent(out var _);
 
     [MethodImpl(MethodImplOptions.NoInlining | MethodImplOptions.NoOptimization)]
-    private static void RentAndReturn(FixSizePool<Obj> pool)
+    private static void RentAndReturn(FixSizePool2<Obj> pool)
     {
         Assert.True(pool.TryRent(out var obj));
         Thread.Yield();
@@ -57,7 +57,7 @@ public class FixSizePoolTests
     }
 
     [MethodImpl(MethodImplOptions.NoInlining)]
-    private static void RunTasks(FixSizePool<Obj> pool, Counter counter, SemaphoreSlim trigger)
+    private static void RunTasks(FixSizePool2<Obj> pool, Counter counter, SemaphoreSlim trigger)
     {
         var tasks = new int[16].Select(_ => Task.Factory.StartNew(() =>
         {
@@ -87,13 +87,13 @@ public class FixSizePoolTests
     }
 
     [MethodImpl(MethodImplOptions.NoInlining)]
-    private static void Insert(FixSizePool<Obj> pool, Counter counter)
+    private static void Insert(FixSizePool2<Obj> pool, Counter counter)
         => pool.Return(new Obj(counter));
 
     [Fact]
     public void One()
     {
-        var pool = new FixSizePool<Obj>(16);
+        var pool = new FixSizePool2<Obj>(16);
         Assert.False(pool.TryRent(out var __));
         Assert.Equal("item", Assert.Throws<ArgumentNullException>(() => pool.Return(default!)).ParamName);
         var counter = new Counter();
@@ -114,7 +114,7 @@ public class FixSizePoolTests
     [MethodImpl(MethodImplOptions.NoInlining)]
     private static void RunBasic(Counter counter)
     {
-        var pool = new FixSizePool<Obj>(16);
+        var pool = new FixSizePool2<Obj>(16);
         using var trigger = new SemaphoreSlim(0, 16);
         RunTasks(pool, counter, trigger);
         ForceGC();
@@ -145,7 +145,7 @@ public class FixSizePoolTests
     public void Invalid()
     {
         Assert.Equal("size", Assert.Throws<ArgumentOutOfRangeException>(() => new FixSizePool<Obj>(-20)).ParamName);
-        var pool = new FixSizePool<Obj>(4);
+        var pool = new FixSizePool2<Obj>(4);
         var counter = new Counter();
         AddFiveObjects(pool, counter);
         ForceGC();
@@ -153,7 +153,7 @@ public class FixSizePoolTests
         Assert.Equal(1, counter.Dtor);
 
         [MethodImpl(MethodImplOptions.NoInlining | MethodImplOptions.NoOptimization)]
-        static void AddFiveObjects(FixSizePool<Obj> pool, Counter counter)
+        static void AddFiveObjects(FixSizePool2<Obj> pool, Counter counter)
         {
             pool.Return(new(counter));
             pool.Return(new(counter));

@@ -9,11 +9,11 @@ namespace NCoreUtils;
 
 internal struct Index : IEquatable<Index>
 {
-    private const uint MaskValue = 0x0000FFFF;
+    private const uint MaskValue = 0x0000FFFFu;
 
-    private const uint MaskLocked = 0x80000000;
+    private const uint MaskLocked = 0x80000000u;
 
-    private const uint MaskLoop = 0x40000000;
+    private const uint MaskLoop = 0x40000000u;
 
     [MethodImpl(O.Inline)]
     [DebuggerStepThrough]
@@ -84,7 +84,7 @@ internal struct Index : IEquatable<Index>
     [DebuggerStepThrough]
     public Index Load()
 #if NET6_0_OR_GREATER
-        => new(Interlocked.CompareExchange(ref _data, default, default));
+        => new(Volatile.Read(ref _data));
 #else
     {
         var ival = Interlocked.CompareExchange(ref Unsafe.As<uint, int>(ref _data), unchecked((int)default), unchecked((int)default));
@@ -246,11 +246,11 @@ public class FixSizePool<T> : IObjectPool<T>
         bool success;
         do
         {
-            var actualStart = _start.Load();
             var actualEnd = _end.Load();
             // check if pool is not locked (no operation is in progress)
             if (!actualEnd.Locked)
             {
+                var actualStart = _start.Load();
                 if (_items.Length == FixSizePoolHelpers.ComputeSize(actualStart, actualEnd, _items.Length))
                 {
                     // recheck whether start/end has changed
