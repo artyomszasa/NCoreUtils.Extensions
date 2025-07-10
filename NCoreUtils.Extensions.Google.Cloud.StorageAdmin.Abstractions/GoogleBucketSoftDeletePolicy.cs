@@ -7,6 +7,7 @@ public class GoogleBucketSoftDeletePolicy(
     DateTimeOffset? effectiveTime = default)
 {
     [JsonPropertyName("retentionDurationSeconds")]
+    [JsonConverter(typeof(PermssiveNullableInt64Converter))]
     public long? RetentionDurationSeconds { get; } = retentionDurationSeconds;
 
     [JsonPropertyName("effectiveTime")]

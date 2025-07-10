@@ -36,6 +36,13 @@ public partial class GoogleStorageAdminApiV1Client
         return req;
     }
 
+    private static readonly HttpMethod HttpMethodPatch
+#if NETFRAMEWORK
+        = new HttpMethod("PATCH");
+#else
+        = HttpMethod.Patch;
+#endif
+
     private HttpRequestMessage CreatePatchBucketRequest(string bucket, GoogleBucketPatch patch, string projection)
     {
 #if NET8_0_OR_GREATER
@@ -47,7 +54,7 @@ public partial class GoogleStorageAdminApiV1Client
         }
 #endif
         var requestUri = $"{GetCachedMethodPath(Methods.PatchBucket)}/{Uri.EscapeDataString(bucket)}?projection={Uri.EscapeDataString(projection)}";
-        var req = new HttpRequestMessage(HttpMethod.Post, requestUri)
+        var req = new HttpRequestMessage(HttpMethodPatch, requestUri)
         {
             Content = ProtoJsonContent.Create(patch, GoogleStorageAdminApiV1SerializerContext.Default.GoogleBucketPatch, null)
         };

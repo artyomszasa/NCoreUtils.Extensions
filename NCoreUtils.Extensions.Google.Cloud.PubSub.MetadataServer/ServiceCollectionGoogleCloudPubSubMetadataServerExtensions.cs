@@ -5,13 +5,12 @@ using NCoreUtils.Google.Cloud.PubSub;
 
 namespace NCoreUtils;
 
-public static class ServiceCollectionGoogleCloudPubSubServiceAccountExtensions
+public static class ServiceCollectionGoogleCloudPubSubMetadataServerExtensions
 {
     public const string DefaultGoogleCloudPubSubServiceEndpoint = "https://pubsub.googleapis.com";
 
     public static IServiceCollection AddGoogleCloudPubSubClient(
         this IServiceCollection services,
-        ServiceAccountCredentialData credentials,
         string? endpoint = default,
         bool configureHttpClient = true)
     {
@@ -22,17 +21,7 @@ public static class ServiceCollectionGoogleCloudPubSubServiceAccountExtensions
                 .AddHttpMessageHandler<InjectGoogleAccessTokenHandler>();
         }
         return services
-            .AddGoogleCloudServiceAccount(credentials)
+            .AddGoogleCloudMetadataServer()
             .AddPubSubV1ApiClient(endpoint ?? DefaultGoogleCloudPubSubServiceEndpoint, PubSubV1ApiClient.HttpClientConfigurationName);
     }
-
-    public static IServiceCollection AddGoogleCloudPubSubClient(
-        this IServiceCollection services,
-        string? endpoint = default,
-        bool configureHttpClient = true)
-        => services.AddGoogleCloudPubSubClient(
-            credentials: ServiceAccountCredentialData.ReadDefaultAsync(CancellationToken.None).GetAwaiter().GetResult(),
-            endpoint: endpoint,
-            configureHttpClient: configureHttpClient
-        );
 }

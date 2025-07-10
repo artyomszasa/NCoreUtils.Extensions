@@ -1,15 +1,14 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>net8.0;net7.0;net6.0;netstandard2.1</TargetFrameworks>
+    <TargetFrameworks>net8.0;net7.0;net6.0</TargetFrameworks>
     <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-    <Version>8.1.6.3</Version>
+    <RootNamespace>NCoreUtils</RootNamespace>
+    <Version>8.1.6-rc01</Version>
     <IsAotCompatible>true</IsAotCompatible>
     <IsTrimmable>true</IsTrimmable>
-    <RootNamespace>NCoreUtils</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <ProjectReference Include="..\NCoreUtils.Extensions.Google.Cloud.MetadataServer\NCoreUtils.Extensions.Google.Cloud.MetadataServer.csproj" />
     <ProjectReference Include="..\NCoreUtils.Extensions.Google.Cloud.PubSub.Core\NCoreUtils.Extensions.Google.Cloud.PubSub.Core.csproj" />
-    <ProjectReference Include="..\NCoreUtils.Extensions.Google.Cloud.ServiceAccount\NCoreUtils.Extensions.Google.Cloud.ServiceAccount.csproj" />
   </ItemGroup>
 </Project>

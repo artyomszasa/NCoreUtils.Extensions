@@ -1,0 +1,42 @@
+﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using NCoreUtils.Google;
+
+namespace NCoreUtils;
+
+public static class ServiceCollectionGoogleCloudStorageAdminMetadataServerExtensions
+{
+    public const string DefaultGoogleCloudStorageServiceEndpoint = "https://storage.googleapis.com";
+
+    public static IServiceCollection AddGoogleStorageAdminApiV1Client(
+        this IServiceCollection services,
+        string? endpoint = default,
+        bool configureHttpClient = true)
+    {
+        if (configureHttpClient)
+        {
+            services.TryAddTransient<InjectGoogleAccessTokenHandler>();
+            services.AddHttpClient(GoogleStorageAdminApiV1Client.HttpClientConfigurationName)
+                .AddHttpMessageHandler<InjectGoogleAccessTokenHandler>();
+        }
+        return services
+            .AddGoogleCloudMetadataServer()
+            .AddGoogleStorageAdminApiV1Client(endpoint ?? DefaultGoogleCloudStorageServiceEndpoint, GoogleStorageAdminApiV1Client.HttpClientConfigurationName);
+    }
+
+    private static IServiceCollection AddGoogleStorageAdminClientWithoutDependencies(
+        this IServiceCollection services,
+        string projectId)
+        => services.AddSingleton<IGoogleStorageAdminClient>(serviceProvider => new GoogleStorageAdminClient(
+            api: serviceProvider.GetRequiredService<IGoogleStorageAdminApiV1>(),
+            projectId: projectId
+        ));
+
+    public static IServiceCollection AddGoogleStorageAdminClient(
+        this IServiceCollection services,
+        string projectId,
+        bool configureHttpClient = true)
+        => services
+            .AddGoogleStorageAdminApiV1Client(default, configureHttpClient)
+            .AddGoogleStorageAdminClientWithoutDependencies(projectId);
+}
