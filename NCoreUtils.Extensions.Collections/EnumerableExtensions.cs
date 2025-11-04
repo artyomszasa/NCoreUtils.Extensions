@@ -11,6 +11,25 @@ namespace NCoreUtils;
 /// </summary>
 public static class EnumerableExtensions
 {
+#if NETSTANDARD2_1 || NETFRAMEWORK
+
+    private static class EmptyArrays<T>
+    {
+        public static readonly T[] Instance = new T[0];
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static T[] EmptyArray<T>() => EmptyArrays<T>.Instance;
+
+#else
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static T[] EmptyArray<T>() => Array.Empty<T>();
+
+#endif
+
+
+
     /// <summary>
     /// Maps collection to array. This method does the same as sequentially invoking <c>Select</c> and
     /// <c>ToArray</c> but creates array of the exact size if size of the input sequence can be determined.
@@ -33,8 +52,13 @@ public static class EnumerableExtensions
                 return array.Map(selector);
             case IList<TSource> list:
                 {
-                    var result = new TResult[list.Count];
-                    for (var i = 0; i < list.Count; ++i)
+                    var count = list.Count;
+                    if (count == 0)
+                    {
+                        return EmptyArray<TResult>();
+                    }
+                    var result = new TResult[count];
+                    for (var i = 0; i < count; ++i)
                     {
                         result[i] = selector(list[i]);
                     }
@@ -42,8 +66,13 @@ public static class EnumerableExtensions
                 }
             case IReadOnlyList<TSource> list:
                 {
-                    var result = new TResult[list.Count];
-                    for (var i = 0; i < list.Count; ++i)
+                    var count = list.Count;
+                    if (count == 0)
+                    {
+                        return EmptyArray<TResult>();
+                    }
+                    var result = new TResult[count];
+                    for (var i = 0; i < count; ++i)
                     {
                         result[i] = selector(list[i]);
                     }
@@ -51,7 +80,12 @@ public static class EnumerableExtensions
                 }
             case ICollection<TSource> collection:
                 {
-                    var result = new TResult[collection.Count];
+                    var count = collection.Count;
+                    if (count == 0)
+                    {
+                        return EmptyArray<TResult>();
+                    }
+                    var result = new TResult[count];
                     var i = 0;
                     foreach (var item in collection)
                     {

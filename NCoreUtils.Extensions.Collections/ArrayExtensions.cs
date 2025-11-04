@@ -46,6 +46,10 @@ public static class ArrayExtensions
         {
             throw new ArgumentNullException(nameof(mapper));
         }
+        if (source.Length == 0)
+        {
+            return EnumerableExtensions.EmptyArray<TResult>();
+        }
         var result = new TResult[source.Length];
         for (var i = 0; i < source.Length; ++i)
         {
