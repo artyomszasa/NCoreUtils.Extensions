@@ -2,6 +2,7 @@ using System.Buffers;
 using System.Text.Json.Serialization;
 using NCoreUtils.Google.Maps.Geocoding.Proto;
 using NCoreUtils.Proto;
+using HttpMethod = System.Net.Http.HttpMethod;
 
 namespace NCoreUtils.Google.Maps.Geocoding;
 

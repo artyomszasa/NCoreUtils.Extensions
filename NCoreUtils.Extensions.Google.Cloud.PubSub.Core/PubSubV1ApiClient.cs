@@ -3,6 +3,7 @@ using System.Text.Json.Serialization;
 using NCoreUtils.Google.Cloud.PubSub.Proto;
 using NCoreUtils.Proto;
 using NCoreUtils.Proto.Internal;
+using HttpMethod = System.Net.Http.HttpMethod;
 
 namespace NCoreUtils.Google.Cloud.PubSub;
 

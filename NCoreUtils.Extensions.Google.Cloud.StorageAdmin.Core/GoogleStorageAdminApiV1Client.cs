@@ -4,6 +4,7 @@ using NCoreUtils.Google.Proto;
 using System.Net.Http;
 using NCoreUtils.Proto.Internal;
 using System.Text.Json.Serialization;
+using HttpMethod = System.Net.Http.HttpMethod;
 
 namespace NCoreUtils;
 
