@@ -4,13 +4,11 @@ using NCoreUtils.Linq;
 
 namespace NCoreUtils.Internal;
 
-internal sealed class SpliceInliner : ExtensionExpressionVisitor
+internal sealed class SpliceInliner(bool keepExtensions) : ExtensionExpressionVisitor(keepExtensions)
 {
     public static SpliceInliner ReduceInstance { get; } = new SpliceInliner(false);
 
     public static SpliceInliner NoReduceInstance { get; } = new SpliceInliner(true);
-
-    public SpliceInliner(bool keepExtensions) : base(keepExtensions) { }
 
     protected override Expression VisitMethodCall(MethodCallExpression node)
     {

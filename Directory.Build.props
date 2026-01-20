@@ -1,11 +1,14 @@
 <Project>
   <PropertyGroup>
-    <LangVersion>12.0</LangVersion>
+    <LangVersion>14.0</LangVersion>
     <Nullable>enable</Nullable>
     <FxNugetVersion>6.0.0</FxNugetVersion>
     <Fx3NugetVersion>3.1.16</Fx3NugetVersion>
-    <ProtoVersion>8.0.0-rc09</ProtoVersion>
+    <ProtoVersion>10.0.0</ProtoVersion>
     <IsTrimmable>true</IsTrimmable>
     <SuppressTrimAnalysisWarnings>false</SuppressTrimAnalysisWarnings>
+  </PropertyGroup>
+  <PropertyGroup>
+    <GoogleExtensionsVersion>10.0.0</GoogleExtensionsVersion>
   </PropertyGroup>
 </Project>

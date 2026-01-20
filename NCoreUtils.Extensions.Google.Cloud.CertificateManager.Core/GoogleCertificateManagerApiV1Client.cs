@@ -41,11 +41,10 @@ public partial class GoogleCertificateManagerApiV1Client
     private static StringEsc Esc(string? source, bool noSep = false)
         => new(true, source, noSep);
 
-    // TODO: C# 13 --> use ReadOnlySpan params
 #if NET6_0_OR_GREATER
     [MethodImpl(MethodImplOptions.AggressiveOptimization)]
 #endif
-    private static string UriJoin(ReadOnlySpan<StringEsc> segments)
+    private static string UriJoin(params ReadOnlySpan<StringEsc> segments)
     {
         var buffer = ArrayPool<char>.Shared.Rent(4096);
         try
@@ -98,13 +97,13 @@ public partial class GoogleCertificateManagerApiV1Client
         string domain,
         IReadOnlyDictionary<string, string>? labels = default)
     {
-        var requestUri = UriJoin([
+        var requestUri = UriJoin(
             GetCachedMethodPath(Methods.CreateDnsAuthorization),
             Esc(projectId),
             "locations",
             Esc(location),
             "dnsAuthorizations"
-        ]);
+        );
         var req = new HttpRequestMessage(HttpMethod.Post, $"{requestUri}?dnsAuthorizationId={Uri.EscapeDataString(dnsAuthorization)}")
         {
             Content = ProtoJsonContent.Create(
@@ -126,14 +125,14 @@ public partial class GoogleCertificateManagerApiV1Client
         string location,
         string dnsAuthorization)
     {
-        var requestUri = UriJoin([
+        var requestUri = UriJoin(
             GetCachedMethodPath(Methods.GetDnsAuthorization),
             Esc(projectId),
             "locations",
             Esc(location),
             "dnsAuthorizations",
             Esc(dnsAuthorization)
-        ]);
+        );
         var req = new HttpRequestMessage(HttpMethod.Get, requestUri);
         req.SetRequiredGcpScope("https://www.googleapis.com/auth/cloud-platform");
         return req;
@@ -144,14 +143,14 @@ public partial class GoogleCertificateManagerApiV1Client
         string location,
         string dnsAuthorization)
     {
-        var requestUri = UriJoin([
+        var requestUri = UriJoin(
             GetCachedMethodPath(Methods.DeleteDnsAuthorization),
             Esc(projectId),
             "locations",
             Esc(location),
             "dnsAuthorizations",
             Esc(dnsAuthorization)
-        ]);
+        );
         var req = new HttpRequestMessage(HttpMethod.Delete, requestUri);
         req.SetRequiredGcpScope("https://www.googleapis.com/auth/cloud-platform");
         return req;
@@ -166,14 +165,14 @@ public partial class GoogleCertificateManagerApiV1Client
         string? description = default,
         IReadOnlyDictionary<string, string>? labels = default)
     {
-        var requestUri = UriJoin([
+        var requestUri = UriJoin(
             GetCachedMethodPath(Methods.CreateCertificate),
             Esc(projectId),
             "locations",
             Esc(location),
             "certificates?certificateId=",
             Esc(certificateId, noSep: true)
-        ]);
+        );
         var req = new HttpRequestMessage(HttpMethod.Post, requestUri)
         {
             Content = ProtoJsonContent.Create(
@@ -196,14 +195,14 @@ public partial class GoogleCertificateManagerApiV1Client
         string location,
         string certificateId)
     {
-        var requestUri = UriJoin([
+        var requestUri = UriJoin(
             GetCachedMethodPath(Methods.GetCertificate),
             Esc(projectId),
             "locations",
             Esc(location),
             "certificates",
             Esc(certificateId)
-        ]);
+        );
         var req = new HttpRequestMessage(HttpMethod.Get, requestUri);
         req.SetRequiredGcpScope("https://www.googleapis.com/auth/cloud-platform");
         return req;
@@ -214,14 +213,14 @@ public partial class GoogleCertificateManagerApiV1Client
         string location,
         string certificateId)
     {
-        var requestUri = UriJoin([
+        var requestUri = UriJoin(
             GetCachedMethodPath(Methods.DeleteCertificate),
             Esc(projectId),
             "locations",
             Esc(location),
             "certificates",
             Esc(certificateId)
-        ]);
+        );
         var req = new HttpRequestMessage(HttpMethod.Delete, requestUri);
         req.SetRequiredGcpScope("https://www.googleapis.com/auth/cloud-platform");
         return req;
@@ -237,7 +236,7 @@ public partial class GoogleCertificateManagerApiV1Client
         string? description = default,
         IReadOnlyDictionary<string, string>? labels = default)
     {
-        var requestUri = UriJoin([
+        var requestUri = UriJoin(
             GetCachedMethodPath(Methods.CreateCertificateMapEntry),
             Esc(projectId),
             "locations",
@@ -246,7 +245,7 @@ public partial class GoogleCertificateManagerApiV1Client
             Esc(mapName),
             "certificateMapEntries?certificateMapEntryId=",
             Esc(entryName, noSep: true)
-        ]);
+        );
         var req = new HttpRequestMessage(HttpMethod.Post, requestUri)
         {
             Content = ProtoJsonContent.Create(
@@ -271,7 +270,7 @@ public partial class GoogleCertificateManagerApiV1Client
         string mapName,
         string entryName)
     {
-        var requestUri = UriJoin([
+        var requestUri = UriJoin(
             GetCachedMethodPath(Methods.GetCertificateMapEntry),
             Esc(projectId),
             "locations",
@@ -280,7 +279,7 @@ public partial class GoogleCertificateManagerApiV1Client
             Esc(mapName),
             "certificateMapEntries",
             Esc(entryName)
-        ]);
+        );
         var req = new HttpRequestMessage(HttpMethod.Get, requestUri);
         req.SetRequiredGcpScope("https://www.googleapis.com/auth/cloud-platform");
         return req;
@@ -292,7 +291,7 @@ public partial class GoogleCertificateManagerApiV1Client
         string mapName,
         string entryName)
     {
-        var requestUri = UriJoin([
+        var requestUri = UriJoin(
             GetCachedMethodPath(Methods.DeleteCertificateMapEntry),
             Esc(projectId),
             "locations",
@@ -301,7 +300,7 @@ public partial class GoogleCertificateManagerApiV1Client
             Esc(mapName),
             "certificateMapEntries",
             Esc(entryName)
-        ]);
+        );
         var req = new HttpRequestMessage(HttpMethod.Delete, requestUri);
         req.SetRequiredGcpScope("https://www.googleapis.com/auth/cloud-platform");
         return req;
@@ -312,14 +311,14 @@ public partial class GoogleCertificateManagerApiV1Client
         string location,
         string operationId)
     {
-        var requestUri = UriJoin([
+        var requestUri = UriJoin(
             GetCachedMethodPath(Methods.GetCreateDnsAuthorizationOperation),
             Esc(projectId),
             "locations",
             Esc(location),
             "operations",
             Esc(operationId)
-        ]);
+        );
         var req = new HttpRequestMessage(HttpMethod.Get, requestUri);
         req.SetRequiredGcpScope("https://www.googleapis.com/auth/cloud-platform");
         return req;
@@ -330,14 +329,14 @@ public partial class GoogleCertificateManagerApiV1Client
         string location,
         string operationId)
     {
-        var requestUri = UriJoin([
+        var requestUri = UriJoin(
             GetCachedMethodPath(Methods.GetDeleteDnsAuthorizationOperation),
             Esc(projectId),
             "locations",
             Esc(location),
             "operations",
             Esc(operationId)
-        ]);
+        );
         var req = new HttpRequestMessage(HttpMethod.Get, requestUri);
         req.SetRequiredGcpScope("https://www.googleapis.com/auth/cloud-platform");
         return req;
@@ -348,14 +347,14 @@ public partial class GoogleCertificateManagerApiV1Client
         string location,
         string operationId)
     {
-        var requestUri = UriJoin([
+        var requestUri = UriJoin(
             GetCachedMethodPath(Methods.GetCreateCertificateOperation),
             Esc(projectId),
             "locations",
             Esc(location),
             "operations",
             Esc(operationId)
-        ]);
+        );
         var req = new HttpRequestMessage(HttpMethod.Get, requestUri);
         req.SetRequiredGcpScope("https://www.googleapis.com/auth/cloud-platform");
         return req;
@@ -366,14 +365,14 @@ public partial class GoogleCertificateManagerApiV1Client
         string location,
         string operationId)
     {
-        var requestUri = UriJoin([
+        var requestUri = UriJoin(
             GetCachedMethodPath(Methods.GetDeleteCertificateOperation),
             Esc(projectId),
             "locations",
             Esc(location),
             "operations",
             Esc(operationId)
-        ]);
+        );
         var req = new HttpRequestMessage(HttpMethod.Get, requestUri);
         req.SetRequiredGcpScope("https://www.googleapis.com/auth/cloud-platform");
         return req;
@@ -384,14 +383,14 @@ public partial class GoogleCertificateManagerApiV1Client
         string location,
         string operationId)
     {
-        var requestUri = UriJoin([
+        var requestUri = UriJoin(
             GetCachedMethodPath(Methods.GetCreateCertificateMapEntryOperation),
             Esc(projectId),
             "locations",
             Esc(location),
             "operations",
             Esc(operationId)
-        ]);
+        );
         var req = new HttpRequestMessage(HttpMethod.Get, requestUri);
         req.SetRequiredGcpScope("https://www.googleapis.com/auth/cloud-platform");
         return req;
@@ -402,14 +401,14 @@ public partial class GoogleCertificateManagerApiV1Client
         string location,
         string operationId)
     {
-        var requestUri = UriJoin([
+        var requestUri = UriJoin(
             GetCachedMethodPath(Methods.GetDeleteCertificateMapEntryOperation),
             Esc(projectId),
             "locations",
             Esc(location),
             "operations",
             Esc(operationId)
-        ]);
+        );
         var req = new HttpRequestMessage(HttpMethod.Get, requestUri);
         req.SetRequiredGcpScope("https://www.googleapis.com/auth/cloud-platform");
         return req;

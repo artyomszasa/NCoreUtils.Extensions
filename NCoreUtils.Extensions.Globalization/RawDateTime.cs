@@ -4,7 +4,7 @@ using System.Runtime.CompilerServices;
 
 namespace NCoreUtils;
 
-public partial struct RawDateTime
+public readonly partial struct RawDateTime
     : IComparable
     , IEquatable<RawDateTime>
     , IComparable<RawDateTime>

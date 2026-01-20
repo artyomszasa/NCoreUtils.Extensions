@@ -2,12 +2,9 @@ using System.Linq.Expressions;
 
 namespace NCoreUtils.Linq;
 
-public abstract class ExtensionExpressionVisitor : ExpressionVisitor
+public abstract class ExtensionExpressionVisitor(bool keepExtensions = false) : ExpressionVisitor
 {
-    protected bool KeepExtensions { get; private set; }
-
-    protected ExtensionExpressionVisitor(bool keepExtensions = false)
-        => KeepExtensions = keepExtensions;
+    protected bool KeepExtensions { get; private set; } = keepExtensions;
 
     internal void Update(bool keepExtensions)
     {

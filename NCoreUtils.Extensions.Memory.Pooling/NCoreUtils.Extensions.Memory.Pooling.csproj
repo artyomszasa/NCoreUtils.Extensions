@@ -1,9 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>net8.0;net7.0;net6.0;netstandard2.1;netstandard2.0;net461;net48</TargetFrameworks>
+    <TargetFrameworks>net10.0;net8.0;net6.0;netstandard2.1;netstandard2.0;net461;net48</TargetFrameworks>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <RootNamespace>NCoreUtils</RootNamespace>
-    <Version>4.0.2</Version>
+    <Version>4.0.2.1</Version>
     <IsAotCompatible Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net7.0'))">true</IsAotCompatible>
     <!-- NuGet -->
     <PackageId>NCoreUtils.Extensions.Memory.Pooling</PackageId>

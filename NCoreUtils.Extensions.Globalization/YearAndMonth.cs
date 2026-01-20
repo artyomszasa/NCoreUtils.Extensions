@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
+using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
@@ -229,27 +230,72 @@ public readonly partial struct YearAndMonth
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static char ToAsciiNum(int i) => unchecked((char)(i + '0'));
 
-    [MethodImpl(OptInlineOptimize)]
-    private int GetFormattedSize()
+#if NET6_0_OR_GREATER
+
+    // FIXME: merge with NU.E.String
+    private static ReadOnlySpan<int> Log2ToLog10Guess =>
+    [
+        0, // 0  --> 0..1
+        0, // 1  --> 2..3
+        0, // 2  --> 4..7
+        1, // 3  --> 8..15
+        1, // 4  --> 16..31
+        1, // 5  --> 32..63
+        2, // 6  --> 64..127
+        2, // 7  --> 128..255
+        2, // 8  --> 256..511
+        3, // 9  --> 512..1023
+        3, // 10 --> 1024..2047
+        3, // 11 --> 2048..4095
+        3, // 12 --> 4096..8191
+        4, // 13 --> 8192..16383
+        4, // 14 --> 16384..32767
+        4, // 15 --> 32768..65535
+    ];
+
+    private static ReadOnlySpan<uint> PowOf10 => [ 1, 10, 100, 1_000, 10_000 ];
+
+    [MethodImpl(OptNoInlineOptimize)]
+    private static int GetYearSize(uint year)
     {
-        int year = Year;
+        var log2 = BitOperations.Log2(year);
+        if (log2 == 0) { return 1; }
+        var guess = UnsafeGetAt(Log2ToLog10Guess, log2);
+        return guess + (year >= UnsafeGetAt(PowOf10, guess) ? 1 : 0);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static T UnsafeGetAt<T>(ReadOnlySpan<T> source, int index)
+            where T : unmanaged
+        {
+            return Unsafe.Add(ref MemoryMarshal.GetReference(source), index);
+        }
+    }
+
+
+#else
+
+    [MethodImpl(OptInlineOptimize)]
+    private int GetYearSize(uint year)
+    {
         int yearSize = 5;
         if (year < 10_000) yearSize = 4;
         if (year < 1_000) yearSize = 3;
         if (year < 100) yearSize = 2;
         if (year < 10) yearSize = 1;
-        return yearSize + 3;
+        return yearSize;
     }
+
+#endif
+
+
+    [MethodImpl(OptInlineOptimize)]
+    internal int GetFormattedSize() => GetYearSize(Year) + 3;
 
     [MethodImpl(OptInlineOptimize)]
     private int FormatToNoCheck(ref char buffer)
     {
         int year = Year;
-        int yearSize = 5;
-        if (year < 10_000) yearSize = 4;
-        if (year < 1_000) yearSize = 3;
-        if (year < 100) yearSize = 2;
-        if (year < 10) yearSize = 1;
+        int yearSize = GetYearSize(unchecked((uint)year));
         var pos = yearSize - 1;
         while (pos > 0)
         {

@@ -13,10 +13,10 @@ public static class ExpressionExtensions
     private delegate bool TryExtractDelegate(Expression expression, out object? value);
 
     private static TryExtractDelegate TryExtractConstantDelegate { get; }
-        = (Expression expression, out object? value) => expression.TryExtractConstant(out value);
+        = (expression, out value) => expression.TryExtractConstant(out value);
 
     private static TryExtractDelegate TryExtractInstanceDelegate { get; }
-        = (Expression expression, out object? value) => expression.TryExtractInstance(out value);
+        = (expression, out value) => expression.TryExtractInstance(out value);
 
     private static FixSizePool<ParameterSubstitution> SubstitutionPool { get; } = new(32);
 
@@ -29,13 +29,7 @@ public static class ExpressionExtensions
             // see: https://github.com/dotnet/runtime/issues/22296
             return Activator.CreateInstance(newExpression.Type)!;
         }
-        return newExpression.Constructor.Invoke(
-#if NETFRAMEWORK
-            new object[0]
-#else
-            []
-#endif
-        );
+        return newExpression.Constructor.Invoke([]);
     }
 
     private static Maybe<PropertyInfo> MaybeExtractBodyProperty(this Expression body)
@@ -64,6 +58,10 @@ public static class ExpressionExtensions
     public static T SubstituteParameter<T>(this T expression, ParameterExpression parameter, Expression replacement, bool keepExtensions)
         where T : Expression
     {
+#if NET6_0_OR_GREATER
+        ArgumentNullException.ThrowIfNull(parameter);
+        ArgumentNullException.ThrowIfNull(replacement);
+#else
         if (parameter == null)
         {
             throw new ArgumentNullException(nameof(parameter));
@@ -72,6 +70,7 @@ public static class ExpressionExtensions
         {
             throw new ArgumentNullException(nameof(replacement));
         }
+#endif
         if (SubstitutionPool.TryRent(out var visitor))
         {
             visitor.Update(parameter, replacement, keepExtensions);
@@ -149,10 +148,14 @@ public static class ExpressionExtensions
     /// </returns>
     public static Maybe<object?> MaybeExtractConstant(this Expression source)
     {
+#if NET6_0_OR_GREATER
+        ArgumentNullException.ThrowIfNull(source);
+#else
         if (source == null)
         {
             throw new ArgumentNullException(nameof(source));
         }
+#endif
         try
         {
             return MaybeExtractConstantImpl(source);

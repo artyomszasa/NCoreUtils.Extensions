@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 using System.Runtime.CompilerServices;
 using NCoreUtils.Internal;
 
@@ -53,7 +52,7 @@ public static class StringExtensions
     {
         if (source is null)
         {
-            return Enumerable.Empty<string>();
+            return [];
         }
 #if NET6_0_OR_GREATER
         var lines = options.HasFlag(StringSplitOptions.TrimEntries)
@@ -69,5 +68,5 @@ public static class StringExtensions
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static IEnumerable<string> SplitIntoLines(this string? source)
-        => source is null ? Enumerable.Empty<string>() : new LineEnumerable(source);
+        => source is null ? [] : new LineEnumerable(source);
 }

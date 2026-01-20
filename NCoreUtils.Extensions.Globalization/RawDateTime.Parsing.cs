@@ -4,7 +4,7 @@ using System.Globalization;
 
 namespace NCoreUtils;
 
-public partial struct RawDateTime
+public readonly partial struct RawDateTime
 #if NET7_0_OR_GREATER
     : IParsable<RawDateTime>
     , ISpanParsable<RawDateTime>

@@ -194,11 +194,19 @@ public static class StringUtils
         return true;
     }
 
-    // FIXME: optimize
+#if NET6_0_OR_GREATER
+    [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+#endif
     private static ulong DivRem(ulong a, ulong b, out ulong reminder)
     {
+#if NET6_0_OR_GREATER
+        var (q, r) = Math.DivRem(a, b);
+        reminder = r;
+        return q;
+#else
         reminder = a % b;
         return a / b;
+#endif
     }
 
     public static bool TryFormatUInt64(ulong value, Span<char> span, out int total)

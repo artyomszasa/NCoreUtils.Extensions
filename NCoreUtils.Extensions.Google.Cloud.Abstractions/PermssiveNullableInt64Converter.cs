@@ -7,16 +7,10 @@ namespace NCoreUtils.Google;
 
 public class PermssiveNullableInt64Converter : JsonConverter<long?>
 {
-    private bool TryParseInt64(ReadOnlySpan<byte> source, out long value)
-    {
-        if (Utf8Parser.TryParse(source, out value, out var bytesConsumed) && bytesConsumed == source.Length)
-        {
-            return true;
-        }
-        return false;
-    }
+    private static bool TryParseInt64(ReadOnlySpan<byte> source, out long value)
+        => Utf8Parser.TryParse(source, out value, out var bytesConsumed) && bytesConsumed == source.Length;
 
-    private bool TryParseInt64(in Utf8JsonReader reader, out long value)
+    private static bool TryParseInt64(in Utf8JsonReader reader, out long value)
     {
         if (reader.HasValueSequence)
         {

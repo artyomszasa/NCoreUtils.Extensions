@@ -428,8 +428,7 @@ public sealed class ArrayPoolList<T> : IList<T>, IList, IReadOnlyList<T>, IDispo
     public bool Exists(Predicate<T> match)
         => FindIndex(match) != -1;
 
-    [return: MaybeNull]
-    public T Find(Predicate<T> match)
+    public T? Find(Predicate<T> match)
     {
         if (match is null)
         {
@@ -443,7 +442,7 @@ public sealed class ArrayPoolList<T> : IList<T>, IList, IReadOnlyList<T>, IDispo
                 return _items[i];
             }
         }
-        return default!;
+        return default;
     }
 
     public int FindIndex(Predicate<T> match)
@@ -474,8 +473,7 @@ public sealed class ArrayPoolList<T> : IList<T>, IList, IReadOnlyList<T>, IDispo
         return -1;
     }
 
-    [return: MaybeNull]
-    public T FindLast(Predicate<T> match)
+    public T? FindLast(Predicate<T> match)
     {
         if (match is null)
         {

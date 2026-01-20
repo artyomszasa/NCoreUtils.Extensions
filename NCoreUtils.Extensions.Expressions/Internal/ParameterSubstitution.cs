@@ -3,18 +3,12 @@ using NCoreUtils.Linq;
 
 namespace NCoreUtils.Internal;
 
-internal sealed class ParameterSubstitution : ExtensionExpressionVisitor
+internal sealed class ParameterSubstitution(ParameterExpression parameter, Expression replacement, bool keepExtensions)
+    : ExtensionExpressionVisitor(keepExtensions)
 {
-    private ParameterExpression Parameter { get; set; }
+    private ParameterExpression Parameter { get; set; } = parameter;
 
-    private Expression Replacement { get; set; }
-
-    public ParameterSubstitution(ParameterExpression parameter, Expression replacement, bool keepExtensions)
-        : base(keepExtensions)
-    {
-        Parameter = parameter;
-        Replacement = replacement;
-    }
+    private Expression Replacement { get; set; } = replacement;
 
     internal ParameterSubstitution Clear()
     {
