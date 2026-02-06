@@ -115,6 +115,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NCoreUtils.Extensions.Googl
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NCoreUtils.Extensions.Google.Cloud.Translation.ServiceAccount", "NCoreUtils.Extensions.Google.Cloud.Translation.ServiceAccount\NCoreUtils.Extensions.Google.Cloud.Translation.ServiceAccount.csproj", "{05B2B9AA-E6DA-447F-8D85-B09CB7410A6E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NCoreUtils.Extensions.Http", "NCoreUtils.Extensions.Http\NCoreUtils.Extensions.Http.csproj", "{8CCD254B-13B6-45CE-8C2C-49CD026977D9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -797,6 +799,18 @@ Global
 		{05B2B9AA-E6DA-447F-8D85-B09CB7410A6E}.Release|x64.Build.0 = Release|Any CPU
 		{05B2B9AA-E6DA-447F-8D85-B09CB7410A6E}.Release|x86.ActiveCfg = Release|Any CPU
 		{05B2B9AA-E6DA-447F-8D85-B09CB7410A6E}.Release|x86.Build.0 = Release|Any CPU
+		{8CCD254B-13B6-45CE-8C2C-49CD026977D9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8CCD254B-13B6-45CE-8C2C-49CD026977D9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8CCD254B-13B6-45CE-8C2C-49CD026977D9}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{8CCD254B-13B6-45CE-8C2C-49CD026977D9}.Debug|x64.Build.0 = Debug|Any CPU
+		{8CCD254B-13B6-45CE-8C2C-49CD026977D9}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{8CCD254B-13B6-45CE-8C2C-49CD026977D9}.Debug|x86.Build.0 = Debug|Any CPU
+		{8CCD254B-13B6-45CE-8C2C-49CD026977D9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8CCD254B-13B6-45CE-8C2C-49CD026977D9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8CCD254B-13B6-45CE-8C2C-49CD026977D9}.Release|x64.ActiveCfg = Release|Any CPU
+		{8CCD254B-13B6-45CE-8C2C-49CD026977D9}.Release|x64.Build.0 = Release|Any CPU
+		{8CCD254B-13B6-45CE-8C2C-49CD026977D9}.Release|x86.ActiveCfg = Release|Any CPU
+		{8CCD254B-13B6-45CE-8C2C-49CD026977D9}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

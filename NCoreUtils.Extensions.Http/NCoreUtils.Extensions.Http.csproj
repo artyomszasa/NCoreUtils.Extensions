@@ -1,0 +1,28 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net10.0;net8.0</TargetFrameworks>
+    <RootNamespace>NCoreUtils</RootNamespace>
+    <Version>10.0.0.1</Version>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <IsAotCompatible>true</IsAotCompatible>
+    <!-- NuGet -->
+    <PackageId>NCoreUtils.Extensions.Http</PackageId>
+    <Title>$(PackageId)</Title>
+    <Authors>Artyom Antyipin</Authors>
+    <Description>HTTP communication related extensions.</Description>
+    <Copyright>Artyom Antyipin</Copyright>
+    <RepositoryUrl>https://github.com/artyomszasa/NCoreUtils.Extensions.git</RepositoryUrl>
+    <PackageReleaseNotes></PackageReleaseNotes>
+    <!-- Assembly Info -->
+    <Product>NCoreUtils</Product>
+    <AssemblyName>$(PackageId)</AssemblyName>
+    <AssemblyTitle>$(AssemblyName)</AssemblyTitle>
+    <!-- Compilation -->
+    <OutputType>Library</OutputType>
+    <DebugType>portable</DebugType>
+    <!--
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    -->
+  </PropertyGroup>
+</Project>
