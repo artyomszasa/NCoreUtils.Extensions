@@ -1,11 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection.Metadata;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-
 namespace NCoreUtils.ObservableProperties;
 
 public enum FieldChangeTriggerStrategy
@@ -79,11 +71,4 @@ internal class ObservableFieldSettings(IFieldSymbol field, INamedTypeSymbol? equ
                 );
         }
     }
-}
-
-internal class ObservableClassTarget(INamedTypeSymbol host, IReadOnlyList<ObservableFieldSettings> fields)
-{
-    public INamedTypeSymbol Host { get; } = host ?? throw new ArgumentNullException(nameof(host));
-
-    public IReadOnlyList<ObservableFieldSettings> Fields { get; } = fields ?? throw new ArgumentNullException(nameof(fields));
 }

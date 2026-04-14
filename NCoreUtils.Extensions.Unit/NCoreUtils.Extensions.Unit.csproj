@@ -41,6 +41,8 @@
     <ProjectReference Include="..\NCoreUtils.Extensions.Memory\NCoreUtils.Extensions.Memory.csproj" />
     <ProjectReference Include="..\NCoreUtils.Extensions.String\NCoreUtils.Extensions.String.csproj" />
     <ProjectReference Include="..\NCoreUtils.Extensions.Memory.Pooling\NCoreUtils.Extensions.Memory.Pooling.csproj" />
+    <ProjectReference Include="..\NCoreUtils.Extensions.ObservableProperties\NCoreUtils.Extensions.ObservableProperties.csproj" />
+    <ProjectReference Include="..\NCoreUtils.Extensions.ObservableProperties.Generator\NCoreUtils.Extensions.ObservableProperties.Generator.csproj"  PrivateAssets="all" ReferenceOutputAssembly="false" OutputItemType="Analyzer" />
   </ItemGroup>
 
   <!-- **** -->
