@@ -2,7 +2,7 @@
   <PropertyGroup>
     <TargetFrameworks>net10.0;net8.0</TargetFrameworks>
     <RootNamespace>NCoreUtils</RootNamespace>
-    <Version>10.0.0.0</Version>
+    <Version>$(GoogleExtensionsVersion)</Version>
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
   <PropertyGroup>

@@ -1,0 +1,71 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>net10.0;net8.0;net6.0;netstandard2.1;net48</TargetFrameworks>
+    <Version>10.0.0-rc00</Version>
+    <IsAotCompatible Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net7.0'))">true</IsAotCompatible>
+    <IsTrimmable>true</IsTrimmable>
+    <RootNamespace>NCoreUtils</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net48' ">
+    <Compile Include="..\Compat\Range\*.cs" />
+    <Compile Include="..\Compat\Nullable\*.cs" />
+    <Compile Remove="Base64.Char.Net8.cs" />
+    <Compile Remove="Base64.Math.Net6.cs" />
+    <Compile Remove="Base64.Standard.Net.cs" />
+    <Compile Remove="Base64.Url.Net.cs" />
+    <Compile Remove="Base64.Url.Net10.cs" />
+    <Compile Remove="Base64Encode.Standard.Net.cs" />
+    <Compile Remove="Base64Encode.Url.Net.cs" />
+    <Compile Remove="Base64Encode.Url.Net10.cs" />
+    <PackageReference Include="System.Memory" Version="4.6.0" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.1' ">
+    <Compile Remove="Base64.Char.Net8.cs" />
+    <Compile Remove="Base64.Math.Net6.cs" />
+    <Compile Remove="Base64.Url.Net10.cs" />
+    <Compile Remove="Base64.Url.Compat.cs" />
+    <Compile Remove="Base64.Standard.Compat.cs" />
+    <Compile Remove="Base64Encode.Standard.Compat.cs" />
+    <Compile Remove="Base64Encode.Url.Compat.cs" />
+    <Compile Remove="Base64Encode.Url.Net10.cs" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net6.0' ">
+    <Compile Remove="Base64.Char.Net8.cs" />
+    <Compile Remove="Base64.Math.Compat.cs" />
+    <Compile Remove="Base64.Url.Net10.cs" />
+    <Compile Remove="Base64.Url.Compat.cs" />
+    <Compile Remove="Base64.Standard.Compat.cs" />
+    <Compile Remove="Base64Encode.Standard.Compat.cs" />
+    <Compile Remove="Base64Encode.Url.Compat.cs" />
+    <Compile Remove="Base64Encode.Url.Net10.cs" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net8.0' ">
+    <Compile Remove="Base64.Char.Compat.cs" />
+    <Compile Remove="Base64.Math.Compat.cs" />
+    <Compile Remove="Base64.Url.Net10.cs" />
+    <Compile Remove="Base64.Url.Compat.cs" />
+    <Compile Remove="Base64.Standard.Compat.cs" />
+    <Compile Remove="Base64Encode.Standard.Compat.cs" />
+    <Compile Remove="Base64Encode.Url.Compat.cs" />
+    <Compile Remove="Base64Encode.Url.Net10.cs" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net10.0' ">
+    <Compile Remove="Base64.Char.Compat.cs" />
+    <Compile Remove="Base64.Math.Compat.cs" />
+    <Compile Remove="Base64.Url.Compat.cs" />
+    <Compile Remove="Base64.Url.Net.cs" />
+    <Compile Remove="Base64.Standard.Compat.cs" />
+    <Compile Remove="Base64Encode.Standard.Compat.cs" />
+    <Compile Remove="Base64Encode.Url.Compat.cs" />
+    <Compile Remove="Base64Encode.Url.Net.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\NCoreUtils.Extensions.Primitives\NCoreUtils.Extensions.Primitives.csproj" />
+    <ProjectReference Include="..\NCoreUtils.Extensions.Preconditions\NCoreUtils.Extensions.Preconditions.csproj" />
+  </ItemGroup>
+</Project>

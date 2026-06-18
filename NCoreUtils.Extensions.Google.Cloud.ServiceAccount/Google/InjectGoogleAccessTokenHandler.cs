@@ -2,14 +2,9 @@ using System.Net.Http.Headers;
 
 namespace NCoreUtils.Google;
 
-public class InjectGoogleAccessTokenHandler : DelegatingHandler
+public class InjectGoogleAccessTokenHandler(IGoogleAccessTokenProvider accessTokenProvider) : DelegatingHandler
 {
-    public IGoogleAccessTokenProvider AccessTokenProvider { get; }
-
-    public InjectGoogleAccessTokenHandler(IGoogleAccessTokenProvider accessTokenProvider)
-    {
-        AccessTokenProvider = accessTokenProvider ?? throw new ArgumentNullException(nameof(accessTokenProvider));
-    }
+    public IGoogleAccessTokenProvider AccessTokenProvider { get; } = accessTokenProvider ?? throw new ArgumentNullException(nameof(accessTokenProvider));
 
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {

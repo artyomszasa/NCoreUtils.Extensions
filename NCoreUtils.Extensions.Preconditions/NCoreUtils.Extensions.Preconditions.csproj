@@ -1,0 +1,16 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>net10.0;net8.0;net6.0;netstandard2.1;net461</TargetFrameworks>
+    <Version>10.0.0.1</Version>
+    <IsAotCompatible Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net7.0'))">true</IsAotCompatible>
+    <IsTrimmable>true</IsTrimmable>
+    <RootNamespace>NCoreUtils</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net461' ">
+    <Compile Include="..\Compat\Lang\CallerArgumentExpressionAttribute.cs" />
+    <Compile Include="..\Compat\Nullable\*.cs" />
+  </ItemGroup>
+  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.1' ">
+    <Compile Include="..\Compat\Lang\CallerArgumentExpressionAttribute.cs" />
+  </ItemGroup>
+</Project>

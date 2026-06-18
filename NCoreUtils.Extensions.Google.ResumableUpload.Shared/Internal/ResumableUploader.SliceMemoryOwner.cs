@@ -1,10 +1,10 @@
 using System.Buffers;
 
-namespace NCoreUtils;
+namespace NCoreUtils.Internal;
 
-public partial class GoogleCloudStorageUploader
+public partial class ResumableUploader
 {
-    private sealed class SliceMemoryOwner : IMemoryOwner<byte>
+    protected sealed class SliceMemoryOwner : IMemoryOwner<byte>
     {
         public IMemoryOwner<byte> Source { get; }
 

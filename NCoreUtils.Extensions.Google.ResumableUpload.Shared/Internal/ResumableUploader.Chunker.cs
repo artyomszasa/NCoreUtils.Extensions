@@ -1,15 +1,15 @@
 using System.Buffers;
 
-namespace NCoreUtils;
+namespace NCoreUtils.Internal;
 
-public partial class GoogleCloudStorageUploader
+public abstract partial class ResumableUploader
 {
-    private interface IDataChunkSource : IDisposable, IAsyncDisposable
+    protected interface IDataChunkSource : IDisposable, IAsyncDisposable
     {
         ValueTask<(int Read, bool Final)> FetchChunkAsync(Memory<byte> buffer, CancellationToken cancellationToken);
     }
 
-    private sealed class DefaultChunkSource(Stream source, bool leaveOpen) : IDataChunkSource
+    protected sealed class DefaultChunkSource(Stream source, bool leaveOpen) : IDataChunkSource
     {
         private Stream Source { get; } = source ?? throw new ArgumentNullException(nameof(source));
 
@@ -48,7 +48,7 @@ public partial class GoogleCloudStorageUploader
             => LeaveOpen ? default : Source.DisposeAsync();
     }
 
-    private sealed class PrefetchChunkSource(Stream source, bool leaveOpen) : IDataChunkSource
+    protected sealed class PrefetchChunkSource(Stream source, bool leaveOpen) : IDataChunkSource
     {
         private const int PrefetchBufferSize = 16 * 1024;
 
@@ -130,7 +130,7 @@ public partial class GoogleCloudStorageUploader
         }
     }
 
-    private static IDataChunkSource CreateChunkSource(Stream stream, bool leaveOpen)
+    protected static IDataChunkSource CreateChunkSource(Stream stream, bool leaveOpen)
     {
         try
         {

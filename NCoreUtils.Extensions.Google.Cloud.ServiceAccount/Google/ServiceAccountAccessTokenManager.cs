@@ -1,15 +1,28 @@
 
 using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.Net.Http.Json;
 using System.Runtime.CompilerServices;
-using System.Text.Json.Serialization;
+using System.Text;
+using System.Text.Json;
+using Microsoft.Extensions.Logging;
 
 namespace NCoreUtils.Google;
 
-[JsonSerializable(typeof(TokenResponse))]
-internal partial class TokenResponseSerializerContext : JsonSerializerContext { }
+#if NETSTANDARD2_1 || NETFRAMEWORK
 
-public class ServiceAccountAccessTokenManager(ServiceAccountCredentialData credential, IHttpClientFactory? httpClientFactory = default)
+internal static class HttpCompat
+{
+    public static Task<string> ReadAsStringAsync(this HttpContent content, CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        return content.ReadAsStringAsync();
+    }
+}
+
+#endif
+
+public class ServiceAccountAccessTokenManager(ILogger<ServiceAccountAccessTokenManager> logger, ServiceAccountCredentialData credential, IHttpClientFactory? httpClientFactory = default)
     : IGoogleAccessTokenProvider
 {
     private sealed record AccessTokenValue(string AccessToken, DateTimeOffset Expiry);
@@ -18,9 +31,11 @@ public class ServiceAccountAccessTokenManager(ServiceAccountCredentialData crede
 
     private Dictionary<ScopeCollection, AccessTokenValue> AccessTokens { get; } = [];
 
-    private ServiceAccountCredentialData Credential { get; } = credential ?? throw new ArgumentNullException(nameof(credential));
-
     private IHttpClientFactory? HttpClientFactory { get; } = httpClientFactory;
+
+    private ILogger<ServiceAccountAccessTokenManager> Logger { get; } = logger ?? throw new ArgumentNullException(nameof(logger));
+
+    protected ServiceAccountCredentialData Credential { get; } = credential ?? throw new ArgumentNullException(nameof(credential));
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private void SetAccessToken(ScopeCollection scope, string accessToken, DateTimeOffset expiry)
@@ -91,25 +106,63 @@ public class ServiceAccountAccessTokenManager(ServiceAccountCredentialData crede
             var factory => factory.CreateClient(nameof(ServiceAccountAccessTokenManager))
         };
 
+    protected virtual string CreateAssertion(ScopeCollection scope)
+        => JwtHelper.CreateJwtToken(Credential, scope);
+
     protected async Task<string> DoGetAccessTokenAsync(ScopeCollection scope, CancellationToken cancellationToken = default)
     {
-        var jwtToken = JwtHelper.CreateJwtToken(Credential, scope);
+        var assertion = CreateAssertion(scope);
         using var request = new HttpRequestMessage(HttpMethod.Post, Credential.TokenUri)
         {
             Content = new FormUrlEncodedContent(new Dictionary<string, string>
             {
                 { "grant_type", "urn:ietf:params:oauth:grant-type:jwt-bearer" },
-                { "assertion", jwtToken }
+                { "assertion", assertion }
             })
         };
         using var client = CreateHttpClient();
         using var response = await client
             .SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken)
             .ConfigureAwait(false);
-        var resp = await response.EnsureSuccessStatusCode()
-            .Content
-            .ReadFromJsonAsync(TokenResponseSerializerContext.Default.TokenResponse, cancellationToken)
-            ?? throw new InvalidOperationException("Token request resulted in null.");
+        TokenResponse resp;
+        if (Logger.IsEnabled(LogLevel.Debug))
+        {
+            var rawResponse = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
+            Logger.LogDebug("Token response: '{Json}'.", rawResponse);
+            if (response.IsSuccessStatusCode)
+            {
+                try
+                {
+                    resp = JsonSerializer.Deserialize(rawResponse, TokenResponseSerializerContext.Default.TokenResponse)
+                        ?? throw new InvalidOperationException("Token request resulted in null.");
+                }
+                catch (Exception exn)
+                {
+                    throw new InvalidOperationException("Failed to read token response.", exn);
+                }
+            }
+            else
+            {
+#if NET6_0_OR_GREATER
+                throw new HttpRequestException(
+                    S.Create(CultureInfo.InvariantCulture, $"Server responded with non-successful status code {response.StatusCode}'."),
+                    null,
+                    response.StatusCode
+                );
+#else
+                throw new HttpRequestException(
+                    S.Create(CultureInfo.InvariantCulture, $"Server responded with non-successful status code {response.StatusCode}'.")
+                );
+#endif
+            }
+        }
+        else
+        {
+            resp = await response.EnsureSuccessStatusCode()
+                .Content
+                .ReadFromJsonAsync(TokenResponseSerializerContext.Default.TokenResponse, cancellationToken)
+                ?? throw new InvalidOperationException("Token request resulted in null.");
+        }
         if (string.IsNullOrEmpty(resp.AccessToken))
         {
             throw new InvalidOperationException("Token response contains no access token.");

@@ -4,11 +4,11 @@
     <Nullable>enable</Nullable>
     <FxNugetVersion>6.0.0</FxNugetVersion>
     <Fx3NugetVersion>3.1.16</Fx3NugetVersion>
-    <ProtoVersion>10.0.0</ProtoVersion>
+    <ProtoVersion>10.0.0.2</ProtoVersion>
     <IsTrimmable Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net8.0'))">true</IsTrimmable>
     <SuppressTrimAnalysisWarnings>false</SuppressTrimAnalysisWarnings>
   </PropertyGroup>
   <PropertyGroup>
-    <GoogleExtensionsVersion>10.0.0</GoogleExtensionsVersion>
+    <GoogleExtensionsVersion>10.0.0.1</GoogleExtensionsVersion>
   </PropertyGroup>
 </Project>

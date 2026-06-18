@@ -3,7 +3,7 @@
     <TargetFrameworks>net10.0;net8.0;net6.0;netstandard2.1</TargetFrameworks>
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>NCoreUtils</RootNamespace>
-    <Version>10.0.0</Version>
+    <Version>$(GoogleExtensionsVersion)</Version>
     <IsAotCompatible>true</IsAotCompatible>
     <IsTrimmable>true</IsTrimmable>
   </PropertyGroup>
@@ -34,6 +34,7 @@
     <ProjectReference Include="..\NCoreUtils.Extensions.Memory\NCoreUtils.Extensions.Memory.csproj" />
     <ProjectReference Include="..\NCoreUtils.Extensions.AsyncEnumerable\NCoreUtils.Extensions.AsyncEnumerable.csproj" />
     <ProjectReference Include="..\NCoreUtils.Extensions.Google.Cloud.Abstractions\NCoreUtils.Extensions.Google.Cloud.Abstractions.csproj" />
+    <ProjectReference Include="..\NCoreUtils.Extensions.Google.ResumableUpload.Shared\NCoreUtils.Extensions.Google.ResumableUpload.Shared.csproj" />
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetFramework)' != 'netstandard2.1' ">
     <ProjectReference Include="..\NCoreUtils.Extensions.Memory.Uri\NCoreUtils.Extensions.Memory.Uri.csproj" />

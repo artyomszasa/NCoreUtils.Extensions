@@ -39,7 +39,7 @@ public partial class GoogleCloudStorageUtils
         );
         // configure progress observere
         var size = 0L;
-        uploader.Progress += (_, e) =>
+        uploader.UploadProgress += (_, e) =>
         {
             progress?.Invoke(e.Sent);
             size = e.Sent;
