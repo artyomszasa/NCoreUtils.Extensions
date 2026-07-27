@@ -2,7 +2,7 @@ using System;
 
 namespace NCoreUtils.Memory
 {
-    public interface IEmplacer<T>
+    public interface IEmplacer<in T>
     {
         int Emplace(T value, Span<char> span);
 
