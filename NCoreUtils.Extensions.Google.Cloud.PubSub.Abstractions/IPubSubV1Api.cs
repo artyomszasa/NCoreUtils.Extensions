@@ -22,4 +22,12 @@ public interface IPubSubV1Api
         IReadOnlyList<string> ackIds,
         CancellationToken cancellationToken = default
     );
+
+    Task ModifyAckDeadline(
+        string projectId,
+        string subscription,
+        IReadOnlyList<string> ackIds,
+        int ackDeadlineSeconds,
+        CancellationToken cancellationToken = default
+    );
 }

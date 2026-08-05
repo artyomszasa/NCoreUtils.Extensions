@@ -3,6 +3,8 @@ NCoreUtils*/obj
 .vscode
 .vs
 
+*.csproj.lscache
+
 # unit
 coverage.opencover.xml
 coverage.cobertura.xml

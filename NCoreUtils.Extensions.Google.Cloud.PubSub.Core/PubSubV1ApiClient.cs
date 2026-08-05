@@ -22,6 +22,7 @@ internal static class HttpCompatExtensions
 [JsonSerializable(typeof(PubSubPublishRequest))]
 [JsonSerializable(typeof(PubSubPullRequest))]
 [JsonSerializable(typeof(PubSubAcknowledgeRequest))]
+[JsonSerializable(typeof(PubSubModifyAckDeadlineRequest))]
 internal partial class PubSubV1ApiSerializerContext : JsonSerializerContext { }
 
 [ProtoClient(typeof(PubSubV1ApiInfo), typeof(PubSubV1ApiSerializerContext))]
@@ -31,11 +32,26 @@ public partial class PubSubV1ApiClient
 
     private HttpRequestMessage CreateAcknowledgeRequest(string projectId, string subscription, IReadOnlyList<string> ackIds)
     {
-        var pathBase = GetCachedMethodPath(Methods.Publish);
+        var pathBase = GetCachedMethodPath(Methods.Acknowledge);
         var path = $"{pathBase}/{projectId}/subscriptions/{subscription}:acknowledge?alt=json";
         var request = new HttpRequestMessage(HttpMethod.Post, path)
         {
             Content = ProtoJsonContent.Create(new PubSubAcknowledgeRequest(ackIds), PubSubV1ApiSerializerContext.Default.PubSubAcknowledgeRequest, default)
+        };
+        request.SetRequiredGcpScope("https://www.googleapis.com/auth/pubsub");
+        return request;
+    }
+
+    private HttpRequestMessage CreateModifyAckDeadlineRequest(string projectId, string subscription, IReadOnlyList<string> ackIds, int ackDeadlineSeconds)
+    {
+        var pathBase = GetCachedMethodPath(Methods.ModifyAckDeadline);
+        var path = $"{pathBase}/{projectId}/subscriptions/{subscription}:modifyAckDeadline?alt=json";
+        var request = new HttpRequestMessage(HttpMethod.Post, path)
+        {
+            Content = ProtoJsonContent.Create(
+                new PubSubModifyAckDeadlineRequest(ackIds, ackDeadlineSeconds),
+                PubSubV1ApiSerializerContext.Default.PubSubModifyAckDeadlineRequest, default
+            )
         };
         request.SetRequiredGcpScope("https://www.googleapis.com/auth/pubsub");
         return request;
@@ -55,7 +71,7 @@ public partial class PubSubV1ApiClient
 
     private HttpRequestMessage CreatePullRequest(string projectId, string subscription, int maxMessages)
     {
-        var pathBase = GetCachedMethodPath(Methods.Publish);
+        var pathBase = GetCachedMethodPath(Methods.Pull);
         var path = $"{pathBase}/{projectId}/subscriptions/{subscription}:pull?alt=json";
         var request = new HttpRequestMessage(HttpMethod.Post, path)
         {
