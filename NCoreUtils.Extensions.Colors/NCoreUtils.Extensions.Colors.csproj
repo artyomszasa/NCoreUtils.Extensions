@@ -1,0 +1,36 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>net10.0;net8.0;net6.0;netstandard2.1;netstandard2.0;net461;net48</TargetFrameworks>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>NCoreUtils.Colors</RootNamespace>
+    <Version>10.0.0</Version>
+    <IsAotCompatible>true</IsAotCompatible>
+  </PropertyGroup>
+  <PropertyGroup>
+    <!-- NuGet -->
+    <PackageId>NCoreUtils.Extensions.Colors</PackageId>
+    <Title>$(PackageId)</Title>
+    <Authors>Artyom Antyipin</Authors>
+    <Description>Color handling helpers.</Description>
+    <Copyright>Artyom Antyipin</Copyright>
+    <RepositoryUrl>https://github.com/artyomszasa/NCoreUtils.Extensions.git</RepositoryUrl>
+    <PackageReleaseNotes></PackageReleaseNotes>
+    <!-- Assembly Info -->
+    <Product>NCoreUtils</Product>
+    <AssemblyName>$(PackageId)</AssemblyName>
+    <AssemblyTitle>$(AssemblyName)</AssemblyTitle>
+    <!-- Compilation -->
+    <OutputType>Library</OutputType>
+    <DebugType>portable</DebugType>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\NCoreUtils.Extensions.Memory\NCoreUtils.Extensions.Memory.csproj" />
+  </ItemGroup>
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net461' OR '$(TargetFramework)' == 'net48' OR '$(TargetFramework)' == 'netstandard2.1' OR '$(TargetFramework)' == 'netstandard2.0' ">
+    <Compile Include="..\Compat\Lang\IsExternalInit.cs" />
+  </ItemGroup>
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net461' OR '$(TargetFramework)' == 'net48' OR '$(TargetFramework)' == 'netstandard2.0' ">
+    <Compile Include="..\Compat\Range\*.cs" />
+    <Compile Include="..\Compat\Nullable\NotNullWhenAttribute.cs" />
+  </ItemGroup>
+</Project>

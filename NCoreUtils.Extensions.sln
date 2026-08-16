@@ -145,6 +145,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NCoreUtils.Extensions.Preco
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NCoreUtils.Extensions.Base64.Unit", "NCoreUtils.Extensions.Base64.Unit\NCoreUtils.Extensions.Base64.Unit.csproj", "{80FC29DF-99D8-4EB1-813D-1AC11387D291}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NCoreUtils.Extensions.Colors", "NCoreUtils.Extensions.Colors\NCoreUtils.Extensions.Colors.csproj", "{D1D5947B-C941-4AC1-838E-BFA487D34659}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -1007,6 +1009,18 @@ Global
 		{80FC29DF-99D8-4EB1-813D-1AC11387D291}.Release|x64.Build.0 = Release|Any CPU
 		{80FC29DF-99D8-4EB1-813D-1AC11387D291}.Release|x86.ActiveCfg = Release|Any CPU
 		{80FC29DF-99D8-4EB1-813D-1AC11387D291}.Release|x86.Build.0 = Release|Any CPU
+		{D1D5947B-C941-4AC1-838E-BFA487D34659}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D1D5947B-C941-4AC1-838E-BFA487D34659}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D1D5947B-C941-4AC1-838E-BFA487D34659}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{D1D5947B-C941-4AC1-838E-BFA487D34659}.Debug|x64.Build.0 = Debug|Any CPU
+		{D1D5947B-C941-4AC1-838E-BFA487D34659}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{D1D5947B-C941-4AC1-838E-BFA487D34659}.Debug|x86.Build.0 = Debug|Any CPU
+		{D1D5947B-C941-4AC1-838E-BFA487D34659}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D1D5947B-C941-4AC1-838E-BFA487D34659}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D1D5947B-C941-4AC1-838E-BFA487D34659}.Release|x64.ActiveCfg = Release|Any CPU
+		{D1D5947B-C941-4AC1-838E-BFA487D34659}.Release|x64.Build.0 = Release|Any CPU
+		{D1D5947B-C941-4AC1-838E-BFA487D34659}.Release|x86.ActiveCfg = Release|Any CPU
+		{D1D5947B-C941-4AC1-838E-BFA487D34659}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
